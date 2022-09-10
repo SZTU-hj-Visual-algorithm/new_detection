@@ -15,7 +15,10 @@ using namespace std;
 
 #define POINT_DIST(p1,p2) std::sqrt((p1.x-p2.x)*(p1.x-p2.x)+(p1.y-p2.y)*(p1.y-p2.y))
 
-struct Light : public cv::RotatedRect   //灯条结构体
+
+
+//灯条结构体
+struct Light : public cv::RotatedRect     //灯条结构体
 {
     Light();
     explicit Light(cv::RotatedRect &box) : cv::RotatedRect(box)
@@ -52,23 +55,16 @@ struct Light : public cv::RotatedRect   //灯条结构体
     double max_area_ratio;
 };
 
-
-struct Armor     //装甲板结构体
+//装甲板结构体
+struct Armor : public cv::RotatedRect    //装甲板结构体
 {
-    Light l_Light;
-    Light r_Light;
     int enermyId;
-    cv::RotatedRect final_Rect;
+
 
 };
 
-struct aimInformation
-{
-    int classId;
-    cv::RotatedRect final_Rect;
-};
 
-
+//主类
 class ArmorDetector:public robot_state
 {
 public:
@@ -101,31 +97,39 @@ public:
         temps.push_back(temp8);
     }
 
-    int detectNum(cv::RotatedRect &final_rect);
+    int detectNum(cv::RotatedRect &f_rect);
 
-    bool conTain(cv::RotatedRect &match_rect,std::vector<cv::RotatedRect> &Lights, size_t &i, size_t &j);
+    bool conTain(Armor &match_rect,std::vector<Light> &Lights, size_t &i, size_t &j);
 
     void setImage(const cv::Mat &src);
 
+
     bool isLight(const Light& light);
 
-    std::vector<Light> findLights();
+    void findLights();
 
     void matchLights();
 
-    aimInformation chooseTarget();
+    void chooseTarget();
+
+    Armor transformPos();
 
 private:
+    int lostCnt;
+    const int binThresh = 150;
+
+    bool Lost;
+    bool smallArmor;
+
     cv::Mat _src;
     cv::Mat _binary;
     std::vector<cv::Mat> temps;
-    bool Lost;
-    int lostCnt;
-    bool smallArmor;
     cv::Rect detectRoi;
     cv::RotatedRect lastArmor;
     std::vector<Light> candidateLights;
     std::vector<Armor> candidateArmors;
+    std::vector<Light> candidataLights;
+    Armor finalArmor;
     cv::Point2f dst_p[4] = {cv::Point2f(0,60),cv::Point2f(0,0),cv::Point2f(30,0),cv::Point2f(30,60)};
 
     inline bool makeRectSafe(cv::Rect & rect, cv::Size size){
@@ -143,6 +147,10 @@ private:
         return true;
     }
 
+    static inline bool area_sort(std::vector<cv::Point> &cnt1,std::vector<cv::Point> &cnt2)
+    {
+        return cv::contourArea(cnt1) > cv::contourArea(cnt2);
+    }
 };
 
 
