@@ -3,7 +3,7 @@ project(shsihi)
 
 set(CMAKE_CXX_STANDARD 11)
 
-find_package(OpenCV 4.5.4 REQUIRED)
+find_package(OpenCV 4 REQUIRED)
 
 include_directories(${OpenCV_INCLUDE_DIRS})
 include_directories(${EIGEN3_INCLUDE_DIRS})
