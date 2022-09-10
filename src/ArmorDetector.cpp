@@ -46,7 +46,6 @@ void ArmorDetector::setImage(const Mat &src)
         imshow("_binary",_binary);
 #endif
 
-
     }
 
 }
@@ -58,7 +57,14 @@ void ArmorDetector::findLights()
 
 void ArmorDetector::matchLights()
 {
-    for
+    for (size_t i=0;i<candidataLights.size()-1;i++)
+    {
+        
+        for (size_t j=1;j<candidataLights.size();j++)
+        {
+
+        }
+    }
 }
 
 void ArmorDetector::chooseTarget()

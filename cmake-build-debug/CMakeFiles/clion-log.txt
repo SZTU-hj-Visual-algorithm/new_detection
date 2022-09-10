@@ -1,4 +1,17 @@
 "E:\clion(c++)\CLion 2021.2\bin\cmake\win\bin\cmake.exe" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_DEPENDS_USE_COMPILER=FALSE -G "CodeBlocks - MinGW Makefiles" F:\SZTU-hj-algorithm\new_detection
+-- The C compiler identification is GNU 8.1.0
+-- The CXX compiler identification is GNU 8.1.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: E:/Mingw/mingw64/bin/gcc.exe - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: E:/Mingw/mingw64/bin/g++.exe - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Found OpenCV: E:/opencv-4.5.4/opencv/build/x64/MinGW (found suitable version "4.5.4", minimum required is "4.5.4") 
 -- Configuring done
 -- Generating done
 -- Build files have been written to: F:/SZTU-hj-algorithm/new_detection/cmake-build-debug
