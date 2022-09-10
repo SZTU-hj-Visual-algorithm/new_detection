@@ -1,0 +1,4 @@
+"E:\clion(c++)\CLion 2021.2\bin\cmake\win\bin\cmake.exe" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_DEPENDS_USE_COMPILER=FALSE -G "CodeBlocks - MinGW Makefiles" F:\SZTU-hj-algorithm\new_detection
+-- Configuring done
+-- Generating done
+-- Build files have been written to: F:/SZTU-hj-algorithm/new_detection/cmake-build-debug
