@@ -6,6 +6,7 @@
 #define DEMO_ROBOT_STATE_H
 
 enum EnermyColor { RED = 0, BLUE = 1 };
+
 class robot_state
 {
 public:

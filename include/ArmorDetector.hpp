@@ -6,9 +6,16 @@
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc.hpp"
 #include "opencv2/dnn/dnn.hpp"
+
+#include <iostream>
+
 #include "robot_state.h"
 
+using namespace std;
+
 #define POINT_DIST(p1,p2) std::sqrt((p1.x-p2.x)*(p1.x-p2.x)+(p1.y-p2.y)*(p1.y-p2.y))
+
+
 
 //灯条结构体
 struct Light : public cv::RotatedRect     //灯条结构体
@@ -21,16 +28,31 @@ struct Light : public cv::RotatedRect     //灯条结构体
         std::sort(p,p+4,[](const cv::Point2f &a, const cv::Point2f &b) {return a.y<b.y;});
         top = (p[0] + p[1]) / 2;
         bottom = (p[2] + p[3]) / 2;
-        height = POINT_DIST(top,bottom);
-        width = POINT_DIST(p[0],p[1]);
-        angle=0;
+        height = POINT_DIST(top, bottom);
+        width = POINT_DIST(p[0], p[1]);
+        angle = 0;
+
+        //judge condition
+        double max_angle = 40.0;
+        double min_hw_ratio = 3;
+        double max_hw_ratio = 10;   // different distance and focus
+        double min_area_ratio = 0.6;   // RotatedRect / Rect
+        double max_area_ratio = 1.0;
+
     }
-    int Lightcolor;
+    int lightColor;
     cv::Point2f top;
     cv::Point2f bottom;
     double angle;
     double height;
     double width;
+
+    //judge condition
+    double max_angle;
+    double min_hw_ratio;
+    double max_hw_ratio;   // different distance and focus
+    double min_area_ratio;   // RotatedRect / Rect
+    double max_area_ratio;
 };
 
 //装甲板结构体
@@ -81,6 +103,9 @@ public:
 
     void setImage(const cv::Mat &src);
 
+
+    bool isLight(const Light& light);
+
     void findLights();
 
     void matchLights();
@@ -101,6 +126,7 @@ private:
     std::vector<cv::Mat> temps;
     cv::Rect detectRoi;
     cv::RotatedRect lastArmor;
+    std::vector<Light> candidateLights;
     std::vector<Armor> candidateArmors;
     std::vector<Light> candidataLights;
     Armor finalArmor;

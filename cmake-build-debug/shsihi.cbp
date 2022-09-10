@@ -5,368 +5,155 @@
 		<Option title="shsihi"/>
 		<Option makefile_is_custom="1"/>
 		<Option compiler="gcc"/>
-		<Option virtualFolders="CMake Files\;CMake Files\opencv-4.5.4\;CMake Files\opencv-4.5.4\opencv\;CMake Files\opencv-4.5.4\opencv\build\;CMake Files\opencv-4.5.4\opencv\build\x64\;CMake Files\opencv-4.5.4\opencv\build\x64\MinGW\;"/>
+		<Option virtualFolders="CMake Files\;CMake Files\..\;CMake Files\..\..\;CMake Files\..\..\..\;CMake Files\..\..\..\..\;CMake Files\..\..\..\..\usr\;CMake Files\..\..\..\..\usr\lib\;CMake Files\..\..\..\..\usr\lib\x86_64-linux-gnu\;CMake Files\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\;CMake Files\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\opencv4\;"/>
 		<Build>
 			<Target title="all">
-				<Option working_dir="F:/SZTU-hj-algorithm/new_detection/cmake-build-debug"/>
+				<Option working_dir="/home/lmx/CLionProjects/new_detection-main/cmake-build-debug"/>
 				<Option type="4"/>
 				<MakeCommands>
-					<Build command="E:/Mingw/mingw64/bin/mingw32-make.exe -f &quot;F:/SZTU-hj-algorithm/new_detection/cmake-build-debug/Makefile&quot;  VERBOSE=1 all"/>
-					<CompileFile command="E:/Mingw/mingw64/bin/mingw32-make.exe -f &quot;F:/SZTU-hj-algorithm/new_detection/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="E:/Mingw/mingw64/bin/mingw32-make.exe -f &quot;F:/SZTU-hj-algorithm/new_detection/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="E:/Mingw/mingw64/bin/mingw32-make.exe -f &quot;F:/SZTU-hj-algorithm/new_detection/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-				</MakeCommands>
-			</Target>
-			<Target title="rebuild_cache">
-				<Option working_dir="F:/SZTU-hj-algorithm/new_detection/cmake-build-debug"/>
-				<Option type="4"/>
-				<MakeCommands>
-					<Build command="E:/Mingw/mingw64/bin/mingw32-make.exe -f &quot;F:/SZTU-hj-algorithm/new_detection/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
-					<CompileFile command="E:/Mingw/mingw64/bin/mingw32-make.exe -f &quot;F:/SZTU-hj-algorithm/new_detection/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="E:/Mingw/mingw64/bin/mingw32-make.exe -f &quot;F:/SZTU-hj-algorithm/new_detection/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="E:/Mingw/mingw64/bin/mingw32-make.exe -f &quot;F:/SZTU-hj-algorithm/new_detection/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/lmx/CLionProjects/new_detection-main/cmake-build-debug/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/lmx/CLionProjects/new_detection-main/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/lmx/CLionProjects/new_detection-main/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/lmx/CLionProjects/new_detection-main/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="shsihi">
-				<Option output="F:/SZTU-hj-algorithm/new_detection/cmake-build-debug/shsihi.exe" prefix_auto="0" extension_auto="0"/>
-				<Option working_dir="F:/SZTU-hj-algorithm/new_detection/cmake-build-debug"/>
+				<Option output="/home/lmx/CLionProjects/new_detection-main/cmake-build-debug/shsihi" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/lmx/CLionProjects/new_detection-main/cmake-build-debug"/>
 				<Option object_output="./"/>
 				<Option type="1"/>
 				<Option compiler="gcc"/>
 				<Compiler>
-					<Add directory="F:/SZTU-hj-algorithm/new_detection/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/build/x64/MinGW"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/core/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/flann/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/imgproc/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/intensity_transform/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/ml/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/phase_unwrapping/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/photo/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/plot/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/quality/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/reg/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/surface_matching/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/xphoto/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/dnn/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/dnn_superres/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/features2d/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/fuzzy/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/hfs/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/imgcodecs/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/line_descriptor/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/saliency/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/text/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/videoio/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/wechat_qrcode/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/barcode/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/calib3d/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/datasets/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/highgui/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/mcc/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/objdetect/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/rapid/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/rgbd/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/shape/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/structured_light/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/video/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/videostab/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/xfeatures2d/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/ximgproc/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/xobjdetect/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/aruco/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/bgsegm/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/bioinspired/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/ccalib/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/dnn_objdetect/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/dpm/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/face/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/gapi/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/optflow/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/stitching/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/superres/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/tracking/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/stereo/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/world/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/img_hash/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/ts/include"/>
-					<Add directory="E:/Mingw/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/include/c++"/>
-					<Add directory="E:/Mingw/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/include/c++/x86_64-w64-mingw32"/>
-					<Add directory="E:/Mingw/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/include/c++/backward"/>
-					<Add directory="E:/Mingw/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/include"/>
-					<Add directory="E:/Mingw/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/include-fixed"/>
-					<Add directory="E:/Mingw/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/../../../../x86_64-w64-mingw32/include"/>
+					<Add directory="/home/lmx/CLionProjects/new_detection-main/include"/>
+					<Add directory="/usr/include/opencv4"/>
+					<Add directory="/usr/include/c++/9"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/9"/>
+					<Add directory="/usr/include/c++/9/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/9/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="E:/Mingw/mingw64/bin/mingw32-make.exe -f &quot;F:/SZTU-hj-algorithm/new_detection/cmake-build-debug/Makefile&quot;  VERBOSE=1 shsihi"/>
-					<CompileFile command="E:/Mingw/mingw64/bin/mingw32-make.exe -f &quot;F:/SZTU-hj-algorithm/new_detection/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="E:/Mingw/mingw64/bin/mingw32-make.exe -f &quot;F:/SZTU-hj-algorithm/new_detection/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="E:/Mingw/mingw64/bin/mingw32-make.exe -f &quot;F:/SZTU-hj-algorithm/new_detection/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/lmx/CLionProjects/new_detection-main/cmake-build-debug/Makefile&quot;  VERBOSE=1 shsihi"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/lmx/CLionProjects/new_detection-main/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/lmx/CLionProjects/new_detection-main/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/lmx/CLionProjects/new_detection-main/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="shsihi/fast">
-				<Option output="F:/SZTU-hj-algorithm/new_detection/cmake-build-debug/shsihi.exe" prefix_auto="0" extension_auto="0"/>
-				<Option working_dir="F:/SZTU-hj-algorithm/new_detection/cmake-build-debug"/>
+				<Option output="/home/lmx/CLionProjects/new_detection-main/cmake-build-debug/shsihi" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/lmx/CLionProjects/new_detection-main/cmake-build-debug"/>
 				<Option object_output="./"/>
 				<Option type="1"/>
 				<Option compiler="gcc"/>
 				<Compiler>
-					<Add directory="F:/SZTU-hj-algorithm/new_detection/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/build/x64/MinGW"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/core/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/flann/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/imgproc/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/intensity_transform/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/ml/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/phase_unwrapping/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/photo/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/plot/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/quality/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/reg/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/surface_matching/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/xphoto/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/dnn/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/dnn_superres/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/features2d/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/fuzzy/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/hfs/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/imgcodecs/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/line_descriptor/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/saliency/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/text/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/videoio/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/wechat_qrcode/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/barcode/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/calib3d/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/datasets/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/highgui/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/mcc/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/objdetect/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/rapid/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/rgbd/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/shape/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/structured_light/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/video/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/videostab/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/xfeatures2d/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/ximgproc/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/xobjdetect/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/aruco/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/bgsegm/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/bioinspired/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/ccalib/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/dnn_objdetect/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/dpm/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/face/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/gapi/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/optflow/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/stitching/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/superres/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/tracking/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/stereo/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/world/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/img_hash/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/ts/include"/>
-					<Add directory="E:/Mingw/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/include/c++"/>
-					<Add directory="E:/Mingw/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/include/c++/x86_64-w64-mingw32"/>
-					<Add directory="E:/Mingw/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/include/c++/backward"/>
-					<Add directory="E:/Mingw/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/include"/>
-					<Add directory="E:/Mingw/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/include-fixed"/>
-					<Add directory="E:/Mingw/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/../../../../x86_64-w64-mingw32/include"/>
+					<Add directory="/home/lmx/CLionProjects/new_detection-main/include"/>
+					<Add directory="/usr/include/opencv4"/>
+					<Add directory="/usr/include/c++/9"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/9"/>
+					<Add directory="/usr/include/c++/9/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/9/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="E:/Mingw/mingw64/bin/mingw32-make.exe -f &quot;F:/SZTU-hj-algorithm/new_detection/cmake-build-debug/Makefile&quot;  VERBOSE=1 shsihi/fast"/>
-					<CompileFile command="E:/Mingw/mingw64/bin/mingw32-make.exe -f &quot;F:/SZTU-hj-algorithm/new_detection/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="E:/Mingw/mingw64/bin/mingw32-make.exe -f &quot;F:/SZTU-hj-algorithm/new_detection/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="E:/Mingw/mingw64/bin/mingw32-make.exe -f &quot;F:/SZTU-hj-algorithm/new_detection/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/lmx/CLionProjects/new_detection-main/cmake-build-debug/Makefile&quot;  VERBOSE=1 shsihi/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/lmx/CLionProjects/new_detection-main/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/lmx/CLionProjects/new_detection-main/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/lmx/CLionProjects/new_detection-main/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="SRCSO">
-				<Option output="F:/SZTU-hj-algorithm/new_detection/cmake-build-debug/libSRCSO.a" prefix_auto="0" extension_auto="0"/>
-				<Option working_dir="F:/SZTU-hj-algorithm/new_detection/cmake-build-debug"/>
+				<Option output="/home/lmx/CLionProjects/new_detection-main/cmake-build-debug/libSRCSO.a" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/lmx/CLionProjects/new_detection-main/cmake-build-debug"/>
 				<Option object_output="./"/>
 				<Option type="2"/>
 				<Option compiler="gcc"/>
 				<Compiler>
-					<Add directory="E:/opencv-4.5.4/opencv/build/x64/MinGW"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/core/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/flann/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/imgproc/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/intensity_transform/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/ml/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/phase_unwrapping/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/photo/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/plot/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/quality/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/reg/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/surface_matching/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/xphoto/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/dnn/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/dnn_superres/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/features2d/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/fuzzy/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/hfs/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/imgcodecs/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/line_descriptor/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/saliency/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/text/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/videoio/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/wechat_qrcode/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/barcode/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/calib3d/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/datasets/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/highgui/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/mcc/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/objdetect/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/rapid/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/rgbd/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/shape/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/structured_light/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/video/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/videostab/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/xfeatures2d/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/ximgproc/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/xobjdetect/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/aruco/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/bgsegm/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/bioinspired/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/ccalib/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/dnn_objdetect/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/dpm/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/face/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/gapi/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/optflow/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/stitching/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/superres/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/tracking/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/stereo/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/world/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/img_hash/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/ts/include"/>
-					<Add directory="F:/SZTU-hj-algorithm/new_detection/include"/>
-					<Add directory="E:/Mingw/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/include/c++"/>
-					<Add directory="E:/Mingw/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/include/c++/x86_64-w64-mingw32"/>
-					<Add directory="E:/Mingw/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/include/c++/backward"/>
-					<Add directory="E:/Mingw/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/include"/>
-					<Add directory="E:/Mingw/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/include-fixed"/>
-					<Add directory="E:/Mingw/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/../../../../x86_64-w64-mingw32/include"/>
+					<Add directory="/usr/include/opencv4"/>
+					<Add directory="/home/lmx/CLionProjects/new_detection-main/include"/>
+					<Add directory="/usr/include/c++/9"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/9"/>
+					<Add directory="/usr/include/c++/9/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/9/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="E:/Mingw/mingw64/bin/mingw32-make.exe -f &quot;F:/SZTU-hj-algorithm/new_detection/cmake-build-debug/Makefile&quot;  VERBOSE=1 SRCSO"/>
-					<CompileFile command="E:/Mingw/mingw64/bin/mingw32-make.exe -f &quot;F:/SZTU-hj-algorithm/new_detection/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="E:/Mingw/mingw64/bin/mingw32-make.exe -f &quot;F:/SZTU-hj-algorithm/new_detection/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="E:/Mingw/mingw64/bin/mingw32-make.exe -f &quot;F:/SZTU-hj-algorithm/new_detection/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/lmx/CLionProjects/new_detection-main/cmake-build-debug/Makefile&quot;  VERBOSE=1 SRCSO"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/lmx/CLionProjects/new_detection-main/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/lmx/CLionProjects/new_detection-main/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/lmx/CLionProjects/new_detection-main/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="SRCSO/fast">
-				<Option output="F:/SZTU-hj-algorithm/new_detection/cmake-build-debug/libSRCSO.a" prefix_auto="0" extension_auto="0"/>
-				<Option working_dir="F:/SZTU-hj-algorithm/new_detection/cmake-build-debug"/>
+				<Option output="/home/lmx/CLionProjects/new_detection-main/cmake-build-debug/libSRCSO.a" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/lmx/CLionProjects/new_detection-main/cmake-build-debug"/>
 				<Option object_output="./"/>
 				<Option type="2"/>
 				<Option compiler="gcc"/>
 				<Compiler>
-					<Add directory="E:/opencv-4.5.4/opencv/build/x64/MinGW"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/core/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/flann/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/imgproc/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/intensity_transform/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/ml/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/phase_unwrapping/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/photo/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/plot/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/quality/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/reg/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/surface_matching/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/xphoto/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/dnn/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/dnn_superres/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/features2d/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/fuzzy/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/hfs/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/imgcodecs/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/line_descriptor/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/saliency/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/text/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/videoio/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/wechat_qrcode/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/barcode/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/calib3d/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/datasets/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/highgui/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/mcc/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/objdetect/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/rapid/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/rgbd/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/shape/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/structured_light/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/video/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/videostab/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/xfeatures2d/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/ximgproc/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/xobjdetect/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/aruco/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/bgsegm/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/bioinspired/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/ccalib/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/dnn_objdetect/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/dpm/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/face/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/gapi/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/optflow/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/stitching/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/superres/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/tracking/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/stereo/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/world/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/img_hash/include"/>
-					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/ts/include"/>
-					<Add directory="F:/SZTU-hj-algorithm/new_detection/include"/>
-					<Add directory="E:/Mingw/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/include/c++"/>
-					<Add directory="E:/Mingw/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/include/c++/x86_64-w64-mingw32"/>
-					<Add directory="E:/Mingw/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/include/c++/backward"/>
-					<Add directory="E:/Mingw/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/include"/>
-					<Add directory="E:/Mingw/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/include-fixed"/>
-					<Add directory="E:/Mingw/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/../../../../x86_64-w64-mingw32/include"/>
+					<Add directory="/usr/include/opencv4"/>
+					<Add directory="/home/lmx/CLionProjects/new_detection-main/include"/>
+					<Add directory="/usr/include/c++/9"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/9"/>
+					<Add directory="/usr/include/c++/9/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/9/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="E:/Mingw/mingw64/bin/mingw32-make.exe -f &quot;F:/SZTU-hj-algorithm/new_detection/cmake-build-debug/Makefile&quot;  VERBOSE=1 SRCSO/fast"/>
-					<CompileFile command="E:/Mingw/mingw64/bin/mingw32-make.exe -f &quot;F:/SZTU-hj-algorithm/new_detection/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="E:/Mingw/mingw64/bin/mingw32-make.exe -f &quot;F:/SZTU-hj-algorithm/new_detection/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="E:/Mingw/mingw64/bin/mingw32-make.exe -f &quot;F:/SZTU-hj-algorithm/new_detection/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/lmx/CLionProjects/new_detection-main/cmake-build-debug/Makefile&quot;  VERBOSE=1 SRCSO/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/lmx/CLionProjects/new_detection-main/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/lmx/CLionProjects/new_detection-main/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/lmx/CLionProjects/new_detection-main/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="edit_cache">
-				<Option working_dir="F:/SZTU-hj-algorithm/new_detection/cmake-build-debug"/>
+				<Option working_dir="/home/lmx/CLionProjects/new_detection-main/cmake-build-debug"/>
 				<Option type="4"/>
 				<MakeCommands>
-					<Build command="E:/Mingw/mingw64/bin/mingw32-make.exe -f &quot;F:/SZTU-hj-algorithm/new_detection/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
-					<CompileFile command="E:/Mingw/mingw64/bin/mingw32-make.exe -f &quot;F:/SZTU-hj-algorithm/new_detection/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="E:/Mingw/mingw64/bin/mingw32-make.exe -f &quot;F:/SZTU-hj-algorithm/new_detection/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="E:/Mingw/mingw64/bin/mingw32-make.exe -f &quot;F:/SZTU-hj-algorithm/new_detection/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/lmx/CLionProjects/new_detection-main/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/lmx/CLionProjects/new_detection-main/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/lmx/CLionProjects/new_detection-main/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/lmx/CLionProjects/new_detection-main/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="rebuild_cache">
+				<Option working_dir="/home/lmx/CLionProjects/new_detection-main/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/lmx/CLionProjects/new_detection-main/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/lmx/CLionProjects/new_detection-main/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/lmx/CLionProjects/new_detection-main/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/lmx/CLionProjects/new_detection-main/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 		</Build>
-		<Unit filename="F:/SZTU-hj-algorithm/new_detection/main.cpp">
+		<Unit filename="/home/lmx/CLionProjects/new_detection-main/main.cpp">
 			<Option target="shsihi"/>
 		</Unit>
-		<Unit filename="F:/SZTU-hj-algorithm/new_detection/src/ArmorDetector.cpp">
+		<Unit filename="/home/lmx/CLionProjects/new_detection-main/src/ArmorDetector.cpp">
 			<Option target="SRCSO"/>
 		</Unit>
-		<Unit filename="F:/SZTU-hj-algorithm/new_detection/CMakeLists.txt">
+		<Unit filename="/home/lmx/CLionProjects/new_detection-main/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\"/>
 		</Unit>
-		<Unit filename="F:/SZTU-hj-algorithm/new_detection/opencv-4.5.4/opencv/build/x64/MinGW/OpenCVConfig-version.cmake">
-			<Option virtualFolder="CMake Files\opencv-4.5.4\opencv\build\x64\MinGW\"/>
+		<Unit filename="/home/lmx/CLionProjects/new_detection-main/../../../../usr/lib/x86_64-linux-gnu/cmake/opencv4/OpenCVConfig-version.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\opencv4\"/>
 		</Unit>
-		<Unit filename="F:/SZTU-hj-algorithm/new_detection/opencv-4.5.4/opencv/build/x64/MinGW/OpenCVConfig.cmake">
-			<Option virtualFolder="CMake Files\opencv-4.5.4\opencv\build\x64\MinGW\"/>
+		<Unit filename="/home/lmx/CLionProjects/new_detection-main/../../../../usr/lib/x86_64-linux-gnu/cmake/opencv4/OpenCVConfig.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\opencv4\"/>
 		</Unit>
-		<Unit filename="F:/SZTU-hj-algorithm/new_detection/opencv-4.5.4/opencv/build/x64/MinGW/OpenCVModules.cmake">
-			<Option virtualFolder="CMake Files\opencv-4.5.4\opencv\build\x64\MinGW\"/>
+		<Unit filename="/home/lmx/CLionProjects/new_detection-main/../../../../usr/lib/x86_64-linux-gnu/cmake/opencv4/OpenCVModules-release.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\opencv4\"/>
+		</Unit>
+		<Unit filename="/home/lmx/CLionProjects/new_detection-main/../../../../usr/lib/x86_64-linux-gnu/cmake/opencv4/OpenCVModules.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\opencv4\"/>
 		</Unit>
 	</Project>
 </CodeBlocks_project_file>
