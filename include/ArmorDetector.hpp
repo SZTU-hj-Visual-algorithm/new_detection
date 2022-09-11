@@ -89,6 +89,9 @@ public:
         temps.push_back(temp6);
         temps.push_back(temp8);
 
+        //binary_thresh
+        binThresh = 150;
+
         //light_judge_condition
         light_max_angle = 30.0;
         light_min_hw_ratio = 3;
@@ -97,8 +100,10 @@ public:
         light_max_area_ratio = 1.0;
 
         //armor_judge_condition
-        max_wh_ratio = 4.5;
-        min_wh_ratio = 1.5;
+        armor_max_wh_ratio = 4.5;
+        armor_min_wh_ratio = 1.5;
+        armor_max_angle = 20.0;
+        armor_height_offset = 0.3;
     }
 
     void setImage(const cv::Mat &src); //对图像进行设置
@@ -114,7 +119,7 @@ public:
 
 private:
     int lostCnt;
-    const int binThresh = 150;
+    int binThresh;
 
     //light_judge_condition
     double light_max_angle;
@@ -125,8 +130,10 @@ private:
 
 
     //armor_judge_condition
-    double max_wh_ratio;
-    double min_wh_ratio;
+    double armor_max_wh_ratio;
+    double armor_min_wh_ratio;
+    double armor_max_angle;
+    double armor_height_offset;
 
     bool Lost;
     bool smallArmor;

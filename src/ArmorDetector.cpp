@@ -160,13 +160,16 @@ void ArmorDetector::matchLights()
             double armorWidth = POINT_DIST(centerI,centerJ) - (lightI.width + lightJ.width)/2.0;
             double armorHeight = (lightI.height + lightJ.height) / 2.0;
 
-            bool hwratio_ok = < armorWidth/armorHeight;
+            //宽高比筛选条件
+            bool whratio_ok = armor_min_wh_ratio < armorWidth/armorHeight && armorWidth/armorHeight < armor_max_wh_ratio;
 
-            bool angle_ok = fabs(lightI.angle - lightJ.angle) < ;
+            //角度筛选条件
+            bool angle_ok = fabs(lightI.angle - lightJ.angle) < armor_max_angle;
 
-            bool height_offset_ok = fabs(lightI.height - lightJ.height) / armorHeight < ;
+            //左右亮灯条中心点高度差筛选条件
+            bool height_offset_ok = fabs(lightI.height - lightJ.height) / armorHeight < armor_height_offset;
 
-            bool is_Armor = hwratio_ok && angle_ok && height_offset_ok;
+            bool is_Armor = whratio_ok && angle_ok && height_offset_ok;
 
             if (is_Armor)
             {
@@ -175,7 +178,7 @@ void ArmorDetector::matchLights()
                 RotatedRect armor_rrect = RotatedRect(armorCenter,
                                                       Size2f(armorWidth,armorHeight),
                                                       armorAngle * 180 / CV_PI);
-                Armor candidateArmor = Armor(armor_rrect);
+                candidateArmors.emplace_back(armor_rrect);
             }
         }
     }
@@ -221,6 +224,13 @@ void ArmorDetector::chooseTarget()
             }
              */
 
+            //打分制筛选装甲板优先级
+            /*1、长宽比（筛选正面和侧面装甲板，尽量打正面装甲板）
+             *2、装甲板宽高最大
+             *3、装甲板靠近图像中心
+             *4、装甲板倾斜角度最小
+             */
+
             cv::Rect img_center_rect(_src.cols*0.3,_src.rows*0.3,_src.cols*0.7,_src.rows*0.7);
             Point2f vertice[4];
             candidateArmors[index].points(vertice);
@@ -255,7 +265,6 @@ void ArmorDetector::chooseTarget()
 Armor ArmorDetector::transformPos()
 {
 
-    
     finalRect = finalArmor.boundingRect();
     if(!finalRect.empty())
     {
