@@ -18,6 +18,7 @@ void ArmorDetector::setImage(const Mat &src)
     }
     else
     {
+        //Rect rect = finalRect;
         Rect rect = lastArmor.boundingRect();
 
         // 这里的w和h系数需要实测一下
@@ -35,12 +36,14 @@ void ArmorDetector::setImage(const Mat &src)
         Point rdPoint = Point(x,y);
         detectRoi = Rect(luPoint,rdPoint);
 
-        if (!makeRectSafe(detectRoi, src.size())){
+        if (!makeRectSafe(detectRoi, src.size()))
+        {
             lastArmor = cv::RotatedRect();
             detectRoi = Rect(0, 0, src.cols, src.rows);
             _src = src;
         }
-        else src(detectRoi).copyTo(_src);
+        else
+            src(detectRoi).copyTo(_src);
 
         //二值化
         Mat gray;
@@ -49,17 +52,27 @@ void ArmorDetector::setImage(const Mat &src)
 #ifdef BINARY_SHOW
         imshow("_binary",_binary);
 #endif BINARY_SHOW
+<<<<<<< Updated upstream
 
 
+=======
+>>>>>>> Stashed changes
     }
-
 }
 
 
 bool ArmorDetector::isLight(const Light& light)
 {
+<<<<<<< Updated upstream
     double hw_ratio = light.height / light.width;
     bool hw_ratio_ok = light.min_hw_ratio < hw_ratio && hw_ratio < light.max_hw_ratio;
+=======
+    int height = light.height;
+    int width = light.width;
+
+    //高一定要大于宽
+    bool standing_ok = height > width;
+>>>>>>> Stashed changes
 
     double area_ratio = light.height * light.width / light.boundingRect().area();
     bool area_ratio_ok = light.min_area_ratio < area_ratio && area_ratio < light.max_area_ratio;
@@ -81,6 +94,7 @@ void ArmorDetector::findLights()
     if (contours.size() < 2)
     {
         lostCnt++;
+        candidateLights.clear();
         return;
     }
 
@@ -139,7 +153,52 @@ void ArmorDetector::findLights()
 
 void ArmorDetector::matchLights()
 {
+<<<<<<< Updated upstream
 
+=======
+    if(candidateLights.size() < 2)
+    {
+        lostCnt++;
+        candidateArmors.clear();
+        return;
+    }
+
+    for (size_t i=0;i<candidateLights.size()-1;i++)
+    {
+        Light lightI = candidateLights[i];
+        Point centerI = lightI.center;
+        for (size_t j=1;j<candidateLights.size();j++)
+        {
+            Light lightJ = candidateLights[j];
+            Point centerJ = lightJ.center;
+            double armorWidth = POINT_DIST(centerI,centerJ) - (lightI.width + lightJ.width)/2.0;
+            double armorHeight = (lightI.height + lightJ.height) / 2.0;
+
+            bool hwratio_ok = < armorWidth/armorHeight;
+
+            bool angle_ok = fabs(lightI.angle - lightJ.angle) < ;
+
+            bool height_offset_ok = fabs(lightI.height - lightJ.height) / armorHeight < ;
+
+            bool is_Armor = hwratio_ok && angle_ok && height_offset_ok;
+
+            if (is_Armor)
+            {
+                Point2f armorCenter = (centerI + centerJ) / 2.0;
+                double armorAngle = atan2(fabs(centerI.y - centerJ.y),fabs(centerI.x - centerJ.x));
+                RotatedRect armor_rrect = RotatedRect(armorCenter,
+                                                      Size2f(armorWidth,armorHeight),
+                                                      armorAngle * 180 / CV_PI);
+                Armor candidateArmor = Armor(armor_rrect);
+            }
+        }
+    }
+    if(candidateArmors.size() < 1)
+    {
+        lostCnt++;
+        return;
+    }
+>>>>>>> Stashed changes
 }
 
 void ArmorDetector::chooseTarget()
@@ -213,11 +272,17 @@ void ArmorDetector::chooseTarget()
 #endif DRAW_FINAL_ARMOR
 }
 
-Armor ArmorDetector::transformPos()
+Armor ArmorDetector::transformPos(const cv::Mat &src)
 {
+    setImage(src);
+    findLights();
+    matchLights();
+    chooseTarget();
 
-    
+    // 变为相对于原图src的矩形框ROI
     finalRect = finalArmor.boundingRect();
+    finalRect = Rect(detectRoi.x+finalRect.x,detectRoi.y+finalRect.y,finalRect.width,finalRect.height);
+
     if(!finalRect.empty())
     {
         lostCnt = 0;
@@ -237,8 +302,10 @@ Armor ArmorDetector::transformPos()
         else if (lostCnt == 18)
             finalRect.size() = Size(finalRect.width * 1.2, finalRect.height * 1.2);
         else if (lostCnt > 33 )
-            finalRect.size() = Size();
+            finalRect.size() = Size(0, 0);
     }
+
+    return finalArmor;
 }
 
 
