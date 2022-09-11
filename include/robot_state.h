@@ -6,6 +6,7 @@
 #define DEMO_ROBOT_STATE_H
 
 enum EnermyColor { RED = 0, BLUE = 1 };
+enum EnermyType  { BIG = 0, SMALL = 1};
 
 class robot_state
 {
@@ -15,6 +16,8 @@ public:
 	float ab_roll = 0.0;
 	float SPEED = 25.0;
 	int enermy_color;
+    int enermy_type;
+    int enermy_ID;
 };
 
 #endif //DEMO_ROBOT_STATE_H

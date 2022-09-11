@@ -15,8 +15,6 @@ using namespace std;
 
 #define POINT_DIST(p1,p2) std::sqrt((p1.x-p2.x)*(p1.x-p2.x)+(p1.y-p2.y)*(p1.y-p2.y))
 
-
-
 //灯条结构体
 struct Light : public cv::RotatedRect     //灯条结构体
 {
@@ -30,15 +28,14 @@ struct Light : public cv::RotatedRect     //灯条结构体
         bottom = (p[2] + p[3]) / 2;
         height = POINT_DIST(top, bottom);
         width = POINT_DIST(p[0], p[1]);
-        angle = 0;
+        angle = top.x < bottom.x ? box.angle : 90 + box.angle;
 
         //judge condition
-        double max_angle = 40.0;
-        double min_hw_ratio = 3;
-        double max_hw_ratio = 10;   // different distance and focus
-        double min_area_ratio = 0.6;   // RotatedRect / Rect
-        double max_area_ratio = 1.0;
-
+        max_angle = 40.0;
+        min_hw_ratio = 3;
+        max_hw_ratio = 10;      // different distance and focus
+        min_area_ratio = 0.6;   // RotatedRect / Rect
+        max_area_ratio = 1.0;
     }
     int lightColor;
     cv::Point2f top;
@@ -58,9 +55,8 @@ struct Light : public cv::RotatedRect     //灯条结构体
 //装甲板结构体
 struct Armor : public cv::RotatedRect    //装甲板结构体
 {
-    int enermyId;
-
-
+    Armor();
+    int enermyID;
 };
 
 
@@ -103,7 +99,6 @@ public:
 
     void setImage(const cv::Mat &src);
 
-
     bool isLight(const Light& light);
 
     void findLights();
@@ -121,15 +116,15 @@ private:
     bool Lost;
     bool smallArmor;
 
-    cv::Mat _src;
+    cv::Mat _src;  //
     cv::Mat _binary;
     std::vector<cv::Mat> temps;
     cv::Rect detectRoi;
     cv::RotatedRect lastArmor;
-    std::vector<Light> candidateLights;
-    std::vector<Armor> candidateArmors;
-    std::vector<Light> candidataLights;
-    Armor finalArmor;
+    std::vector<Light> candidateLights; // 筛选的灯条
+    std::vector<Armor> candidateArmors; // 筛选的装甲板
+    Armor finalArmor;  // 最终装甲板
+    cv::Rect finalRect;  // 最终框住装甲板旋转举行的正矩形
     cv::Point2f dst_p[4] = {cv::Point2f(0,60),cv::Point2f(0,0),cv::Point2f(30,0),cv::Point2f(30,60)};
 
     inline bool makeRectSafe(cv::Rect & rect, cv::Size size){
