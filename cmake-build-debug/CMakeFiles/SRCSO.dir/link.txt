@@ -1,0 +1,2 @@
+E:\Mingw\mingw64\bin\ar.exe qc libSRCSO.a CMakeFiles/SRCSO.dir/src/ArmorDetector.cpp.obj
+E:\Mingw\mingw64\bin\ranlib.exe libSRCSO.a

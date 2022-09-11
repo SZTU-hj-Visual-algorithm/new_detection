@@ -50,23 +50,32 @@ void ArmorDetector::setImage(const Mat &src)
         imshow("_binary",_binary);
 #endif BINARY_SHOW
 
-
     }
 
 }
 
 
-bool ArmorDetector::isLight(const Light& light)
+bool ArmorDetector::isLight(Light& light, vector<Point> &cnt)
 {
-    double hw_ratio = light.height / light.width;
-    bool hw_ratio_ok = light.min_hw_ratio < hw_ratio && hw_ratio < light.max_hw_ratio;
+    int height = light.height;
+    int width = light.width;
 
-    double area_ratio = light.height * light.width / light.boundingRect().area();
-    bool area_ratio_ok = light.min_area_ratio < area_ratio && area_ratio < light.max_area_ratio;
+    //高一定要大于宽
+    bool standing_ok = height> width;
 
-    bool angle_ok = light.angle < light.max_angle;
+    //高宽比条件
+    double hw_ratio = height / width;
+    bool hw_ratio_ok = light_min_hw_ratio < hw_ratio && hw_ratio < light_max_hw_ratio;
 
-    bool is_light = hw_ratio_ok && area_ratio_ok && angle_ok ;
+    //外接矩形面积和像素点面积之比条件
+    double area_ratio = height * width / contourArea(cnt);
+    bool area_ratio_ok = light_min_area_ratio < area_ratio && area_ratio < light_max_area_ratio;
+
+    //灯条角度条件
+    bool angle_ok = fabs(90.0 - light.angle) < light_max_angle;
+
+    //灯条判断的条件总集
+    bool is_light = hw_ratio_ok && area_ratio_ok && angle_ok && standing_ok;
 
     return is_light;
 }
@@ -78,6 +87,7 @@ void ArmorDetector::findLights()
     vector<cv::Vec4i> hierarchy;
     cv::findContours(_binary, contours, hierarchy, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 
+
     if (contours.size() < 2)
     {
         lostCnt++;
@@ -86,10 +96,10 @@ void ArmorDetector::findLights()
 
     for (int index = 0; index < contours.size(); index++)
     {
-        cv::RotatedRect r_rect = cv::minAreaRect(contours[index]);
+        RotatedRect r_rect = minAreaRect(contours[index]);
         Light light = Light(r_rect);
 
-        if (isLight(light))
+        if (isLight(light, contours[index]))
         {
             cv::Rect rect = r_rect.boundingRect();
 
@@ -139,7 +149,36 @@ void ArmorDetector::findLights()
 
 void ArmorDetector::matchLights()
 {
+    for (size_t i=0;i<candidateLights.size()-1;i++)
+    {
+        Light lightI = candidateLights[i];
+        Point centerI = lightI.center;
+        for (size_t j=1;j<candidateLights.size();j++)
+        {
+            Light lightJ = candidateLights[j];
+            Point centerJ = lightJ.center;
+            double armorWidth = POINT_DIST(centerI,centerJ) - (lightI.width + lightJ.width)/2.0;
+            double armorHeight = (lightI.height + lightJ.height) / 2.0;
 
+            bool hwratio_ok = < armorWidth/armorHeight;
+
+            bool angle_ok = fabs(lightI.angle - lightJ.angle) < ;
+
+            bool height_offset_ok = fabs(lightI.height - lightJ.height) / armorHeight < ;
+
+            bool is_Armor = hwratio_ok && angle_ok && height_offset_ok;
+
+            if (is_Armor)
+            {
+                Point2f armorCenter = (centerI + centerJ) / 2.0;
+                double armorAngle = atan2(fabs(centerI.y - centerJ.y),fabs(centerI.x - centerJ.x));
+                RotatedRect armor_rrect = RotatedRect(armorCenter,
+                                                      Size2f(armorWidth,armorHeight),
+                                                      armorAngle * 180 / CV_PI);
+                Armor candidateArmor = Armor(armor_rrect);
+            }
+        }
+    }
 }
 
 void ArmorDetector::chooseTarget()
