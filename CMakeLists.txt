@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.20)
 project(shsihi)
 
 set(CMAKE_CXX_STANDARD 11)
+set(OpenCV_DIR C:/OpenCV_454/build)
 
 find_package(OpenCV 4 REQUIRED)
 

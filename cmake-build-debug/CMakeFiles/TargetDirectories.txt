@@ -1,4 +1,4 @@
-/home/lmx/CLionProjects/new_detection-main/cmake-build-debug/CMakeFiles/shsihi.dir
-/home/lmx/CLionProjects/new_detection-main/cmake-build-debug/CMakeFiles/SRCSO.dir
-/home/lmx/CLionProjects/new_detection-main/cmake-build-debug/CMakeFiles/edit_cache.dir
-/home/lmx/CLionProjects/new_detection-main/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+C:/Users/Lmx6771/Desktop/local_repo/new_detection/cmake-build-debug/CMakeFiles/shsihi.dir
+C:/Users/Lmx6771/Desktop/local_repo/new_detection/cmake-build-debug/CMakeFiles/SRCSO.dir
+C:/Users/Lmx6771/Desktop/local_repo/new_detection/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/Lmx6771/Desktop/local_repo/new_detection/cmake-build-debug/CMakeFiles/rebuild_cache.dir
