@@ -6,7 +6,6 @@
 			[
 				{
 					"build" : ".",
-					"jsonFile" : "directory-.-Debug-f5ebdc15457944623624.json",
 					"minimumCMakeVersion" : 
 					{
 						"string" : "3.20"
@@ -41,14 +40,14 @@
 				{
 					"directoryIndex" : 0,
 					"id" : "SRCSO::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-SRCSO-Debug-ba863531ba0dcafa359a.json",
+					"jsonFile" : "target-SRCSO-Debug-cd80baeed7a7fcea9a68.json",
 					"name" : "SRCSO",
 					"projectIndex" : 0
 				},
 				{
 					"directoryIndex" : 0,
 					"id" : "shsihi::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-shsihi-Debug-e89fc1db014d2961dec8.json",
+					"jsonFile" : "target-shsihi-Debug-e5f94b216a846047902b.json",
 					"name" : "shsihi",
 					"projectIndex" : 0
 				}
@@ -58,12 +57,12 @@
 	"kind" : "codemodel",
 	"paths" : 
 	{
-		"build" : "/home/lmx/CLionProjects/new_detection-main/cmake-build-debug",
-		"source" : "/home/lmx/CLionProjects/new_detection-main"
+		"build" : "F:/SZTU-hj-algorithm/new_detection/cmake-build-debug",
+		"source" : "F:/SZTU-hj-algorithm/new_detection"
 	},
 	"version" : 
 	{
 		"major" : 2,
-		"minor" : 3
+		"minor" : 2
 	}
 }

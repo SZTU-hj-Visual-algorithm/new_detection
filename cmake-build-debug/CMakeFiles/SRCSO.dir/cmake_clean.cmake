@@ -1,6 +1,5 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/SRCSO.dir/src/ArmorDetector.cpp.o"
-  "CMakeFiles/SRCSO.dir/src/ArmorDetector.cpp.o.d"
+  "CMakeFiles/SRCSO.dir/src/ArmorDetector.cpp.obj"
   "libSRCSO.a"
   "libSRCSO.pdb"
 )

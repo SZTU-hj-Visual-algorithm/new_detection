@@ -11,7 +11,7 @@
 -- Check for working CXX compiler: E:/Mingw/mingw64/bin/g++.exe - skipped
 -- Detecting CXX compile features
 -- Detecting CXX compile features - done
--- Found OpenCV: E:/opencv-4.5.4/opencv/build/x64/MinGW (found suitable version "4.5.4", minimum required is "4.5.4") 
+-- Found OpenCV: E:/opencv-4.5.4/opencv/build/x64/MinGW (found suitable version "4.5.4", minimum required is "4") 
 -- Configuring done
 -- Generating done
 -- Build files have been written to: F:/SZTU-hj-algorithm/new_detection/cmake-build-debug
