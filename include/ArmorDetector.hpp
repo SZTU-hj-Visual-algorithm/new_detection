@@ -51,10 +51,6 @@ struct Armor : public cv::RotatedRect    //装甲板结构体
     }
     int enermyId;
 
-    //判断装甲板的条件参数
-    double max_wh_ratio;
-    double min_wh_ratio;
-
 };
 
 //主类
