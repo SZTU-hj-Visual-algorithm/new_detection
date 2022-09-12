@@ -19,6 +19,7 @@ void ArmorDetector::setImage(const Mat &src)
     }
     else
     {
+        //Rect rect = finalRect;
         Rect rect = lastArmor.boundingRect();
 
         double scale_w = 2;
@@ -42,12 +43,14 @@ void ArmorDetector::setImage(const Mat &src)
         Point rdPoint = Point(x,y);
         detectRoi = Rect(luPoint,rdPoint);
 
+
         if (!makeRectSafe(detectRoi, src.size())){
             lastArmor = Armor();
             detectRoi = Rect(0, 0, src.cols, src.rows);
             _src = src;
         }
-        else src(detectRoi).copyTo(_src);
+        else
+            src(detectRoi).copyTo(_src);
 
         //二值化
         Mat gray;
@@ -56,14 +59,12 @@ void ArmorDetector::setImage(const Mat &src)
 #ifdef BINARY_SHOW
         imshow("_binary",_binary);
 #endif BINARY_SHOW
-
     }
-
 }
 
 
 bool ArmorDetector::isLight(Light& light, vector<Point> &cnt) const
-{
+{.
     int height = light.height;
     int width = light.width;
 
@@ -98,6 +99,7 @@ void ArmorDetector::findLights()
     if (contours.size() < 2)
     {
         lostCnt++;
+        candidateLights.clear();
         return;
     }
 
@@ -156,6 +158,14 @@ void ArmorDetector::findLights()
 
 void ArmorDetector::matchLights()
 {
+    if(candidateLights.size() < 2)
+    {
+        lostCnt++;
+        candidateArmors.clear();
+        return;
+    }
+
+
     for (size_t i=0;i<candidateLights.size()-1;i++)
     {
         Light lightI = candidateLights[i];
@@ -166,6 +176,7 @@ void ArmorDetector::matchLights()
             Point centerJ = lightJ.center;
             double armorWidth = POINT_DIST(centerI,centerJ) - (lightI.width + lightJ.width)/2.0;
             double armorHeight = (lightI.height + lightJ.height) / 2.0;
+
 
             //宽高比筛选条件
             bool whratio_ok = armor_min_wh_ratio < armorWidth/armorHeight && armorWidth/armorHeight < armor_max_wh_ratio;
@@ -185,11 +196,18 @@ void ArmorDetector::matchLights()
                 RotatedRect armor_rrect = RotatedRect(armorCenter,
                                                       Size2f(armorWidth,armorHeight),
                                                       armorAngle * 180 / CV_PI);
+    
                 candidateArmors.emplace_back(armor_rrect);
                 (candidateArmors.end()-1)->light_height_rate = lightI.height / lightJ.height;
             }
         }
     }
+    if(candidateArmors.size() < 1)
+    {
+        lostCnt++;
+        return;
+    }
+
 }
 
 void ArmorDetector::chooseTarget()
@@ -286,9 +304,17 @@ void ArmorDetector::chooseTarget()
 #endif DRAW_FINAL_ARMOR
 }
 
-Armor ArmorDetector::transformPos()
+Armor ArmorDetector::transformPos(const cv::Mat &src)
 {
+
+    setImage(src);
+    findLights();
+    matchLights();
+    chooseTarget();
+
     finalRect = finalArmor.boundingRect();
+    finalRect = Rect(detectRoi.x+finalRect.x,detectRoi.y+finalRect.y,finalRect.width,finalRect.height);
+
     if(!finalRect.empty())
     {
         finalArmor.center.x += detectRoi.x;
@@ -309,9 +335,10 @@ Armor ArmorDetector::transformPos()
             lastArmor.size = Size(lastArmor.size.width * 1.2, lastArmor.size.height * 1.2);
         else if (lostCnt == 18)
             lastArmor.size = Size(lastArmor.size.width * 1.2, lastArmor.size.height * 1.2);
-        else if (lostCnt > 33 )
-            lastArmor.size = Size();
+        else if (lostCnt > 33 )lastArmor.size = Size();
     }
+
+    return finalArmor;
 }
 
 

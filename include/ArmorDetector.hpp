@@ -113,8 +113,7 @@ public:
 
     void chooseTarget(); //找出优先级最高的装甲板
 
-    Armor transformPos(); //将最终目标的坐标转换到摄像头原大小的
-
+    Armor transformPos(const cv::Mat &src); //将最终目标的坐标转换到摄像头原大小的
 
 private:
     int lostCnt;
@@ -137,11 +136,14 @@ private:
     bool Lost;
     bool smallArmor;
 
-    cv::Mat _src;  //
+    cv::Mat _src;  // 裁剪src后的ROI
     cv::Mat _binary;
     std::vector<cv::Mat> temps;
-    cv::Rect detectRoi;
+
+    cv::Rect detectRoi;  //为了把src通过roi变成_src
+
     Armor lastArmor;
+
 
     std::vector<Light> candidateLights; // 筛选的灯条
     std::vector<Armor> candidateArmors; // 筛选的装甲板
@@ -151,8 +153,8 @@ private:
     cv::Point2f dst_p[4] = {cv::Point2f(0,60),cv::Point2f(0,0),cv::Point2f(30,0),cv::Point2f(30,60)};
 
 
+    bool isLight(Light& light, std::vector<cv::Point> &cnt);
 
-    bool isLight(Light& light, std::vector<cv::Point> &cnt) const;
 
     int detectNum(cv::RotatedRect &f_rect);
 
