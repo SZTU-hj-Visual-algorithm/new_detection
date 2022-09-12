@@ -18,8 +18,7 @@ void ArmorDetector::setImage(const Mat &src)
     }
     else
     {
-        //Rect rect = finalRect;
-        Rect rect = lastArmor.boundingRect();
+        Rect rect = lastRect;
 
         // 这里的w和h系数需要实测一下
         double scale_w = 2;
@@ -28,11 +27,11 @@ void ArmorDetector::setImage(const Mat &src)
         //获取当前帧的roi
         int w = int(rect.width * scale_w);
         int h = int(rect.height * scale_h);
-        int x = max(lastCenter.x - w/2, 0);
-        int y = max(lastCenter.y - h/2, 0);
+        int x = max(lastCenter.x - w, 0);
+        int y = max(lastCenter.y - h, 0);
         Point luPoint = Point(x,y);
-        x = min(lastCenter.x + w/2, src.cols);
-        y = min(lastCenter.y + h/2, src.rows);
+        x = min(lastCenter.x + w, src.cols);
+        y = min(lastCenter.y + h, src.rows);
         Point rdPoint = Point(x,y);
         detectRoi = Rect(luPoint,rdPoint);
 
@@ -52,27 +51,20 @@ void ArmorDetector::setImage(const Mat &src)
 #ifdef BINARY_SHOW
         imshow("_binary",_binary);
 #endif BINARY_SHOW
-<<<<<<< Updated upstream
-
-
-=======
->>>>>>> Stashed changes
     }
 }
 
 
 bool ArmorDetector::isLight(const Light& light)
 {
-<<<<<<< Updated upstream
     double hw_ratio = light.height / light.width;
     bool hw_ratio_ok = light.min_hw_ratio < hw_ratio && hw_ratio < light.max_hw_ratio;
-=======
+
     int height = light.height;
     int width = light.width;
 
     //高一定要大于宽
     bool standing_ok = height > width;
->>>>>>> Stashed changes
 
     double area_ratio = light.height * light.width / light.boundingRect().area();
     bool area_ratio_ok = light.min_area_ratio < area_ratio && area_ratio < light.max_area_ratio;
@@ -153,9 +145,6 @@ void ArmorDetector::findLights()
 
 void ArmorDetector::matchLights()
 {
-<<<<<<< Updated upstream
-
-=======
     if(candidateLights.size() < 2)
     {
         lostCnt++;
@@ -190,6 +179,7 @@ void ArmorDetector::matchLights()
                                                       Size2f(armorWidth,armorHeight),
                                                       armorAngle * 180 / CV_PI);
                 Armor candidateArmor = Armor(armor_rrect);
+                // 敌方ID也要传进去
             }
         }
     }
@@ -198,7 +188,6 @@ void ArmorDetector::matchLights()
         lostCnt++;
         return;
     }
->>>>>>> Stashed changes
 }
 
 void ArmorDetector::chooseTarget()
@@ -281,10 +270,11 @@ Armor ArmorDetector::transformPos(const cv::Mat &src)
 
     // 变为相对于原图src的矩形框ROI
     finalRect = finalArmor.boundingRect();
-    finalRect = Rect(detectRoi.x+finalRect.x,detectRoi.y+finalRect.y,finalRect.width,finalRect.height);
+    finalRect = Rect(detectRoi.x + finalRect.x,detectRoi.y + finalRect.y,detectRoi.width,detectRoi.height);
 
     if(!finalRect.empty())
     {
+        lastRect = finalRect;
         lostCnt = 0;
     }
     else
@@ -292,17 +282,17 @@ Armor ArmorDetector::transformPos(const cv::Mat &src)
         ++lostCnt;
 
         if (lostCnt < 8)
-            finalRect.size() = Size(finalRect.width * 1.0, finalRect.height * 1.0);
+            lastRect.size() = Size(finalRect.width * 1.0, finalRect.height * 1.0);
         else if(lostCnt == 9)
-            finalRect.size() = Size(finalRect.width * 1.2, finalRect.height * 1.2);
+            lastRect.size() = Size(finalRect.width * 1.2, finalRect.height * 1.2);
         else if(lostCnt == 12)
-            finalRect.size() = Size(finalRect.width * 1.5, finalRect.height * 1.5);
+            lastRect.size() = Size(finalRect.width * 1.5, finalRect.height * 1.5);
         else if(lostCnt == 15)
-            finalRect.size() = Size(finalRect.width * 1.2, finalRect.height * 1.2);
+            lastRect.size() = Size(finalRect.width * 1.2, finalRect.height * 1.2);
         else if (lostCnt == 18)
-            finalRect.size() = Size(finalRect.width * 1.2, finalRect.height * 1.2);
+            lastRect.size() = Size(finalRect.width * 1.2, finalRect.height * 1.2);
         else if (lostCnt > 33 )
-            finalRect.size() = Size(0, 0);
+            lastRect.size() = Size(0, 0);
     }
 
     return finalArmor;
@@ -365,7 +355,7 @@ int ArmorDetector::detectNum(RotatedRect &f_rect)
         matchTemplate(num_roi,temps[i],result,TM_CCORR_NORMED);
         minMaxLoc(result,&minVal, &maxVal, &minLoc, &maxLoc);
         //printf("max_val:%lf\n",maxVal);
-        if((maxVal > max_num)&&(maxVal > max_val))
+        if((maxVal > num_confidence)&&(maxVal > max_val))
         {
             max_index = i;
             max_val = maxVal;

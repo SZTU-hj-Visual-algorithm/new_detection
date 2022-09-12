@@ -91,6 +91,8 @@ public:
         temps.push_back(temp2);
         temps.push_back(temp6);
         temps.push_back(temp8);
+
+        num_confidence = 0.7;
     }
 
     int detectNum(cv::RotatedRect &f_rect);
@@ -105,13 +107,9 @@ public:
 
     void matchLights();
 
-<<<<<<< Updated upstream
     void chooseTarget();
 
-    Armor transformPos();
-=======
     Armor transformPos(const cv::Mat &src); //将最终目标的坐标转换到摄像头原大小的
->>>>>>> Stashed changes
 
 private:
     int lostCnt;
@@ -123,29 +121,25 @@ private:
     cv::Mat _src;  // 裁剪src后的ROI
     cv::Mat _binary;
     std::vector<cv::Mat> temps;
-<<<<<<< Updated upstream
-    cv::Rect detectRoi;
-    cv::RotatedRect lastArmor;
-=======
+    int num_confidence;
+
     cv::Rect detectRoi;  //为了把src通过roi变成_src
     cv::RotatedRect lastArmor;  // 上一帧检测到的旋转矩形
+    cv::Rect lastRect;
 
->>>>>>> Stashed changes
     std::vector<Light> candidateLights; // 筛选的灯条
     std::vector<Armor> candidateArmors; // 筛选的装甲板
+
     Armor finalArmor;  // 最终装甲板
     cv::Rect finalRect;  // 最终框住装甲板旋转举行的正矩形
     cv::Point2f dst_p[4] = {cv::Point2f(0,60),cv::Point2f(0,0),cv::Point2f(30,0),cv::Point2f(30,60)};
 
-<<<<<<< Updated upstream
-=======
     bool isLight(Light& light, std::vector<cv::Point> &cnt);
 
     int detectNum(cv::RotatedRect &f_rect);
 
     bool conTain(Armor &match_rect,std::vector<Light> &Lights, size_t &i, size_t &j);
 
->>>>>>> Stashed changes
     inline bool makeRectSafe(cv::Rect & rect, cv::Size size){
         if (rect.x < 0)
             rect.x = 0;
