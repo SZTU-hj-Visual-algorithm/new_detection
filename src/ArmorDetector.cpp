@@ -56,7 +56,7 @@ void ArmorDetector::setImage(const Mat &src)
 }
 
 
-bool ArmorDetector::isLight(Light& light, vector<Point> &cnt)
+bool ArmorDetector::isLight(Light& light, vector<Point> &cnt) const
 {
     int height = light.height;
     int width = light.width;
@@ -95,12 +95,12 @@ void ArmorDetector::findLights()
         return;
     }
 
-    for (int index = 0; index < contours.size(); index++)
+    for (auto & contour : contours)
     {
-        RotatedRect r_rect = minAreaRect(contours[index]);
+        RotatedRect r_rect = minAreaRect(contour);
         Light light = Light(r_rect);
 
-        if (isLight(light, contours[index]))
+        if (isLight(light, contour))
         {
             cv::Rect rect = r_rect.boundingRect();
 
@@ -114,7 +114,7 @@ void ArmorDetector::findLights()
                 {
                     for (int j = 0; j < roi.cols; j++)
                     {
-                        if (cv::pointPolygonTest(contours[index], cv::Point2f(j + rect.x, i + rect.y), false) >= 0) // 只加正矩形中的轮廓！！！
+                        if (cv::pointPolygonTest(contour, cv::Point2f(j + rect.x, i + rect.y), false) >= 0) // 只加正矩形中的轮廓！！！
                         {
                             sum_r += roi.at<cv::Vec3b>(i, j)[2];
                             sum_b += roi.at<cv::Vec3b>(i, j)[0];
@@ -187,7 +187,7 @@ void ArmorDetector::matchLights()
 
 void ArmorDetector::chooseTarget()
 {
-    if(candidateArmors.size() == 0)
+    if(candidateArmors.empty())
     {
         lostCnt++;
         finalArmor = Armor();
@@ -212,7 +212,7 @@ void ArmorDetector::chooseTarget()
         for(int i = 0; i < candidateArmors.size(); ++i) {
             candidateArmors[i].id = detectNum(candidateArmors[i]);
             if (candidateArmors[i].id == 0) {
-                swap(candidateArmors[i], candidateArmors[candidateArmors.size()-1]);
+                swap(candidateArmors[i], *(candidateArmors.end() -1 ));
                 candidateArmors.pop_back();
                 continue;
             }
@@ -223,50 +223,48 @@ void ArmorDetector::chooseTarget()
                 candidateArmors[i].type = SMALL;
         }
 
-        if (finalRect.contains(candidateArmors[0].center) && candidateArmors[0].id == finalArmor.id){ goto label;}  // 追踪上一帧装甲板
-        //int best_index;  // 最佳目标
+        if (!finalRect.contains(candidateArmors[0].center) && candidateArmors[0].id != finalArmor.id) {   // 追踪上一帧装甲板
 
-        // 装甲板中心点在屏幕中心部分，在中心部分中又是倾斜最小的，
-        // 如何避免频繁切换目标：缩小矩形框就是跟踪到了，一旦陀螺则会目标丢失，
-        // UI界面做数字选择，选几就是几号，可能在切换会麻烦，（不建议）
+            //int best_index;  // 最佳目标
+            // 装甲板中心点在屏幕中心部分，在中心部分中又是倾斜最小的，
+            // 如何避免频繁切换目标：缩小矩形框就是跟踪到了，一旦陀螺则会目标丢失，
+            // UI界面做数字选择，选几就是几号，可能在切换会麻烦，（不建议）
 
-        for(int index = 1; index < candidateArmors.size(); index++)
-        {
-            /*
-            double pts_dis = POINT_DIST(candidateArmors[index].center, Point2f(_src.cols,_src.rows));
-            if(pts_dis < min_pts_dis)
-            {
-                min_pts_dis = pts_dis;
-                min_dis_index = index;
-            }
-             */
-
-            if (finalRect.contains(candidateArmors[index].center) && candidateArmors[index].id == finalArmor.id){ goto label;}  // 追踪上一帧装甲板
-
-            //打分制筛选装甲板优先级
-            /*1、长宽比（筛选正面和侧面装甲板，尽量打正面装甲板）
-             *2、装甲板宽高最大
-             *3、装甲板靠近图像中心
-             *4、装甲板倾斜角度最小
-             */
-
-            cv::Rect img_center_rect(_src.cols*0.3,_src.rows*0.3,_src.cols*0.7,_src.rows*0.7);
-            Point2f vertice[4];
-            candidateArmors[index].points(vertice);
-            if(img_center_rect.contains(candidateArmors[index].center) &&
-               img_center_rect.contains(vertice[0]) &&
-               img_center_rect.contains(vertice[1]) &&
-               img_center_rect.contains(vertice[2]) &&
-               img_center_rect.contains(vertice[3]) )
-            {
-                if(min_angle > candidateArmors[index].angle)
+            for (int index = 1; index < candidateArmors.size(); index++) {
+                /*
+                double pts_dis = POINT_DIST(candidateArmors[index].center, Point2f(_src.cols,_src.rows));
+                if(pts_dis < min_pts_dis)
                 {
-                    min_angle = candidateArmors[index].angle;
-                    min_angle_index = index;
+                    min_pts_dis = pts_dis;
+                    min_dis_index = index;
+                }
+                 */
+
+                if (finalRect.contains(candidateArmors[index].center) &&
+                    candidateArmors[index].id == finalArmor.id) { break; }  // 追踪上一帧装甲板
+
+                //打分制筛选装甲板优先级
+                /*1、长宽比（筛选正面和侧面装甲板，尽量打正面装甲板）
+                 *2、装甲板宽高最大
+                 *3、装甲板靠近图像中心
+                 *4、装甲板倾斜角度最小
+                 */
+
+                cv::Rect img_center_rect(_src.cols * 0.3, _src.rows * 0.3, _src.cols * 0.7, _src.rows * 0.7);
+                Point2f vertice[4];
+                candidateArmors[index].points(vertice);
+                if (img_center_rect.contains(candidateArmors[index].center) &&
+                    img_center_rect.contains(vertice[0]) &&
+                    img_center_rect.contains(vertice[1]) &&
+                    img_center_rect.contains(vertice[2]) &&
+                    img_center_rect.contains(vertice[3])) {
+                    if (min_angle > candidateArmors[index].angle) {
+                        min_angle = candidateArmors[index].angle;
+                        min_angle_index = index;
+                    }
                 }
             }
         }
-        label:
         finalArmor = candidateArmors[min_angle_index];
     }
 
