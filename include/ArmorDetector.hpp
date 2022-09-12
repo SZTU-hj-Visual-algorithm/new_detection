@@ -48,6 +48,7 @@ struct Armor : public cv::RotatedRect    //装甲板结构体
     {
 
     }
+    double light_height_rate;  // 左右灯条高度比
     int id;  // 装甲板类别
     int area;  // 装甲板面积
     cv::Point2f center;  // 相对于原图坐标
@@ -61,7 +62,7 @@ class ArmorDetector:public robot_state
 public:
     ArmorDetector()
     {
-        lastArmor = cv::RotatedRect();
+        lastArmor = Armor();
         detectRoi = cv::Rect();
         smallArmor = false;
         lostCnt = 0;
@@ -140,12 +141,12 @@ private:
     cv::Mat _binary;
     std::vector<cv::Mat> temps;
     cv::Rect detectRoi;
-    cv::RotatedRect lastArmor;
+    Armor lastArmor;
 
     std::vector<Light> candidateLights; // 筛选的灯条
     std::vector<Armor> candidateArmors; // 筛选的装甲板
     Armor finalArmor;  // 最终装甲板
-    cv::Rect finalRect;  // 最终框住装甲板旋转举行的正矩形
+    cv::Rect finalRect;  // 最终框住装甲板旋转矩形的正矩形
 
     cv::Point2f dst_p[4] = {cv::Point2f(0,60),cv::Point2f(0,0),cv::Point2f(30,0),cv::Point2f(30,60)};
 

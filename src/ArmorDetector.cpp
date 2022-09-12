@@ -2,8 +2,8 @@
 #include "DNN_detect.h"
 
 //#define BINARY_SHOW
-#define DRAW_LIGHTS_CONTOURS
-#define DRAW_FINAL_ARMOR
+//#define DRAW_LIGHTS_CONTOURS
+//#define DRAW_FINAL_ARMOR
 
 using namespace cv;
 using namespace std;
@@ -21,23 +21,29 @@ void ArmorDetector::setImage(const Mat &src)
     {
         Rect rect = lastArmor.boundingRect();
 
-        // 这里的w和h系数需要实测一下
         double scale_w = 2;
         double scale_h = 2;
+        int lu_x_offset = 0;
+        int rd_x_offset = 0;
+        // 获取偏移量
+        if(lastArmor.light_height_rate > 1)
+            lu_x_offset = 6 *( pow(lastArmor.light_height_rate - 1, 0.6) + 0.09) * rect.width;
+        else
+            rd_x_offset = 6 * (pow(1 - lastArmor.light_height_rate, 0.6) + 0.15) * rect.width;
 
         //获取当前帧的roi
         int w = int(rect.width * scale_w);
         int h = int(rect.height * scale_h);
-        int x = max(lastCenter.x - w/2, 0);
-        int y = max(lastCenter.y - h/2, 0);
+        int x = max(lastCenter.x - w - lu_x_offset, 0);
+        int y = max(lastCenter.y + h, 0);
         Point luPoint = Point(x,y);
-        x = min(lastCenter.x + w/2, src.cols);
-        y = min(lastCenter.y + h/2, src.rows);
+        x = std::min(lastCenter.x + w + rd_x_offset, src.cols);
+        y = std::min(lastCenter.y + h, src.rows);
         Point rdPoint = Point(x,y);
         detectRoi = Rect(luPoint,rdPoint);
 
         if (!makeRectSafe(detectRoi, src.size())){
-            lastArmor = cv::RotatedRect();
+            lastArmor = Armor();
             detectRoi = Rect(0, 0, src.cols, src.rows);
             _src = src;
         }
@@ -180,6 +186,7 @@ void ArmorDetector::matchLights()
                                                       Size2f(armorWidth,armorHeight),
                                                       armorAngle * 180 / CV_PI);
                 candidateArmors.emplace_back(armor_rrect);
+                (candidateArmors.end()-1)->light_height_rate = lightI.height / lightJ.height;
             }
         }
     }
@@ -281,28 +288,29 @@ void ArmorDetector::chooseTarget()
 
 Armor ArmorDetector::transformPos()
 {
-
     finalRect = finalArmor.boundingRect();
     if(!finalRect.empty())
     {
+        finalArmor.center.x += detectRoi.x;
+        finalArmor.center.y += detectRoi.y;
         lostCnt = 0;
+        lastArmor = finalArmor;
     }
     else
     {
         ++lostCnt;
-
         if (lostCnt < 8)
-            finalRect.size() = Size(finalRect.width * 1.0, finalRect.height * 1.0);
+            lastArmor.size = Size(lastArmor.size.width * 1.1, lastArmor.size.height * 1.4);
         else if(lostCnt == 9)
-            finalRect.size() = Size(finalRect.width * 1.2, finalRect.height * 1.2);
+            lastArmor.size = Size(lastArmor.size.width * 1.5, lastArmor.size.height * 1.5);
         else if(lostCnt == 12)
-            finalRect.size() = Size(finalRect.width * 1.5, finalRect.height * 1.5);
+            lastArmor.size = Size(lastArmor.size.width * 1.2, lastArmor.size.height * 1.2);
         else if(lostCnt == 15)
-            finalRect.size() = Size(finalRect.width * 1.2, finalRect.height * 1.2);
+            lastArmor.size = Size(lastArmor.size.width * 1.2, lastArmor.size.height * 1.2);
         else if (lostCnt == 18)
-            finalRect.size() = Size(finalRect.width * 1.2, finalRect.height * 1.2);
+            lastArmor.size = Size(lastArmor.size.width * 1.2, lastArmor.size.height * 1.2);
         else if (lostCnt > 33 )
-            finalRect.size() = Size();
+            lastArmor.size = Size();
     }
 }
 
@@ -349,8 +357,6 @@ int ArmorDetector::detectNum(RotatedRect &f_rect)
     Mat num_roi;
     bin_dst(dst_roi).copyTo(num_roi);
     imshow("num",num_roi);
-
-
 
 
     double minVal,maxVal;
