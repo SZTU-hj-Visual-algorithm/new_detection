@@ -5,7 +5,7 @@
 
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc.hpp"
-
+#include "DNN_detect.h"
 #include <iostream>
 
 #include "robot_state.h"
@@ -51,7 +51,6 @@ struct Armor : public cv::RotatedRect    //装甲板结构体
     double light_height_rate;  // 左右灯条高度比
     int id;  // 装甲板类别
     int area;  // 装甲板面积
-    cv::Point2f center;  // 相对于原图坐标
     EnermyType type;  // 装甲板类型
 
 };
@@ -67,26 +66,6 @@ public:
         smallArmor = false;
         lostCnt = 0;
         Lost = true;
-        cv::Mat temp1 = cv::imread("../template/1.png");
-        cv::Mat temp3 = cv::imread("../template/3.png");
-        cv::Mat temp4 = cv::imread("../template/4.png");
-        cv::Mat temp2 = cv::imread("../template/2.png");
-        cv::Mat temp6 = cv::imread("../template/6.png");
-        cv::Mat temp8 = cv::imread("../template/8.png");
-
-        cvtColor(temp1,temp1,cv::COLOR_BGR2GRAY);
-        cvtColor(temp3,temp3,cv::COLOR_BGR2GRAY);
-        cvtColor(temp4,temp4,cv::COLOR_BGR2GRAY);
-        cvtColor(temp2,temp2,cv::COLOR_BGR2GRAY);
-        cvtColor(temp6,temp6,cv::COLOR_BGR2GRAY);
-        cvtColor(temp8,temp8,cv::COLOR_BGR2GRAY);
-
-        temps.push_back(temp1);
-        temps.push_back(temp3);
-        temps.push_back(temp4);
-        temps.push_back(temp2);
-        temps.push_back(temp6);
-        temps.push_back(temp8);
 
         //binary_thresh
         binThresh = 150;
@@ -103,6 +82,11 @@ public:
         armor_min_wh_ratio = 1.5;
         armor_max_angle = 20.0;
         armor_height_offset = 0.3;
+        armor_ij_min_ratio = 0.5;
+        armor_ij_max_ratio = 5.0;
+
+        //armor_grade_condition
+        armor_standart_wh = 1.75;
     }
 
     void setImage(const cv::Mat &src); //对图像进行设置
@@ -132,6 +116,15 @@ private:
     double armor_min_wh_ratio;
     double armor_max_angle;
     double armor_height_offset;
+    double armor_ij_min_ratio;
+    double armor_ij_max_ratio;
+
+    //armor_grade_condition
+    double armor_standart_wh;
+    double wh_grade_ratio;
+    double height_grade_ratio;
+    double near_grade_ratio;
+    double angle_grade_ratio;
 
     bool Lost;
     bool smallArmor;
@@ -155,10 +148,46 @@ private:
 
     bool isLight(Light& light, std::vector<cv::Point> &cnt);
 
-
     int detectNum(cv::RotatedRect &f_rect);
 
-    bool conTain(Armor &match_rect,std::vector<Light> &Lights, size_t &i, size_t &j);
+    bool conTain(cv::RotatedRect &match_rect,std::vector<Light> &Lights, size_t &i, size_t &j);
+
+    inline int whGrade(const double wh_ratio)
+    {
+        return wh_ratio/armor_standart_wh > 1 ? 100 : (wh_ratio/armor_standart_wh) * 100;
+    }
+
+    inline int heightGrade(const double armor_height, const double begin_height, const double end_height)
+    {
+        double hRotation = (armor_height - end_height) / (begin_height - end_height);
+        return hRotation*100;
+    }
+
+    inline int nearGrade(const Armor &checkArmor)
+    {
+        cv::Rect img_center_rect(_src.cols * 0.3, _src.rows * 0.3, _src.cols * 0.7, _src.rows * 0.7);
+        Point2f vertice[4];
+        checkArmor.points(vertice);
+        if (img_center_rect.contains(checkArmor.center) &&
+        img_center_rect.contains(vertice[0]) &&
+        img_center_rect.contains(vertice[1]) &&
+        img_center_rect.contains(vertice[2]) &&
+        img_center_rect.contains(vertice[3]))
+        {
+            return 100;
+        }
+        else
+        {
+            return 0;
+        }
+    }
+
+
+    inline int angleGrade(const double armorAngle)
+    {
+        double angle_ratio = (90.0-armorAngle) / 90.0;
+        return angle_ratio*100;
+    }
 
     inline bool makeRectSafe(cv::Rect & rect, cv::Size size){
         if (rect.x < 0)
@@ -178,6 +207,11 @@ private:
     static inline bool area_sort(std::vector<cv::Point> &cnt1,std::vector<cv::Point> &cnt2)
     {
         return cv::contourArea(cnt1) > cv::contourArea(cnt2);
+    }
+
+    static inline bool height_sort(Armor &candidate1,Armor &candidate2)
+    {
+        return candidate1.size.height > candidate2.size.height;
     }
 
 
