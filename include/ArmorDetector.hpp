@@ -5,7 +5,6 @@
 
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc.hpp"
-#include "opencv2/dnn/dnn.hpp"
 
 #include <iostream>
 
@@ -30,12 +29,6 @@ struct Light : public cv::RotatedRect     //灯条结构体
         width = POINT_DIST(p[0], p[1]);
         angle = top.x < bottom.x ? box.angle : 90 + box.angle;
 
-        //judge condition
-        max_angle = 40.0;
-        min_hw_ratio = 3;
-        max_hw_ratio = 10;      // different distance and focus
-        min_area_ratio = 0.6;   // RotatedRect / Rect
-        max_area_ratio = 1.0;
     }
     int lightColor;
     cv::Point2f top;
@@ -44,21 +37,24 @@ struct Light : public cv::RotatedRect     //灯条结构体
     double height;
     double width;
 
-    //judge condition
-    double max_angle;
-    double min_hw_ratio;
-    double max_hw_ratio;   // different distance and focus
-    double min_area_ratio;   // RotatedRect / Rect
-    double max_area_ratio;
+
 };
 
 //装甲板结构体
 struct Armor : public cv::RotatedRect    //装甲板结构体
 {
     Armor();
-    int enermyID;
-};
+    explicit Armor(cv::RotatedRect &box) : cv::RotatedRect(box)
+    {
 
+    }
+    double light_height_rate;  // 左右灯条高度比
+    int id;  // 装甲板类别
+    int area;  // 装甲板面积
+    cv::Point2f center;  // 相对于原图坐标
+    EnermyType type;  // 装甲板类型
+
+};
 
 //主类
 class ArmorDetector:public robot_state
@@ -66,7 +62,7 @@ class ArmorDetector:public robot_state
 public:
     ArmorDetector()
     {
-        lastArmor = cv::RotatedRect();
+        lastArmor = Armor();
         detectRoi = cv::Rect();
         smallArmor = false;
         lostCnt = 0;
@@ -91,31 +87,51 @@ public:
         temps.push_back(temp2);
         temps.push_back(temp6);
         temps.push_back(temp8);
+
+        //binary_thresh
+        binThresh = 150;
+
+        //light_judge_condition
+        light_max_angle = 30.0;
+        light_min_hw_ratio = 3;
+        light_max_hw_ratio = 10;   // different distance and focus
+        light_min_area_ratio = 0.6;   // RotatedRect / Rect
+        light_max_area_ratio = 1.0;
+
+        //armor_judge_condition
+        armor_max_wh_ratio = 4.5;
+        armor_min_wh_ratio = 1.5;
+        armor_max_angle = 20.0;
+        armor_height_offset = 0.3;
     }
 
-    int detectNum(cv::RotatedRect &f_rect);
+    void setImage(const cv::Mat &src); //对图像进行设置
 
-    bool conTain(Armor &match_rect,std::vector<Light> &Lights, size_t &i, size_t &j);
+    void findLights(); //找灯条获取候选匹配的灯条
 
-    void setImage(const cv::Mat &src);
+    void matchLights(); //匹配灯条获取候选装甲板
 
-    bool isLight(const Light& light);
+    void chooseTarget(); //找出优先级最高的装甲板
 
-    void findLights();
-
-    void matchLights();
-
-<<<<<<< Updated upstream
-    void chooseTarget();
-
-    Armor transformPos();
-=======
     Armor transformPos(const cv::Mat &src); //将最终目标的坐标转换到摄像头原大小的
->>>>>>> Stashed changes
 
 private:
     int lostCnt;
-    const int binThresh = 150;
+    int binThresh;
+
+    //light_judge_condition
+    double light_max_angle;
+    double light_min_hw_ratio;
+    double light_max_hw_ratio;   // different distance and focus
+    double light_min_area_ratio;   // RotatedRect / Rect
+    double light_max_area_ratio;
+
+
+    //armor_judge_condition
+    double armor_max_wh_ratio;
+    double armor_min_wh_ratio;
+    double armor_max_angle;
+    double armor_height_offset;
 
     bool Lost;
     bool smallArmor;
@@ -123,29 +139,27 @@ private:
     cv::Mat _src;  // 裁剪src后的ROI
     cv::Mat _binary;
     std::vector<cv::Mat> temps;
-<<<<<<< Updated upstream
-    cv::Rect detectRoi;
-    cv::RotatedRect lastArmor;
-=======
-    cv::Rect detectRoi;  //为了把src通过roi变成_src
-    cv::RotatedRect lastArmor;  // 上一帧检测到的旋转矩形
 
->>>>>>> Stashed changes
+    cv::Rect detectRoi;  //为了把src通过roi变成_src
+
+    Armor lastArmor;
+
+
     std::vector<Light> candidateLights; // 筛选的灯条
     std::vector<Armor> candidateArmors; // 筛选的装甲板
     Armor finalArmor;  // 最终装甲板
-    cv::Rect finalRect;  // 最终框住装甲板旋转举行的正矩形
+    cv::Rect finalRect;  // 最终框住装甲板旋转矩形的正矩形
+
     cv::Point2f dst_p[4] = {cv::Point2f(0,60),cv::Point2f(0,0),cv::Point2f(30,0),cv::Point2f(30,60)};
 
-<<<<<<< Updated upstream
-=======
+
     bool isLight(Light& light, std::vector<cv::Point> &cnt);
+
 
     int detectNum(cv::RotatedRect &f_rect);
 
     bool conTain(Armor &match_rect,std::vector<Light> &Lights, size_t &i, size_t &j);
 
->>>>>>> Stashed changes
     inline bool makeRectSafe(cv::Rect & rect, cv::Size size){
         if (rect.x < 0)
             rect.x = 0;
@@ -165,6 +179,8 @@ private:
     {
         return cv::contourArea(cnt1) > cv::contourArea(cnt2);
     }
+
+
 };
 
 
