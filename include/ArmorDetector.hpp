@@ -5,7 +5,6 @@
 
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc.hpp"
-#include "opencv2/dnn/dnn.hpp"
 
 #include <iostream>
 
@@ -49,7 +48,10 @@ struct Armor : public cv::RotatedRect    //装甲板结构体
     {
 
     }
-    int enermyId;
+    int id;  // 装甲板类别
+    int area;  // 装甲板面积
+    cv::Point2f center;  // 相对于原图坐标
+    EnermyType type;  // 装甲板类型
 
 };
 

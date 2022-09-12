@@ -1,4 +1,5 @@
 #include "ArmorDetector.hpp"
+#include "DNN_detect.h"
 
 //#define BINARY_SHOW
 #define DRAW_LIGHTS_CONTOURS
@@ -207,6 +208,22 @@ void ArmorDetector::chooseTarget()
         double min_angle = candidateArmors[0].angle;    // 识别到装甲板中倾斜程度最小的
         int min_angle_index = 0; // 下标
 
+        // 获取每个候选装甲板的id和type
+        for(int i = 0; i < candidateArmors.size(); ++i) {
+            candidateArmors[i].id = detectNum(candidateArmors[i]);
+            if (candidateArmors[i].id == 0) {
+                swap(candidateArmors[i], candidateArmors[candidateArmors.size()-1]);
+                candidateArmors.pop_back();
+                continue;
+            }
+            // 暂时只有五个类别
+            if (candidateArmors[i].id == 1)
+                candidateArmors[i].type = BIG;
+            if (candidateArmors[i].id == 2 || candidateArmors[i].id == 3 || candidateArmors[i].id == 4)
+                candidateArmors[i].type = SMALL;
+        }
+
+        if (finalRect.contains(candidateArmors[0].center) && candidateArmors[0].id == finalArmor.id){ goto label;}  // 追踪上一帧装甲板
         //int best_index;  // 最佳目标
 
         // 装甲板中心点在屏幕中心部分，在中心部分中又是倾斜最小的，
@@ -223,6 +240,8 @@ void ArmorDetector::chooseTarget()
                 min_dis_index = index;
             }
              */
+
+            if (finalRect.contains(candidateArmors[index].center) && candidateArmors[index].id == finalArmor.id){ goto label;}  // 追踪上一帧装甲板
 
             //打分制筛选装甲板优先级
             /*1、长宽比（筛选正面和侧面装甲板，尽量打正面装甲板）
@@ -247,7 +266,7 @@ void ArmorDetector::chooseTarget()
                 }
             }
         }
-
+        label:
         finalArmor = candidateArmors[min_angle_index];
     }
 
@@ -319,6 +338,7 @@ int ArmorDetector::detectNum(RotatedRect &f_rect)
     Mat matrix_per = getPerspectiveTransform(src_p,dst_p);
     warpPerspective(numSrc,dst,matrix_per,Size(30,60));
 
+/////////////////////////////////模板匹配////////////////////////////////
     Mat bin_dst,gray_dst;
     cvtColor(dst,gray_dst,COLOR_BGR2GRAY);
     threshold(gray_dst,bin_dst,0,255,THRESH_BINARY | THRESH_OTSU);
@@ -380,6 +400,11 @@ int ArmorDetector::detectNum(RotatedRect &f_rect)
         enermy_type = BIG;
     }
     return classid;
+    //////////////////////////end//////////////////////////
+
+    //////////////////////////神经网络//////////////////////////
+    return DNN_detect::dnn_detect(dst);
+    //////////////////////////end///////////////////////////
 }
 
 
