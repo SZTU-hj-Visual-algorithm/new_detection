@@ -151,7 +151,7 @@ private:
 
 
 
-    bool isLight(Light& light, std::vector<cv::Point> &cnt);
+    bool isLight(Light& light, std::vector<cv::Point> &cnt) const;
 
     int detectNum(cv::RotatedRect &f_rect);
 
