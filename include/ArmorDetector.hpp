@@ -52,42 +52,13 @@ struct Armor : public cv::RotatedRect    //装甲板结构体
     int id;  // 装甲板类别
     int area;  // 装甲板面积
     EnermyType type;  // 装甲板类型
-
 };
 
 //主类
 class ArmorDetector:public robot_state
 {
 public:
-    ArmorDetector()
-    {
-        lastArmor = Armor();
-        detectRoi = cv::Rect();
-        smallArmor = false;
-        lostCnt = 0;
-        Lost = true;
-
-        //binary_thresh
-        binThresh = 150;
-
-        //light_judge_condition
-        light_max_angle = 30.0;
-        light_min_hw_ratio = 3;
-        light_max_hw_ratio = 10;   // different distance and focus
-        light_min_area_ratio = 0.6;   // RotatedRect / Rect
-        light_max_area_ratio = 1.0;
-
-        //armor_judge_condition
-        armor_max_wh_ratio = 4.5;
-        armor_min_wh_ratio = 1.5;
-        armor_max_angle = 20.0;
-        armor_height_offset = 0.3;
-        armor_ij_min_ratio = 0.5;
-        armor_ij_max_ratio = 5.0;
-
-        //armor_grade_condition
-        armor_standart_wh = 1.75;
-    }
+    ArmorDetector(); //构造函数初始化
 
     void setImage(const cv::Mat &src); //对图像进行设置
 
@@ -154,13 +125,17 @@ private:
 
     inline int whGrade(const double wh_ratio)
     {
+        // 可以选择大装甲板，小装甲板w/h最大大约在2.45左右，大装甲板大约在4左右
         return wh_ratio/armor_standart_wh > 1 ? 100 : (wh_ratio/armor_standart_wh) * 100;
     }
 
     inline int heightGrade(const double armor_height, const double begin_height, const double end_height)
     {
+        // 都和第一个装甲板高度比较？假设第一个得分为中值，对以后的给分上下波动
+        // 可能会出现超过一百的情况，
+        // 找一个好一点的标准值，下面改成了面积
         double hRotation = (armor_height - end_height) / (begin_height - end_height);
-        return hRotation*100;
+        return hRotation * 100;
     }
 
     inline int nearGrade(const Armor &checkArmor)
@@ -172,7 +147,7 @@ private:
         img_center_rect.contains(vertice[0]) &&
         img_center_rect.contains(vertice[1]) &&
         img_center_rect.contains(vertice[2]) &&
-        img_center_rect.contains(vertice[3]))
+        img_center_rect.contains(vertice[3]) )
         {
             return 100;
         }
@@ -182,11 +157,61 @@ private:
         }
     }
 
-
     inline int angleGrade(const double armorAngle)
     {
         double angle_ratio = (90.0-armorAngle) / 90.0;
         return angle_ratio*100;
+    }
+
+    int armorGrade(const Armor& checkArmor)
+    {
+        // 看看裁判系统的通信机制，雷达的制作规范；
+
+        // 选择用int截断double
+
+        // 长宽比
+        int wh_grade;
+        double big_wh_standard = 3.5; // 4左右最佳，3.5以上比较正，具体再修改
+        double small_wh_standard = 2; // 2.5左右最佳，2以上比较正，具体再修改
+        double wh_ratio = checkArmor.size.height>checkArmor.size.width ? checkArmor.size.height / checkArmor.size.width : checkArmor.size.width > checkArmor.size.height;
+        if(checkArmor.type == BIG)
+        {
+            wh_grade = wh_ratio/big_wh_standard > 1 ? 100 : (wh_ratio/big_wh_standard) * 100;
+        }
+        else
+        {
+            wh_grade = wh_ratio/small_wh_standard > 1 ? 100 : (wh_ratio/small_wh_standard) * 100;
+        }
+
+        // 最大装甲板，用面积，找一个标准值（固定距离（比如3/4米），装甲板大小（Armor.area）大约是多少，分大小装甲板）
+        // 比标准大就是100，小就是做比例，，，，可能小的得出来的值会很小
+        int area_grade;
+        double big_area_standard = 2000; // 不知道，得实测
+        double small_area_standard = 1000; // 不知道，得实测
+        if(checkArmor.type == BIG)
+        {
+            area_grade = checkArmor.area/big_area_standard > 1 ? 100 : (checkArmor.area/big_area_standard) * 100;
+        }
+        else
+        {
+            area_grade = checkArmor.area/small_area_standard > 1 ? 100 : (checkArmor.area/small_area_standard) * 100;
+        }
+
+        // 靠近中心，与中心做距离，设定标准值，看图传和摄像头看到的画面的差异
+        int near_grade;
+        double near_standard = 500;
+        double pts_distance = POINT_DIST(checkArmor.center, Point2f(_src.cols * 0.5, _src.rows * 0.5));
+        near_grade = pts_distance/near_standard > 1 ? 100 : (pts_distance/near_standard) * 100;
+
+        // 角度不歪
+        int angle_grade;
+        angle_grade = (90.0 - checkArmor.angle) / 90.0 * 100;
+
+        // 下面的系数得详细调节；
+        int final_grade = wh_grade    * 0.4 +
+                          area_grade  * 0.3 +
+                          near_grade  * 0.2 +
+                          angle_grade * 0.1 ;
     }
 
     inline bool makeRectSafe(cv::Rect & rect, cv::Size size){

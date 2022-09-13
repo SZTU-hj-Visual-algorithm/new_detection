@@ -7,6 +7,36 @@
 using namespace cv;
 using namespace std;
 
+ArmorDetector::ArmorDetector()
+{
+    lastArmor = Armor();
+    detectRoi = cv::Rect();
+    smallArmor = false;
+    lostCnt = 0;
+    Lost = true;
+
+    //binary_thresh
+    binThresh = 150;
+
+    //light_judge_condition
+    light_max_angle = 30.0;
+    light_min_hw_ratio = 3;
+    light_max_hw_ratio = 10;   // different distance and focus
+    light_min_area_ratio = 0.6;   // RotatedRect / Rect
+    light_max_area_ratio = 1.0;
+
+    //armor_judge_condition
+    armor_max_wh_ratio = 4.5;
+    armor_min_wh_ratio = 1.5;
+    armor_max_angle = 20.0;
+    armor_height_offset = 0.3;
+    armor_ij_min_ratio = 0.5;
+    armor_ij_max_ratio = 5.0;
+
+    //armor_grade_condition
+    armor_standart_wh = 1.75;
+}
+
 void ArmorDetector::setImage(const Mat &src)
 {
     const Point &lastCenter = lastArmor.center;
