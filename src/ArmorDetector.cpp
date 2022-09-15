@@ -264,7 +264,7 @@ void ArmorDetector::chooseTarget()
     }
     else if(candidateArmors.size() == 1)
     {
-        candidateArmors[0].id = detectNum(candidateArmors[0]);
+        detectNum(candidateArmors[0], candidateArmors[0]);
         if (candidateArmors[0].id == 0)
         {
             lostCnt++;
