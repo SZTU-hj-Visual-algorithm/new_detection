@@ -68,6 +68,8 @@ public:
 
     void chooseTarget(); //找出优先级最高的装甲板
 
+    void chooseTarget2(); //找出优先级最高的装甲板
+
     Armor transformPos(const cv::Mat &src); //将最终目标的坐标转换到摄像头原大小的
 
 private:
@@ -91,7 +93,16 @@ private:
     double armor_ij_max_ratio;
 
     //armor_grade_condition
+<<<<<<< Updated upstream
     double armor_standart_wh;
+=======
+    double big_wh_standard;
+    double small_wh_standard;
+    double near_standard;
+
+    //armor_grade_project_ratio
+    double id_grade_ratio;
+>>>>>>> Stashed changes
     double wh_grade_ratio;
     double height_grade_ratio;
     double near_grade_ratio;
@@ -116,6 +127,7 @@ private:
 
     cv::Point2f dst_p[4] = {cv::Point2f(0,60),cv::Point2f(0,0),cv::Point2f(30,0),cv::Point2f(30,60)};
 
+    int grade_standard;
 
     bool isLight(Light& light, std::vector<cv::Point> &cnt);
 
