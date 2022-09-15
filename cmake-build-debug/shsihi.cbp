@@ -35,6 +35,7 @@
 				<Option compiler="gcc"/>
 				<Compiler>
 					<Add directory="F:/SZTU-hj-algorithm/new_detection/include"/>
+					<Add directory="F:/SZTU-hj-algorithm/new_detection/include/camera"/>
 					<Add directory="E:/opencv-4.5.4/opencv/build/x64/MinGW"/>
 					<Add directory="E:/opencv-4.5.4/opencv/sources/include"/>
 					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/core/include"/>
@@ -113,6 +114,7 @@
 				<Option compiler="gcc"/>
 				<Compiler>
 					<Add directory="F:/SZTU-hj-algorithm/new_detection/include"/>
+					<Add directory="F:/SZTU-hj-algorithm/new_detection/include/camera"/>
 					<Add directory="E:/opencv-4.5.4/opencv/build/x64/MinGW"/>
 					<Add directory="E:/opencv-4.5.4/opencv/sources/include"/>
 					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/core/include"/>
@@ -247,6 +249,7 @@
 					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/img_hash/include"/>
 					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/ts/include"/>
 					<Add directory="F:/SZTU-hj-algorithm/new_detection/include"/>
+					<Add directory="F:/SZTU-hj-algorithm/new_detection/include/camera"/>
 					<Add directory="E:/Mingw/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/include/c++"/>
 					<Add directory="E:/Mingw/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/include/c++/x86_64-w64-mingw32"/>
 					<Add directory="E:/Mingw/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/include/c++/backward"/>
@@ -325,6 +328,7 @@
 					<Add directory="E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/img_hash/include"/>
 					<Add directory="E:/opencv-4.5.4/opencv/sources/modules/ts/include"/>
 					<Add directory="F:/SZTU-hj-algorithm/new_detection/include"/>
+					<Add directory="F:/SZTU-hj-algorithm/new_detection/include/camera"/>
 					<Add directory="E:/Mingw/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/include/c++"/>
 					<Add directory="E:/Mingw/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/include/c++/x86_64-w64-mingw32"/>
 					<Add directory="E:/Mingw/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/include/c++/backward"/>
@@ -354,6 +358,12 @@
 			<Option target="shsihi"/>
 		</Unit>
 		<Unit filename="F:/SZTU-hj-algorithm/new_detection/src/ArmorDetector.cpp">
+			<Option target="SRCSO"/>
+		</Unit>
+		<Unit filename="F:/SZTU-hj-algorithm/new_detection/src/DNN_detect.cpp">
+			<Option target="SRCSO"/>
+		</Unit>
+		<Unit filename="F:/SZTU-hj-algorithm/new_detection/src/camera.cpp">
 			<Option target="SRCSO"/>
 		</Unit>
 		<Unit filename="F:/SZTU-hj-algorithm/new_detection/CMakeLists.txt">

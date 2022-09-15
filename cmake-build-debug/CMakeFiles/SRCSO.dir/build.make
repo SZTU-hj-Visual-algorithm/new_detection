@@ -79,17 +79,49 @@ CMakeFiles/SRCSO.dir/src/ArmorDetector.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/SRCSO.dir/src/ArmorDetector.cpp.s"
 	E:\Mingw\mingw64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S F:\SZTU-hj-algorithm\new_detection\src\ArmorDetector.cpp -o CMakeFiles\SRCSO.dir\src\ArmorDetector.cpp.s
 
+CMakeFiles/SRCSO.dir/src/DNN_detect.cpp.obj: CMakeFiles/SRCSO.dir/flags.make
+CMakeFiles/SRCSO.dir/src/DNN_detect.cpp.obj: CMakeFiles/SRCSO.dir/includes_CXX.rsp
+CMakeFiles/SRCSO.dir/src/DNN_detect.cpp.obj: ../src/DNN_detect.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=F:\SZTU-hj-algorithm\new_detection\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/SRCSO.dir/src/DNN_detect.cpp.obj"
+	E:\Mingw\mingw64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles\SRCSO.dir\src\DNN_detect.cpp.obj -c F:\SZTU-hj-algorithm\new_detection\src\DNN_detect.cpp
+
+CMakeFiles/SRCSO.dir/src/DNN_detect.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/SRCSO.dir/src/DNN_detect.cpp.i"
+	E:\Mingw\mingw64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E F:\SZTU-hj-algorithm\new_detection\src\DNN_detect.cpp > CMakeFiles\SRCSO.dir\src\DNN_detect.cpp.i
+
+CMakeFiles/SRCSO.dir/src/DNN_detect.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/SRCSO.dir/src/DNN_detect.cpp.s"
+	E:\Mingw\mingw64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S F:\SZTU-hj-algorithm\new_detection\src\DNN_detect.cpp -o CMakeFiles\SRCSO.dir\src\DNN_detect.cpp.s
+
+CMakeFiles/SRCSO.dir/src/camera.cpp.obj: CMakeFiles/SRCSO.dir/flags.make
+CMakeFiles/SRCSO.dir/src/camera.cpp.obj: CMakeFiles/SRCSO.dir/includes_CXX.rsp
+CMakeFiles/SRCSO.dir/src/camera.cpp.obj: ../src/camera.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=F:\SZTU-hj-algorithm\new_detection\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/SRCSO.dir/src/camera.cpp.obj"
+	E:\Mingw\mingw64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles\SRCSO.dir\src\camera.cpp.obj -c F:\SZTU-hj-algorithm\new_detection\src\camera.cpp
+
+CMakeFiles/SRCSO.dir/src/camera.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/SRCSO.dir/src/camera.cpp.i"
+	E:\Mingw\mingw64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E F:\SZTU-hj-algorithm\new_detection\src\camera.cpp > CMakeFiles\SRCSO.dir\src\camera.cpp.i
+
+CMakeFiles/SRCSO.dir/src/camera.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/SRCSO.dir/src/camera.cpp.s"
+	E:\Mingw\mingw64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S F:\SZTU-hj-algorithm\new_detection\src\camera.cpp -o CMakeFiles\SRCSO.dir\src\camera.cpp.s
+
 # Object files for target SRCSO
 SRCSO_OBJECTS = \
-"CMakeFiles/SRCSO.dir/src/ArmorDetector.cpp.obj"
+"CMakeFiles/SRCSO.dir/src/ArmorDetector.cpp.obj" \
+"CMakeFiles/SRCSO.dir/src/DNN_detect.cpp.obj" \
+"CMakeFiles/SRCSO.dir/src/camera.cpp.obj"
 
 # External object files for target SRCSO
 SRCSO_EXTERNAL_OBJECTS =
 
 libSRCSO.a: CMakeFiles/SRCSO.dir/src/ArmorDetector.cpp.obj
+libSRCSO.a: CMakeFiles/SRCSO.dir/src/DNN_detect.cpp.obj
+libSRCSO.a: CMakeFiles/SRCSO.dir/src/camera.cpp.obj
 libSRCSO.a: CMakeFiles/SRCSO.dir/build.make
 libSRCSO.a: CMakeFiles/SRCSO.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=F:\SZTU-hj-algorithm\new_detection\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX static library libSRCSO.a"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=F:\SZTU-hj-algorithm\new_detection\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking CXX static library libSRCSO.a"
 	$(CMAKE_COMMAND) -P CMakeFiles\SRCSO.dir\cmake_clean_target.cmake
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles\SRCSO.dir\link.txt --verbose=$(VERBOSE)
 

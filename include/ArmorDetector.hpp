@@ -43,16 +43,25 @@ struct Light : public cv::RotatedRect     //灯条结构体
 //装甲板结构体
 struct Armor : public cv::RotatedRect    //装甲板结构体
 {
-    Armor();
+    Armor()
+    {
+        light_height_rate = 0;
+        confidence = 0;
+        id = 0;
+        type = SMALL;
+    }
     explicit Armor(cv::RotatedRect &box) : cv::RotatedRect(box)
     {
-
+        light_height_rate = 0;
+        confidence = 0;
+        id = 0;
+        type = SMALL;
     }
     double light_height_rate;  // 左右灯条高度比
     double confidence;
     int id;  // 装甲板类别
-    int area;  // 装甲板面积
     EnermyType type;  // 装甲板类型
+//    int area;  // 装甲板面积
 };
 
 //主类
@@ -61,15 +70,9 @@ class ArmorDetector:public robot_state
 public:
     ArmorDetector(); //构造函数初始化
 
-    void setImage(const cv::Mat &src); //对图像进行设置
+    Armor autoAim(const cv::Mat &src); //将最终目标的坐标转换到摄像头原大小的
 
-    void findLights(); //找灯条获取候选匹配的灯条
 
-    void matchLights(); //匹配灯条获取候选装甲板
-
-    void chooseTarget(); //找出优先级最高的装甲板
-
-    Armor getTarget(const cv::Mat &src); //将最终目标的坐标转换到摄像头原大小的
 
 private:
     int lostCnt;
@@ -95,6 +98,7 @@ private:
     double big_wh_standard;
     double small_wh_standard;
     double near_standard;
+    int grade_standard;
 
     //armor_grade_project_ratio
     double id_grade_ratio;
@@ -114,24 +118,34 @@ private:
 
     Armor lastArmor;
 
-    int grade_standard;
-
     std::vector<Light> candidateLights; // 筛选的灯条
     std::vector<Armor> candidateArmors; // 筛选的装甲板
     Armor finalArmor;  // 最终装甲板
 
     cv::Point2f dst_p[4] = {cv::Point2f(0,60),cv::Point2f(0,0),cv::Point2f(30,0),cv::Point2f(30,60)};
 
+    void setImage(const cv::Mat &src); //对图像进行设置
+
+    void findLights(); //找灯条获取候选匹配的灯条
+
+    void matchLights(); //匹配灯条获取候选装甲板
+
+    void chooseTarget(); //找出优先级最高的装甲板
 
     bool isLight(Light& light, std::vector<cv::Point> &cnt);
-
-    void detectNum(cv::RotatedRect &f_rect, Armor& armor);
 
     bool conTain(cv::RotatedRect &match_rect,std::vector<Light> &Lights, size_t &i, size_t &j);
 
     int armorGrade(const Armor& checkArmor);
 
-    inline bool makeRectSafe(cv::Rect & rect, cv::Size size){
+    void detectNum(Armor& armor);
+
+    static inline void dnn_detect(cv::Mat frame, Armor& armor)// 调用该函数即可返回数字ID
+    {
+        return DNN_detect::net_forward(DNN_detect::img_processing(std::move(frame), TO_GRAY), DNN_detect::read_net(NET_PATH), armor.id, armor.confidence);
+    }
+
+    static inline bool makeRectSafe(cv::Rect & rect, cv::Size size){
         if (rect.x < 0)
             rect.x = 0;
         if (rect.x + rect.width > size.width)
@@ -146,17 +160,10 @@ private:
         return true;
     }
 
-    static inline bool area_sort(std::vector<cv::Point> &cnt1,std::vector<cv::Point> &cnt2)
-    {
-        return cv::contourArea(cnt1) > cv::contourArea(cnt2);
-    }
-
     static inline bool height_sort(Armor &candidate1,Armor &candidate2)
     {
         return candidate1.size.height > candidate2.size.height;
     }
-
-
 };
 
 

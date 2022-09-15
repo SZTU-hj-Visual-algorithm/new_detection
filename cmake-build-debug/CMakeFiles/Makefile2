@@ -82,12 +82,12 @@ clean: CMakeFiles/SRCSO.dir/clean
 CMakeFiles/shsihi.dir/all: CMakeFiles/SRCSO.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\shsihi.dir\build.make CMakeFiles/shsihi.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\shsihi.dir\build.make CMakeFiles/shsihi.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=F:\SZTU-hj-algorithm\new_detection\cmake-build-debug\CMakeFiles --progress-num=3,4 "Built target shsihi"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=F:\SZTU-hj-algorithm\new_detection\cmake-build-debug\CMakeFiles --progress-num=5,6 "Built target shsihi"
 .PHONY : CMakeFiles/shsihi.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/shsihi.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start F:\SZTU-hj-algorithm\new_detection\cmake-build-debug\CMakeFiles 4
+	$(CMAKE_COMMAND) -E cmake_progress_start F:\SZTU-hj-algorithm\new_detection\cmake-build-debug\CMakeFiles 6
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 CMakeFiles/shsihi.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start F:\SZTU-hj-algorithm\new_detection\cmake-build-debug\CMakeFiles 0
 .PHONY : CMakeFiles/shsihi.dir/rule
@@ -108,12 +108,12 @@ CMakeFiles/shsihi.dir/clean:
 CMakeFiles/SRCSO.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\SRCSO.dir\build.make CMakeFiles/SRCSO.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\SRCSO.dir\build.make CMakeFiles/SRCSO.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=F:\SZTU-hj-algorithm\new_detection\cmake-build-debug\CMakeFiles --progress-num=1,2 "Built target SRCSO"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=F:\SZTU-hj-algorithm\new_detection\cmake-build-debug\CMakeFiles --progress-num=1,2,3,4 "Built target SRCSO"
 .PHONY : CMakeFiles/SRCSO.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/SRCSO.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start F:\SZTU-hj-algorithm\new_detection\cmake-build-debug\CMakeFiles 2
+	$(CMAKE_COMMAND) -E cmake_progress_start F:\SZTU-hj-algorithm\new_detection\cmake-build-debug\CMakeFiles 4
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 CMakeFiles/SRCSO.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start F:\SZTU-hj-algorithm\new_detection\cmake-build-debug\CMakeFiles 0
 .PHONY : CMakeFiles/SRCSO.dir/rule
