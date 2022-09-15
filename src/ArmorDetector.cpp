@@ -265,8 +265,8 @@ void ArmorDetector::chooseTarget()
     }
     else if(candidateArmors.size() == 1)
     {
-        detectNum(candidateArmors[0], candidateArmors[0]);
-        if (candidateArmors[0].id == 0)
+        candidateArmors[0].id = detectNum(candidateArmors[0]);
+        if (candidateArmors[0].id == 0 && candidateArmors[0].id == 2)
         {
             lostCnt++;
             finalArmor = Armor();
@@ -344,7 +344,7 @@ void ArmorDetector::chooseTarget()
 #endif DRAW_FINAL_ARMOR
 }
 
-Armor ArmorDetector::transformPos(const cv::Mat &src)
+Armor ArmorDetector::getTarget(const cv::Mat &src)
 {
 
     setImage(src);
