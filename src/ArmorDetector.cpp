@@ -303,7 +303,7 @@ void ArmorDetector::chooseTarget()
 
 //        if (!finalRect.contains(candidateArmors[0].center) && candidateArmors[0].id != finalArmor.id) {   // 追踪上一帧装甲板//??
 
-            //int best_index;  // 最佳目标
+            // int best_index;  // 最佳目标
             // 装甲板中心点在屏幕中心部分，在中心部分中又是倾斜最小的，
             // 如何避免频繁切换目标：缩小矩形框就是跟踪到了，一旦陀螺则会目标丢失，
             // UI界面做数字选择，选几就是几号，可能在切换会麻烦，（不建议）
@@ -335,6 +335,56 @@ void ArmorDetector::chooseTarget()
             }
 //        }
         finalArmor = candidateArmors[best_index];
+    }
+
+#ifdef DRAW_FINAL_ARMOR
+    Mat final_armor = _src.clone();
+    Point2f vertice_armor[4];
+    finalArmor.points(vertice_armor);
+    for (int i = 0; i < 4; i++) {
+        line(final_armor, vertice_armor[i], vertice_armor[(i + 1) % 4], CV_RGB(0, 255, 0));
+    }
+    imshow("final_armor-show", final_armor);
+#endif DRAW_FINAL_ARMOR
+}
+
+void ArmorDetector::chooseTarget2()
+{
+    if(candidateArmors.empty())
+    {
+        lostCnt++;
+        finalArmor = Armor();
+    }
+    else if(candidateArmors.size() == 1)
+    {
+        finalArmor = candidateArmors[0];
+    }
+    else
+    {
+        int final_index = 0; // 下标
+        int max_grade = armorGrade(candidateArmors[0]);
+
+        sort(candidateArmors.begin(),candidateArmors.end(), height_sort);
+
+        // 获取每个候选装甲板的id和type
+        for(int i = 0; i < candidateArmors.size(); ++i) {
+            candidateArmors[i].id = detectNum(candidateArmors[i]);
+            // 暂时只有五个类别
+            if (candidateArmors[i].id == 1)
+                candidateArmors[i].type = BIG;
+            if (candidateArmors[i].id == 2 || candidateArmors[i].id == 3 || candidateArmors[i].id == 4)
+                candidateArmors[i].type = SMALL;
+
+            int grade = armorGrade(candidateArmors[i]);
+
+            if(grade > max_grade && grade > grade_standard)
+            {
+                max_grade = grade;
+                final_index = i;
+            }
+        }
+
+        finalArmor = candidateArmors[final_index];
     }
 
 #ifdef DRAW_FINAL_ARMOR
