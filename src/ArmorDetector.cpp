@@ -39,8 +39,9 @@ ArmorDetector::ArmorDetector()
     near_standard = 500;
 
     //armor_grade_project_ratio
-    wh_grade_ratio = 0.4;
-    height_grade_ratio = 0.3;
+    id_grade_ratio = 0.2;
+    wh_grade_ratio = 0.3;
+    height_grade_ratio = 0.2;
     near_grade_ratio = 0.2;
     angle_grade_ratio = 0.1;
 }
@@ -263,16 +264,31 @@ void ArmorDetector::chooseTarget()
     }
     else if(candidateArmors.size() == 1)
     {
-        finalArmor = candidateArmors[0];
+        candidateArmors[0].id = detectNum(candidateArmors[0]);
+        if (candidateArmors[0].id == 0)
+        {
+            lostCnt++;
+            finalArmor = Armor();
+        }
+        else if (candidateArmors[0].id == 1)
+        {
+            candidateArmors[0].type = BIG;
+            finalArmor = candidateArmors[0];
+        }
+        else if (candidateArmors[0].id == 3 || candidateArmors[0].id == 4)
+        {
+            candidateArmors[0].type = SMALL;
+            finalArmor = candidateArmors[0];
+        }
     }
     else
     {
-        int min_angle_index = 0; // 下标
-
+        int best_index = 0; // 下标
+        int best_record = 0;
         // 获取每个候选装甲板的id和type
         for(int i = 0; i < candidateArmors.size(); ++i) {
             candidateArmors[i].id = detectNum(candidateArmors[i]);
-            if (candidateArmors[i].id == 0) {
+            if (candidateArmors[i].id == 0 && candidateArmors[i].id == 2) {
                 swap(candidateArmors[i], *(candidateArmors.end() -1 ));
                 candidateArmors.pop_back();
                 i--;
@@ -281,11 +297,11 @@ void ArmorDetector::chooseTarget()
             // 暂时只有五个类别
             if (candidateArmors[i].id == 1)
                 candidateArmors[i].type = BIG;
-            if (candidateArmors[i].id == 2 || candidateArmors[i].id == 3 || candidateArmors[i].id == 4)
+            else if (candidateArmors[i].id == 3 || candidateArmors[i].id == 4)
                 candidateArmors[i].type = SMALL;
         }
 
-        if (!finalRect.contains(candidateArmors[0].center) && candidateArmors[0].id != finalArmor.id) {   // 追踪上一帧装甲板//??
+//        if (!finalRect.contains(candidateArmors[0].center) && candidateArmors[0].id != finalArmor.id) {   // 追踪上一帧装甲板//??
 
             //int best_index;  // 最佳目标
             // 装甲板中心点在屏幕中心部分，在中心部分中又是倾斜最小的，
@@ -294,8 +310,8 @@ void ArmorDetector::chooseTarget()
             sort(candidateArmors.begin(),candidateArmors.end(), height_sort);
             for (int index = 1; index < candidateArmors.size(); index++) {
 
-                if (finalRect.contains(candidateArmors[index].center) &&
-                    candidateArmors[index].id == finalArmor.id) { break; }  // 追踪上一帧装甲板//??
+//                if (finalRect.contains(candidateArmors[index].center) &&
+//                    candidateArmors[index].id == finalArmor.id) { break; }  // 追踪上一帧装甲板//??
 
                 //打分制筛选装甲板优先级
                 /*最高优先级数字识别英雄1号装甲板，其次3和4号（如果打分的话1给100，3和4给80大概这个比例）
@@ -310,14 +326,15 @@ void ArmorDetector::chooseTarget()
                 //4、在前三步打分之前对装甲板进行高由大到小排序，获取最大最小值然后归一化，用归一化的高度值乘上标准分作为得分
                 Armor checkArmor = candidateArmors[index];
                 int final_record = armorGrade(checkArmor);
-
-                //最后筛选出得分最高的，暂未写
-
-
+                if (final_record > best_record)
+                {
+                    best_record = final_record;
+                    best_index = index;
+                }
 
             }
-        }
-        finalArmor = candidateArmors[min_angle_index];
+//        }
+        finalArmor = candidateArmors[best_index];
     }
 
 #ifdef DRAW_FINAL_ARMOR
@@ -339,6 +356,7 @@ Armor ArmorDetector::transformPos(const cv::Mat &src)
     matchLights();
     chooseTarget();
 
+    //这里逻辑还是有点问题
     finalRect = finalArmor.boundingRect();
     finalRect = Rect(detectRoi.x+finalRect.x,detectRoi.y+finalRect.y,finalRect.width,finalRect.height);
 
@@ -351,6 +369,7 @@ Armor ArmorDetector::transformPos(const cv::Mat &src)
     }
     else
     {
+        //这里整体逻辑也要改一下
         ++lostCnt;
         if (lostCnt < 8)
             lastArmor.size = Size(lastArmor.size.width * 1.1, lastArmor.size.height * 1.4);
@@ -364,7 +383,8 @@ Armor ArmorDetector::transformPos(const cv::Mat &src)
             lastArmor.size = Size(lastArmor.size.width * 1.2, lastArmor.size.height * 1.2);
         else if (lostCnt > 33 )lastArmor.size = Size();
     }
-
+    candidateArmors.clear();
+    candidateLights.clear();
     return finalArmor;
 }
 
@@ -433,7 +453,20 @@ int ArmorDetector::armorGrade(const Armor& checkArmor)
 
     // 选择用int截断double
 
-    /////////长宽比打分项目/////////////
+    /////////id优先级打分项目////////////////////////
+    int id_grade;
+    int check_id = checkArmor.id;
+    if (check_id == lastArmor.id)
+    {
+        id_grade = check_id == 1 ? 100 : 80;
+    }
+    else
+    {
+        id_grade = check_id == 1 ? 80 : 60;
+    }
+    ////////end///////////////////////////////////
+
+    /////////长宽比打分项目/////////////////////////
     int wh_grade;
     double wh_ratio = checkArmor.size.width > checkArmor.size.height;
     if(checkArmor.type == BIG)
@@ -444,7 +477,7 @@ int ArmorDetector::armorGrade(const Armor& checkArmor)
     {
         wh_grade = wh_ratio/small_wh_standard > 1 ? 100 : (wh_ratio/small_wh_standard) * 100;
     }
-    /////////end////////////////////////
+    /////////end///////////////////////////////////
 
     /////////最大装甲板板打分项目/////////////////////
     // 最大装甲板，用面积，找一个标准值（固定距离（比如3/4米），装甲板大小（Armor.area）大约是多少，分大小装甲板）
@@ -471,10 +504,11 @@ int ArmorDetector::armorGrade(const Armor& checkArmor)
     /////////end///////////////////////////////
 
     // 下面的系数得详细调节；
-    int final_grade = wh_grade  * wh_grade_ratio +
-            height_grade  * height_grade_ratio +
-            near_grade  * near_grade_ratio +
-            angle_grade * angle_grade_ratio ;
+    int final_grade = id_grade * id_grade_ratio +
+                      wh_grade  * wh_grade_ratio +
+                      height_grade  * height_grade_ratio +
+                      near_grade  * near_grade_ratio +
+                      angle_grade * angle_grade_ratio;
 
     return final_grade;
 }
