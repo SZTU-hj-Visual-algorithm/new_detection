@@ -96,6 +96,7 @@ private:
     double near_standard;
 
     //armor_grade_project_ratio
+    double id_grade_ratio;
     double wh_grade_ratio;
     double height_grade_ratio;
     double near_grade_ratio;
