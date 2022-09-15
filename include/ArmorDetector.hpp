@@ -68,7 +68,7 @@ public:
 
     void chooseTarget(); //找出优先级最高的装甲板
 
-    Armor transformPos(const cv::Mat &src); //将最终目标的坐标转换到摄像头原大小的
+    Armor getTarget(const cv::Mat &src); //将最终目标的坐标转换到摄像头原大小的
 
 private:
     int lostCnt;
@@ -117,7 +117,6 @@ private:
     std::vector<Light> candidateLights; // 筛选的灯条
     std::vector<Armor> candidateArmors; // 筛选的装甲板
     Armor finalArmor;  // 最终装甲板
-    cv::Rect finalRect;  // 最终框住装甲板旋转矩形的正矩形
 
     cv::Point2f dst_p[4] = {cv::Point2f(0,60),cv::Point2f(0,0),cv::Point2f(30,0),cv::Point2f(30,60)};
 

@@ -265,7 +265,7 @@ void ArmorDetector::chooseTarget()
     else if(candidateArmors.size() == 1)
     {
         candidateArmors[0].id = detectNum(candidateArmors[0]);
-        if (candidateArmors[0].id == 0)
+        if (candidateArmors[0].id == 0 && candidateArmors[0].id == 0)
         {
             lostCnt++;
             finalArmor = Armor();
@@ -348,7 +348,7 @@ void ArmorDetector::chooseTarget()
 #endif DRAW_FINAL_ARMOR
 }
 
-Armor ArmorDetector::transformPos(const cv::Mat &src)
+Armor ArmorDetector::getTarget(const cv::Mat &src)
 {
 
     setImage(src);
@@ -356,11 +356,7 @@ Armor ArmorDetector::transformPos(const cv::Mat &src)
     matchLights();
     chooseTarget();
 
-    //这里逻辑还是有点问题
-    finalRect = finalArmor.boundingRect();
-    finalRect = Rect(detectRoi.x+finalRect.x,detectRoi.y+finalRect.y,finalRect.width,finalRect.height);
-
-    if(!finalRect.empty())
+    if(!finalArmor.size.empty())
     {
         finalArmor.center.x += detectRoi.x;
         finalArmor.center.y += detectRoi.y;
