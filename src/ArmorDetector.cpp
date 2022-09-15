@@ -292,9 +292,6 @@ void ArmorDetector::chooseTarget()
         for(int i = 0; i < candidateArmors.size(); ++i) {
             candidateArmors[i].id = detectNum(candidateArmors[i]);
             if (candidateArmors[i].id == 0 && candidateArmors[i].id == 2) {
-                swap(candidateArmors[i], *(candidateArmors.end() -1 ));
-                candidateArmors.pop_back();
-                i--;
                 continue;
             }
             // 暂时只有五个类别
