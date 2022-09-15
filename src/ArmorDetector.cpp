@@ -1,6 +1,6 @@
 #include "ArmorDetector.hpp"
 
-//#define BINARY_SHOW
+#define BINARY_SHOW
 //#define DRAW_LIGHTS_CONTOURS
 //#define DRAW_FINAL_ARMOR
 
@@ -80,15 +80,14 @@ void ArmorDetector::setImage(const Mat &src)
         }
         else
             src(detectRoi).copyTo(_src);
-
-        //二值化
-        Mat gray;
-        cvtColor(_src,gray,COLOR_BGR2GRAY);
-        threshold(gray,_binary,binThresh,255,THRESH_BINARY);
-#ifdef BINARY_SHOW
-        imshow("_binary",_binary);
-#endif BINARY_SHOW
     }
+    //二值化
+    Mat gray;
+    cvtColor(_src,gray,COLOR_BGR2GRAY);
+    threshold(gray,_binary,binThresh,255,THRESH_BINARY);
+#ifdef BINARY_SHOW
+    imshow("_binary",_binary);
+#endif //BINARY_SHOW
 }
 
 
