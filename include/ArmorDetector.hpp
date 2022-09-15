@@ -68,8 +68,6 @@ public:
 
     void chooseTarget(); //找出优先级最高的装甲板
 
-    void chooseTarget2(); //找出优先级最高的装甲板
-
     Armor transformPos(const cv::Mat &src); //将最终目标的坐标转换到摄像头原大小的
 
 private:
@@ -115,6 +113,7 @@ private:
 
     Armor lastArmor;
 
+    int grade_standard;
 
     std::vector<Light> candidateLights; // 筛选的灯条
     std::vector<Armor> candidateArmors; // 筛选的装甲板

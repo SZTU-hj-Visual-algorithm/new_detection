@@ -44,6 +44,8 @@ ArmorDetector::ArmorDetector()
     height_grade_ratio = 0.2;
     near_grade_ratio = 0.2;
     angle_grade_ratio = 0.1;
+
+    grade_standard = 70; // 及格分
 }
 
 void ArmorDetector::setImage(const Mat &src)
@@ -321,63 +323,13 @@ void ArmorDetector::chooseTarget()
             //4、在前三步打分之前对装甲板进行高由大到小排序，获取最大最小值然后归一化，用归一化的高度值乘上标准分作为得分
             Armor checkArmor = candidateArmors[i];
             int final_record = armorGrade(checkArmor);
-            if (final_record > best_record)
+            if (final_record > best_record && final_record > grade_standard)
             {
                 best_record = final_record;
                 best_index = i;
             }
         }
         finalArmor = candidateArmors[best_index];
-    }
-
-#ifdef DRAW_FINAL_ARMOR
-    Mat final_armor = _src.clone();
-    Point2f vertice_armor[4];
-    finalArmor.points(vertice_armor);
-    for (int i = 0; i < 4; i++) {
-        line(final_armor, vertice_armor[i], vertice_armor[(i + 1) % 4], CV_RGB(0, 255, 0));
-    }
-    imshow("final_armor-show", final_armor);
-#endif DRAW_FINAL_ARMOR
-}
-
-void ArmorDetector::chooseTarget2()
-{
-    if(candidateArmors.empty())
-    {
-        lostCnt++;
-        finalArmor = Armor();
-    }
-    else if(candidateArmors.size() == 1)
-    {
-        finalArmor = candidateArmors[0];
-    }
-    else
-    {
-        int final_index = 0; // 下标
-        int max_grade = armorGrade(candidateArmors[0]);
-
-        sort(candidateArmors.begin(),candidateArmors.end(), height_sort);
-
-        // 获取每个候选装甲板的id和type
-        for(int i = 0; i < candidateArmors.size(); ++i) {
-            candidateArmors[i].id = detectNum(candidateArmors[i]);
-            // 暂时只有五个类别
-            if (candidateArmors[i].id == 1)
-                candidateArmors[i].type = BIG;
-            if (candidateArmors[i].id == 2 || candidateArmors[i].id == 3 || candidateArmors[i].id == 4)
-                candidateArmors[i].type = SMALL;
-
-            int grade = armorGrade(candidateArmors[i]);
-
-            if(grade > max_grade && grade > grade_standard)
-            {
-                max_grade = grade;
-                final_index = i;
-            }
-        }
-
-        finalArmor = candidateArmors[final_index];
     }
 
 #ifdef DRAW_FINAL_ARMOR
