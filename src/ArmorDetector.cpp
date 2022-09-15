@@ -1,6 +1,6 @@
 #include "ArmorDetector.hpp"
 
-//#define BINARY_SHOW
+#define BINARY_SHOW
 //#define DRAW_LIGHTS_CONTOURS
 //#define DRAW_FINAL_ARMOR
 
@@ -44,6 +44,8 @@ ArmorDetector::ArmorDetector()
     height_grade_ratio = 0.2;
     near_grade_ratio = 0.2;
     angle_grade_ratio = 0.1;
+
+    grade_standard = 70; // 及格分
 }
 
 void ArmorDetector::setImage(const Mat &src)
@@ -89,15 +91,14 @@ void ArmorDetector::setImage(const Mat &src)
         }
         else
             src(detectRoi).copyTo(_src);
-
-        //二值化
-        Mat gray;
-        cvtColor(_src,gray,COLOR_BGR2GRAY);
-        threshold(gray,_binary,binThresh,255,THRESH_BINARY);
-#ifdef BINARY_SHOW
-        imshow("_binary",_binary);
-#endif BINARY_SHOW
     }
+    //二值化
+    Mat gray;
+    cvtColor(_src,gray,COLOR_BGR2GRAY);
+    threshold(gray,_binary,binThresh,255,THRESH_BINARY);
+#ifdef BINARY_SHOW
+    imshow("_binary",_binary);
+#endif //BINARY_SHOW
 }
 
 
@@ -265,7 +266,7 @@ void ArmorDetector::chooseTarget()
     else if(candidateArmors.size() == 1)
     {
         candidateArmors[0].id = detectNum(candidateArmors[0]);
-        if (candidateArmors[0].id == 0 && candidateArmors[0].id == 0)
+        if (candidateArmors[0].id == 0 && candidateArmors[0].id == 2)
         {
             lostCnt++;
             finalArmor = Armor();
@@ -283,15 +284,17 @@ void ArmorDetector::chooseTarget()
     }
     else
     {
+
         int best_index = 0; // 下标
-        int best_record = 0;
+        int best_record = armorGrade(candidateArmors[0]);
+
+        sort(candidateArmors.begin(),candidateArmors.end(), height_sort);
+
         // 获取每个候选装甲板的id和type
+
         for(int i = 0; i < candidateArmors.size(); ++i) {
             candidateArmors[i].id = detectNum(candidateArmors[i]);
             if (candidateArmors[i].id == 0 && candidateArmors[i].id == 2) {
-                swap(candidateArmors[i], *(candidateArmors.end() -1 ));
-                candidateArmors.pop_back();
-                i--;
                 continue;
             }
             // 暂时只有五个类别
@@ -299,41 +302,34 @@ void ArmorDetector::chooseTarget()
                 candidateArmors[i].type = BIG;
             else if (candidateArmors[i].id == 3 || candidateArmors[i].id == 4)
                 candidateArmors[i].type = SMALL;
-        }
 
-//        if (!finalRect.contains(candidateArmors[0].center) && candidateArmors[0].id != finalArmor.id) {   // 追踪上一帧装甲板//??
-
-            //int best_index;  // 最佳目标
+            // int best_index;  // 最佳目标
             // 装甲板中心点在屏幕中心部分，在中心部分中又是倾斜最小的，
             // 如何避免频繁切换目标：缩小矩形框就是跟踪到了，一旦陀螺则会目标丢失，
             // UI界面做数字选择，选几就是几号，可能在切换会麻烦，（不建议）
-            sort(candidateArmors.begin(),candidateArmors.end(), height_sort);
-            for (int index = 1; index < candidateArmors.size(); index++) {
 
 //                if (finalRect.contains(candidateArmors[index].center) &&
 //                    candidateArmors[index].id == finalArmor.id) { break; }  // 追踪上一帧装甲板//??
 
-                //打分制筛选装甲板优先级
-                /*最高优先级数字识别英雄1号装甲板，其次3和4号（如果打分的话1给100，3和4给80大概这个比例）
-                 *1、宽高比（筛选正面和侧面装甲板，尽量打正面装甲板）
-                 *2、装甲板靠近图像中心
-                 *3、装甲板倾斜角度最小
-                 *4、装甲板高最大
-                 */
-                //1、宽高比用一个标准值和当前值做比值（大于标准值默认置为1）乘上标准分数作为得分
-                //2、在缩小roi内就给分，不在不给分（分数占比较低）
-                //3、90度减去装甲板的角度除以90得到比值乘上标准分作为得分
-                //4、在前三步打分之前对装甲板进行高由大到小排序，获取最大最小值然后归一化，用归一化的高度值乘上标准分作为得分
-                Armor checkArmor = candidateArmors[index];
-                int final_record = armorGrade(checkArmor);
-                if (final_record > best_record)
-                {
-                    best_record = final_record;
-                    best_index = index;
-                }
-
+            //打分制筛选装甲板优先级
+            /*最高优先级数字识别英雄1号装甲板，其次3和4号（如果打分的话1给100，3和4给80大概这个比例）
+             *1、宽高比（筛选正面和侧面装甲板，尽量打正面装甲板）
+             *2、装甲板靠近图像中心
+             *3、装甲板倾斜角度最小
+             *4、装甲板高最大
+             */
+            //1、宽高比用一个标准值和当前值做比值（大于标准值默认置为1）乘上标准分数作为得分
+            //2、在缩小roi内就给分，不在不给分（分数占比较低）
+            //3、90度减去装甲板的角度除以90得到比值乘上标准分作为得分
+            //4、在前三步打分之前对装甲板进行高由大到小排序，获取最大最小值然后归一化，用归一化的高度值乘上标准分作为得分
+            Armor checkArmor = candidateArmors[i];
+            int final_record = armorGrade(checkArmor);
+            if (final_record > best_record && final_record > grade_standard)
+            {
+                best_record = final_record;
+                best_index = i;
             }
-//        }
+        }
         finalArmor = candidateArmors[best_index];
     }
 
@@ -385,7 +381,7 @@ Armor ArmorDetector::getTarget(const cv::Mat &src)
 }
 
 
-int ArmorDetector::detectNum(RotatedRect &f_rect)
+void ArmorDetector::detectNum(RotatedRect &f_rect, Armor& armor)
 {
     int classid = 0;
     Point2f pp[4];
@@ -413,8 +409,7 @@ int ArmorDetector::detectNum(RotatedRect &f_rect)
     // 仿射变换
     Mat matrix_per = getPerspectiveTransform(src_p,dst_p);
     warpPerspective(numSrc,dst,matrix_per,Size(30,60));
-
-    return DNN_detect::dnn_detect(dst);
+    DNN_detect::dnn_detect(dst, armor);
 }
 
 
