@@ -1,6 +1,6 @@
 #include "ArmorDetector.hpp"
 
-//#define BINARY_SHOW
+#define BINARY_SHOW
 //#define DRAW_LIGHTS_CONTOURS
 //#define DRAW_FINAL_ARMOR
 
@@ -91,15 +91,14 @@ void ArmorDetector::setImage(const Mat &src)
         }
         else
             src(detectRoi).copyTo(_src);
-
-        //二值化
-        Mat gray;
-        cvtColor(_src,gray,COLOR_BGR2GRAY);
-        threshold(gray,_binary,binThresh,255,THRESH_BINARY);
-#ifdef BINARY_SHOW
-        imshow("_binary",_binary);
-#endif BINARY_SHOW
     }
+    //二值化
+    Mat gray;
+    cvtColor(_src,gray,COLOR_BGR2GRAY);
+    threshold(gray,_binary,binThresh,255,THRESH_BINARY);
+#ifdef BINARY_SHOW
+    imshow("_binary",_binary);
+#endif //BINARY_SHOW
 }
 
 
@@ -266,7 +265,7 @@ void ArmorDetector::chooseTarget()
     }
     else if(candidateArmors.size() == 1)
     {
-        candidateArmors[0].id = detectNum(candidateArmors[0]);
+        detectNum(candidateArmors[0], candidateArmors[0]);
         if (candidateArmors[0].id == 0)
         {
             lostCnt++;
@@ -285,12 +284,14 @@ void ArmorDetector::chooseTarget()
     }
     else
     {
+
         int best_index = 0; // 下标
         int best_record = armorGrade(candidateArmors[0]);
 
         sort(candidateArmors.begin(),candidateArmors.end(), height_sort);
 
         // 获取每个候选装甲板的id和type
+
         for(int i = 0; i < candidateArmors.size(); ++i) {
             candidateArmors[i].id = detectNum(candidateArmors[i]);
             if (candidateArmors[i].id == 0 && candidateArmors[i].id == 2) {
@@ -380,7 +381,7 @@ Armor ArmorDetector::transformPos(const cv::Mat &src)
 }
 
 
-int ArmorDetector::detectNum(RotatedRect &f_rect)
+void ArmorDetector::detectNum(RotatedRect &f_rect, Armor& armor)
 {
     int classid = 0;
     Point2f pp[4];
@@ -408,8 +409,7 @@ int ArmorDetector::detectNum(RotatedRect &f_rect)
     // 仿射变换
     Mat matrix_per = getPerspectiveTransform(src_p,dst_p);
     warpPerspective(numSrc,dst,matrix_per,Size(30,60));
-
-    return DNN_detect::dnn_detect(dst);
+    DNN_detect::dnn_detect(dst, armor);
 }
 
 
