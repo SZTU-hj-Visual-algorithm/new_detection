@@ -49,6 +49,7 @@ struct Armor : public cv::RotatedRect    //装甲板结构体
 
     }
     double light_height_rate;  // 左右灯条高度比
+    double confidence;
     int id;  // 装甲板类别
     int area;  // 装甲板面积
     EnermyType type;  // 装甲板类型
@@ -119,7 +120,7 @@ private:
 
     bool isLight(Light& light, std::vector<cv::Point> &cnt);
 
-    int detectNum(cv::RotatedRect &f_rect);
+    void detectNum(cv::RotatedRect &f_rect, Armor& armor);
 
     bool conTain(cv::RotatedRect &match_rect,std::vector<Light> &Lights, size_t &i, size_t &j);
 

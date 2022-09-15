@@ -269,9 +269,9 @@ void ArmorDetector::chooseTarget()
         double min_angle = candidateArmors[0].angle;    // 识别到装甲板中倾斜程度最小的
         int min_angle_index = 0; // 下标
 
-        // 获取每个候选装甲板的id和type//这里的循环逻辑有点问题
-        for(int i = 0; i < candidateArmors.size(); ++i) {
-            candidateArmors[i].id = detectNum(candidateArmors[i]);
+        // 获取每个候选装甲板的id和type
+        for(auto i = candidateArmors.size()-1; i < 0; --i) {
+            detectNum(candidateArmors[i], candidateArmors[i]);
             if (candidateArmors[i].id == 0) {
                 swap(candidateArmors[i], *(candidateArmors.end() -1 ));
                 candidateArmors.pop_back();
@@ -283,6 +283,8 @@ void ArmorDetector::chooseTarget()
             if (candidateArmors[i].id == 2 || candidateArmors[i].id == 3 || candidateArmors[i].id == 4)
                 candidateArmors[i].type = SMALL;
         }
+
+
 
         if (!finalRect.contains(candidateArmors[0].center) && candidateArmors[0].id != finalArmor.id) {   // 追踪上一帧装甲板//??
 
@@ -384,7 +386,7 @@ Armor ArmorDetector::transformPos(const cv::Mat &src)
 }
 
 
-int ArmorDetector::detectNum(RotatedRect &f_rect)
+void ArmorDetector::detectNum(RotatedRect &f_rect, Armor& armor)
 {
     int classid = 0;
     Point2f pp[4];
@@ -412,8 +414,7 @@ int ArmorDetector::detectNum(RotatedRect &f_rect)
     // 仿射变换
     Mat matrix_per = getPerspectiveTransform(src_p,dst_p);
     warpPerspective(numSrc,dst,matrix_per,Size(30,60));
-
-    return DNN_detect::dnn_detect(dst);
+    DNN_detect::dnn_detect(dst, armor);
 }
 
 
