@@ -351,11 +351,7 @@ Armor ArmorDetector::transformPos(const cv::Mat &src)
     matchLights();
     chooseTarget();
 
-    //这里逻辑还是有点问题
-    finalRect = finalArmor.boundingRect();
-    finalRect = Rect(detectRoi.x+finalRect.x,detectRoi.y+finalRect.y,finalRect.width,finalRect.height);
-
-    if(!finalRect.empty())
+    if(!finalArmor.size.empty())
     {
         finalArmor.center.x += detectRoi.x;
         finalArmor.center.y += detectRoi.y;

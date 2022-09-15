@@ -118,7 +118,6 @@ private:
     std::vector<Light> candidateLights; // 筛选的灯条
     std::vector<Armor> candidateArmors; // 筛选的装甲板
     Armor finalArmor;  // 最终装甲板
-    cv::Rect finalRect;  // 最终框住装甲板旋转矩形的正矩形
 
     cv::Point2f dst_p[4] = {cv::Point2f(0,60),cv::Point2f(0,0),cv::Point2f(30,0),cv::Point2f(30,60)};
 
