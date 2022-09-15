@@ -1,12 +1,7 @@
 #include "DNN_detect.h"
 
-int DNN_detect::dnn_detect(Mat frame) {
-    return net_forward(img_processing(std::move(frame), TO_GRAY), read_net(NET_PATH));
-}
-
-int DNN_detect::dnn_detect(const String& imgpath) {
-    Mat frame = imread(imgpath);
-    return net_forward(img_processing(frame, TO_GRAY), read_net(NET_PATH));
+void DNN_detect::dnn_detect(Mat frame, Armor& armor) {
+    return net_forward(img_processing(std::move(frame), TO_GRAY), read_net(NET_PATH), armor.id, armor.confidence);
 }
 
 dnn::Net DNN_detect::read_net(const String& net_path) {
@@ -21,11 +16,15 @@ Mat DNN_detect::img_processing(Mat ori_img, bool to_gray) {
     return out_blob;
 }
 
-int DNN_detect::net_forward(const Mat& blob, dnn::Net net) {
+void DNN_detect::net_forward(const Mat& blob, dnn::Net net, int& id, double& confidence) {
     net.setInput(blob);
-    Mat output = net.forward();
-    Point minLoc, maxcLoc;
-    double min, max;
-    cv::minMaxLoc(output, &min, &max, &minLoc, &maxcLoc);
-    return maxcLoc.x;
+    Mat outputs = net.forward();
+    float max_prob = *std::max_element(outputs.begin<float>(), outputs.end<float>());
+    cv::Mat softmax_prob;
+    cv::exp(outputs - max_prob, softmax_prob);
+    float sum = static_cast<float>(cv::sum(softmax_prob)[0]);
+    softmax_prob /= sum;
+    cv::Point class_id;
+    minMaxLoc(softmax_prob.reshape(1, 1), nullptr, &confidence, nullptr, &class_id);
+    id = class_id.x;
 }

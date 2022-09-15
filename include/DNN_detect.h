@@ -2,6 +2,7 @@
 #define CV_DNN_DETECT_H
 
 #include <opencv2/opencv.hpp>
+#include "ArmorDetector.hpp"
 #include <iostream>
 
 using namespace cv;
@@ -12,11 +13,10 @@ using namespace cv;
 
 class DNN_detect{
 public:
-    static int dnn_detect(Mat frame);  // 调用该函数即可返回数字ID
-    static int dnn_detect(const String& img_path);
+    static void dnn_detect(Mat frame, Armor& armor);  // 调用该函数即可返回数字ID
 private:
     static dnn::Net read_net(const String& net_path);
     static Mat img_processing(Mat ori_img, bool is_gray);
-    static int net_forward(const Mat& blob, dnn::Net net);
+    static void net_forward(const Mat& blob, dnn::Net net, int& id, double & confidence);
 };
 #endif //CV_DNN_DETECT_H
