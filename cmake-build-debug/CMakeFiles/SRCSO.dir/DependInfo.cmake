@@ -9,6 +9,8 @@ set(CMAKE_DEPENDS_LANGUAGES
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
   "F:/SZTU-hj-algorithm/new_detection/src/ArmorDetector.cpp" "F:/SZTU-hj-algorithm/new_detection/cmake-build-debug/CMakeFiles/SRCSO.dir/src/ArmorDetector.cpp.obj"
+  "F:/SZTU-hj-algorithm/new_detection/src/DNN_detect.cpp" "F:/SZTU-hj-algorithm/new_detection/cmake-build-debug/CMakeFiles/SRCSO.dir/src/DNN_detect.cpp.obj"
+  "F:/SZTU-hj-algorithm/new_detection/src/camera.cpp" "F:/SZTU-hj-algorithm/new_detection/cmake-build-debug/CMakeFiles/SRCSO.dir/src/camera.cpp.obj"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 
@@ -71,6 +73,7 @@ set(CMAKE_CXX_TARGET_INCLUDE_PATH
   "E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/img_hash/include"
   "E:/opencv-4.5.4/opencv/sources/modules/ts/include"
   "../include"
+  "../include/camera"
   )
 
 # The set of dependency files which are needed:

@@ -88,6 +88,7 @@ shsihi_EXTERNAL_OBJECTS =
 
 shsihi.exe: CMakeFiles/shsihi.dir/main.cpp.obj
 shsihi.exe: CMakeFiles/shsihi.dir/build.make
+shsihi.exe: libSRCSO.a
 shsihi.exe: E:/opencv-4.5.4/opencv/build/x64/MinGW/lib/libopencv_world454.dll.a
 shsihi.exe: E:/opencv-4.5.4/opencv/build/x64/MinGW/lib/libopencv_world454.dll.a
 shsihi.exe: E:/opencv-4.5.4/opencv/build/x64/MinGW/lib/libopencv_world454.dll.a
@@ -140,7 +141,8 @@ shsihi.exe: E:/opencv-4.5.4/opencv/build/x64/MinGW/lib/libopencv_world454.dll.a
 shsihi.exe: E:/opencv-4.5.4/opencv/build/x64/MinGW/lib/libopencv_world454.dll.a
 shsihi.exe: E:/opencv-4.5.4/opencv/build/x64/MinGW/lib/libopencv_world454.dll.a
 shsihi.exe: E:/opencv-4.5.4/opencv/build/x64/MinGW/lib/libopencv_world454.dll.a
-shsihi.exe: libSRCSO.a
+shsihi.exe: ../tools/MVCAMSDK.lib
+shsihi.exe: ../tools/MVCAMSDK_X64.lib
 shsihi.exe: E:/opencv-4.5.4/opencv/build/x64/MinGW/lib/libopencv_world454.dll.a
 shsihi.exe: CMakeFiles/shsihi.dir/linklibs.rsp
 shsihi.exe: CMakeFiles/shsihi.dir/objects1.rsp

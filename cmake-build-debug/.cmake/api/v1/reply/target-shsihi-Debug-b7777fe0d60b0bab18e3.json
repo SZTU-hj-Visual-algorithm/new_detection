@@ -29,31 +29,49 @@
 			{
 				"command" : 0,
 				"file" : 0,
-				"line" : 15,
+				"line" : 18,
 				"parent" : 0
 			},
 			{
 				"command" : 1,
 				"file" : 0,
-				"line" : 17,
+				"line" : 20,
 				"parent" : 0
 			},
 			{
 				"command" : 1,
 				"file" : 0,
-				"line" : 19,
+				"line" : 21,
+				"parent" : 0
+			},
+			{
+				"command" : 1,
+				"file" : 0,
+				"line" : 22,
+				"parent" : 0
+			},
+			{
+				"command" : 1,
+				"file" : 0,
+				"line" : 23,
+				"parent" : 0
+			},
+			{
+				"command" : 2,
+				"file" : 0,
+				"line" : 13,
+				"parent" : 0
+			},
+			{
+				"command" : 2,
+				"file" : 0,
+				"line" : 14,
 				"parent" : 0
 			},
 			{
 				"command" : 2,
 				"file" : 0,
 				"line" : 11,
-				"parent" : 0
-			},
-			{
-				"command" : 2,
-				"file" : 0,
-				"line" : 9,
 				"parent" : 0
 			}
 		]
@@ -73,286 +91,290 @@
 			"includes" : 
 			[
 				{
-					"backtrace" : 4,
+					"backtrace" : 6,
 					"path" : "F:/SZTU-hj-algorithm/new_detection/include"
 				},
 				{
-					"backtrace" : 5,
+					"backtrace" : 7,
+					"path" : "F:/SZTU-hj-algorithm/new_detection/include/camera"
+				},
+				{
+					"backtrace" : 8,
 					"isSystem" : true,
 					"path" : "E:/opencv-4.5.4/opencv/build/x64/MinGW"
 				},
 				{
-					"backtrace" : 5,
+					"backtrace" : 8,
 					"isSystem" : true,
 					"path" : "E:/opencv-4.5.4/opencv/sources/include"
 				},
 				{
-					"backtrace" : 5,
+					"backtrace" : 8,
 					"isSystem" : true,
 					"path" : "E:/opencv-4.5.4/opencv/sources/modules/core/include"
 				},
 				{
-					"backtrace" : 5,
+					"backtrace" : 8,
 					"isSystem" : true,
 					"path" : "E:/opencv-4.5.4/opencv/sources/modules/flann/include"
 				},
 				{
-					"backtrace" : 5,
+					"backtrace" : 8,
 					"isSystem" : true,
 					"path" : "E:/opencv-4.5.4/opencv/sources/modules/imgproc/include"
 				},
 				{
-					"backtrace" : 5,
+					"backtrace" : 8,
 					"isSystem" : true,
 					"path" : "E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/intensity_transform/include"
 				},
 				{
-					"backtrace" : 5,
+					"backtrace" : 8,
 					"isSystem" : true,
 					"path" : "E:/opencv-4.5.4/opencv/sources/modules/ml/include"
 				},
 				{
-					"backtrace" : 5,
+					"backtrace" : 8,
 					"isSystem" : true,
 					"path" : "E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/phase_unwrapping/include"
 				},
 				{
-					"backtrace" : 5,
+					"backtrace" : 8,
 					"isSystem" : true,
 					"path" : "E:/opencv-4.5.4/opencv/sources/modules/photo/include"
 				},
 				{
-					"backtrace" : 5,
+					"backtrace" : 8,
 					"isSystem" : true,
 					"path" : "E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/plot/include"
 				},
 				{
-					"backtrace" : 5,
+					"backtrace" : 8,
 					"isSystem" : true,
 					"path" : "E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/quality/include"
 				},
 				{
-					"backtrace" : 5,
+					"backtrace" : 8,
 					"isSystem" : true,
 					"path" : "E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/reg/include"
 				},
 				{
-					"backtrace" : 5,
+					"backtrace" : 8,
 					"isSystem" : true,
 					"path" : "E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/surface_matching/include"
 				},
 				{
-					"backtrace" : 5,
+					"backtrace" : 8,
 					"isSystem" : true,
 					"path" : "E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/xphoto/include"
 				},
 				{
-					"backtrace" : 5,
+					"backtrace" : 8,
 					"isSystem" : true,
 					"path" : "E:/opencv-4.5.4/opencv/sources/modules/dnn/include"
 				},
 				{
-					"backtrace" : 5,
+					"backtrace" : 8,
 					"isSystem" : true,
 					"path" : "E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/dnn_superres/include"
 				},
 				{
-					"backtrace" : 5,
+					"backtrace" : 8,
 					"isSystem" : true,
 					"path" : "E:/opencv-4.5.4/opencv/sources/modules/features2d/include"
 				},
 				{
-					"backtrace" : 5,
+					"backtrace" : 8,
 					"isSystem" : true,
 					"path" : "E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/fuzzy/include"
 				},
 				{
-					"backtrace" : 5,
+					"backtrace" : 8,
 					"isSystem" : true,
 					"path" : "E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/hfs/include"
 				},
 				{
-					"backtrace" : 5,
+					"backtrace" : 8,
 					"isSystem" : true,
 					"path" : "E:/opencv-4.5.4/opencv/sources/modules/imgcodecs/include"
 				},
 				{
-					"backtrace" : 5,
+					"backtrace" : 8,
 					"isSystem" : true,
 					"path" : "E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/line_descriptor/include"
 				},
 				{
-					"backtrace" : 5,
+					"backtrace" : 8,
 					"isSystem" : true,
 					"path" : "E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/saliency/include"
 				},
 				{
-					"backtrace" : 5,
+					"backtrace" : 8,
 					"isSystem" : true,
 					"path" : "E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/text/include"
 				},
 				{
-					"backtrace" : 5,
+					"backtrace" : 8,
 					"isSystem" : true,
 					"path" : "E:/opencv-4.5.4/opencv/sources/modules/videoio/include"
 				},
 				{
-					"backtrace" : 5,
+					"backtrace" : 8,
 					"isSystem" : true,
 					"path" : "E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/wechat_qrcode/include"
 				},
 				{
-					"backtrace" : 5,
+					"backtrace" : 8,
 					"isSystem" : true,
 					"path" : "E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/barcode/include"
 				},
 				{
-					"backtrace" : 5,
+					"backtrace" : 8,
 					"isSystem" : true,
 					"path" : "E:/opencv-4.5.4/opencv/sources/modules/calib3d/include"
 				},
 				{
-					"backtrace" : 5,
+					"backtrace" : 8,
 					"isSystem" : true,
 					"path" : "E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/datasets/include"
 				},
 				{
-					"backtrace" : 5,
+					"backtrace" : 8,
 					"isSystem" : true,
 					"path" : "E:/opencv-4.5.4/opencv/sources/modules/highgui/include"
 				},
 				{
-					"backtrace" : 5,
+					"backtrace" : 8,
 					"isSystem" : true,
 					"path" : "E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/mcc/include"
 				},
 				{
-					"backtrace" : 5,
+					"backtrace" : 8,
 					"isSystem" : true,
 					"path" : "E:/opencv-4.5.4/opencv/sources/modules/objdetect/include"
 				},
 				{
-					"backtrace" : 5,
+					"backtrace" : 8,
 					"isSystem" : true,
 					"path" : "E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/rapid/include"
 				},
 				{
-					"backtrace" : 5,
+					"backtrace" : 8,
 					"isSystem" : true,
 					"path" : "E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/rgbd/include"
 				},
 				{
-					"backtrace" : 5,
+					"backtrace" : 8,
 					"isSystem" : true,
 					"path" : "E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/shape/include"
 				},
 				{
-					"backtrace" : 5,
+					"backtrace" : 8,
 					"isSystem" : true,
 					"path" : "E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/structured_light/include"
 				},
 				{
-					"backtrace" : 5,
+					"backtrace" : 8,
 					"isSystem" : true,
 					"path" : "E:/opencv-4.5.4/opencv/sources/modules/video/include"
 				},
 				{
-					"backtrace" : 5,
+					"backtrace" : 8,
 					"isSystem" : true,
 					"path" : "E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/videostab/include"
 				},
 				{
-					"backtrace" : 5,
+					"backtrace" : 8,
 					"isSystem" : true,
 					"path" : "E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/xfeatures2d/include"
 				},
 				{
-					"backtrace" : 5,
+					"backtrace" : 8,
 					"isSystem" : true,
 					"path" : "E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/ximgproc/include"
 				},
 				{
-					"backtrace" : 5,
+					"backtrace" : 8,
 					"isSystem" : true,
 					"path" : "E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/xobjdetect/include"
 				},
 				{
-					"backtrace" : 5,
+					"backtrace" : 8,
 					"isSystem" : true,
 					"path" : "E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/aruco/include"
 				},
 				{
-					"backtrace" : 5,
+					"backtrace" : 8,
 					"isSystem" : true,
 					"path" : "E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/bgsegm/include"
 				},
 				{
-					"backtrace" : 5,
+					"backtrace" : 8,
 					"isSystem" : true,
 					"path" : "E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/bioinspired/include"
 				},
 				{
-					"backtrace" : 5,
+					"backtrace" : 8,
 					"isSystem" : true,
 					"path" : "E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/ccalib/include"
 				},
 				{
-					"backtrace" : 5,
+					"backtrace" : 8,
 					"isSystem" : true,
 					"path" : "E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/dnn_objdetect/include"
 				},
 				{
-					"backtrace" : 5,
+					"backtrace" : 8,
 					"isSystem" : true,
 					"path" : "E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/dpm/include"
 				},
 				{
-					"backtrace" : 5,
+					"backtrace" : 8,
 					"isSystem" : true,
 					"path" : "E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/face/include"
 				},
 				{
-					"backtrace" : 5,
+					"backtrace" : 8,
 					"isSystem" : true,
 					"path" : "E:/opencv-4.5.4/opencv/sources/modules/gapi/include"
 				},
 				{
-					"backtrace" : 5,
+					"backtrace" : 8,
 					"isSystem" : true,
 					"path" : "E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/optflow/include"
 				},
 				{
-					"backtrace" : 5,
+					"backtrace" : 8,
 					"isSystem" : true,
 					"path" : "E:/opencv-4.5.4/opencv/sources/modules/stitching/include"
 				},
 				{
-					"backtrace" : 5,
+					"backtrace" : 8,
 					"isSystem" : true,
 					"path" : "E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/superres/include"
 				},
 				{
-					"backtrace" : 5,
+					"backtrace" : 8,
 					"isSystem" : true,
 					"path" : "E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/tracking/include"
 				},
 				{
-					"backtrace" : 5,
+					"backtrace" : 8,
 					"isSystem" : true,
 					"path" : "E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/stereo/include"
 				},
 				{
-					"backtrace" : 5,
+					"backtrace" : 8,
 					"isSystem" : true,
 					"path" : "E:/opencv-4.5.4/opencv/sources/modules/world/include"
 				},
 				{
-					"backtrace" : 5,
+					"backtrace" : 8,
 					"isSystem" : true,
 					"path" : "E:/opencv-4.5.4/opencv_contrib-4.5.4/modules/img_hash/include"
 				},
 				{
-					"backtrace" : 5,
+					"backtrace" : 8,
 					"isSystem" : true,
 					"path" : "E:/opencv-4.5.4/opencv/sources/modules/ts/include"
 				}
@@ -362,7 +384,7 @@
 			{
 				"backtraces" : 
 				[
-					2
+					3
 				],
 				"standard" : "11"
 			},
@@ -375,7 +397,7 @@
 	"dependencies" : 
 	[
 		{
-			"backtrace" : 3,
+			"backtrace" : 2,
 			"id" : "SRCSO::@6890427a1f51a3e7e1df"
 		}
 	],
@@ -394,271 +416,281 @@
 			},
 			{
 				"backtrace" : 2,
-				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
+				"fragment" : "libSRCSO.a",
 				"role" : "libraries"
 			},
 			{
-				"backtrace" : 2,
-				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
-				"role" : "libraries"
-			},
-			{
-				"backtrace" : 2,
-				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
-				"role" : "libraries"
-			},
-			{
-				"backtrace" : 2,
-				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
-				"role" : "libraries"
-			},
-			{
-				"backtrace" : 2,
-				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
-				"role" : "libraries"
-			},
-			{
-				"backtrace" : 2,
-				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
-				"role" : "libraries"
-			},
-			{
-				"backtrace" : 2,
-				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
-				"role" : "libraries"
-			},
-			{
-				"backtrace" : 2,
-				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
-				"role" : "libraries"
-			},
-			{
-				"backtrace" : 2,
-				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
-				"role" : "libraries"
-			},
-			{
-				"backtrace" : 2,
-				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
-				"role" : "libraries"
-			},
-			{
-				"backtrace" : 2,
-				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
-				"role" : "libraries"
-			},
-			{
-				"backtrace" : 2,
-				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
-				"role" : "libraries"
-			},
-			{
-				"backtrace" : 2,
-				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
-				"role" : "libraries"
-			},
-			{
-				"backtrace" : 2,
-				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
-				"role" : "libraries"
-			},
-			{
-				"backtrace" : 2,
-				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
-				"role" : "libraries"
-			},
-			{
-				"backtrace" : 2,
-				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
-				"role" : "libraries"
-			},
-			{
-				"backtrace" : 2,
-				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
-				"role" : "libraries"
-			},
-			{
-				"backtrace" : 2,
-				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
-				"role" : "libraries"
-			},
-			{
-				"backtrace" : 2,
-				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
-				"role" : "libraries"
-			},
-			{
-				"backtrace" : 2,
-				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
-				"role" : "libraries"
-			},
-			{
-				"backtrace" : 2,
-				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
-				"role" : "libraries"
-			},
-			{
-				"backtrace" : 2,
-				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
-				"role" : "libraries"
-			},
-			{
-				"backtrace" : 2,
-				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
-				"role" : "libraries"
-			},
-			{
-				"backtrace" : 2,
-				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
-				"role" : "libraries"
-			},
-			{
-				"backtrace" : 2,
-				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
-				"role" : "libraries"
-			},
-			{
-				"backtrace" : 2,
-				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
-				"role" : "libraries"
-			},
-			{
-				"backtrace" : 2,
-				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
-				"role" : "libraries"
-			},
-			{
-				"backtrace" : 2,
-				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_img_hash454.dll.a",
-				"role" : "libraries"
-			},
-			{
-				"backtrace" : 2,
-				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
-				"role" : "libraries"
-			},
-			{
-				"backtrace" : 2,
-				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
-				"role" : "libraries"
-			},
-			{
-				"backtrace" : 2,
-				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
-				"role" : "libraries"
-			},
-			{
-				"backtrace" : 2,
-				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
-				"role" : "libraries"
-			},
-			{
-				"backtrace" : 2,
-				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
-				"role" : "libraries"
-			},
-			{
-				"backtrace" : 2,
-				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
-				"role" : "libraries"
-			},
-			{
-				"backtrace" : 2,
-				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
-				"role" : "libraries"
-			},
-			{
-				"backtrace" : 2,
-				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
-				"role" : "libraries"
-			},
-			{
-				"backtrace" : 2,
-				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
-				"role" : "libraries"
-			},
-			{
-				"backtrace" : 2,
-				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
-				"role" : "libraries"
-			},
-			{
-				"backtrace" : 2,
-				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
-				"role" : "libraries"
-			},
-			{
-				"backtrace" : 2,
-				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
-				"role" : "libraries"
-			},
-			{
-				"backtrace" : 2,
-				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
-				"role" : "libraries"
-			},
-			{
-				"backtrace" : 2,
-				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
-				"role" : "libraries"
-			},
-			{
-				"backtrace" : 2,
-				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
-				"role" : "libraries"
-			},
-			{
-				"backtrace" : 2,
-				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
-				"role" : "libraries"
-			},
-			{
-				"backtrace" : 2,
-				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
-				"role" : "libraries"
-			},
-			{
-				"backtrace" : 2,
-				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
-				"role" : "libraries"
-			},
-			{
-				"backtrace" : 2,
-				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
-				"role" : "libraries"
-			},
-			{
-				"backtrace" : 2,
-				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
-				"role" : "libraries"
-			},
-			{
-				"backtrace" : 2,
-				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
-				"role" : "libraries"
-			},
-			{
-				"backtrace" : 2,
-				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
-				"role" : "libraries"
-			},
-			{
-				"backtrace" : 2,
-				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
-				"role" : "libraries"
-			},
-			{
-				"backtrace" : 2,
+				"backtrace" : 3,
 				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
 				"role" : "libraries"
 			},
 			{
 				"backtrace" : 3,
-				"fragment" : "libSRCSO.a",
+				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
 				"role" : "libraries"
 			},
 			{
-				"backtrace" : 2,
+				"backtrace" : 3,
+				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_img_hash454.dll.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 4,
+				"fragment" : "..\\tools\\MVCAMSDK.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "..\\tools\\MVCAMSDK_X64.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
 				"fragment" : "E:\\opencv-4.5.4\\opencv\\build\\x64\\MinGW\\lib\\libopencv_world454.dll.a",
 				"role" : "libraries"
 			},

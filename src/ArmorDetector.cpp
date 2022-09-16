@@ -2,7 +2,8 @@
 
 #define BINARY_SHOW
 //#define DRAW_LIGHTS_CONTOURS
-//#define DRAW_FINAL_ARMOR
+//#define DRAW_FINAL_ARMOR_CLASS
+#define DRAW_FINAL_ARMOR_MAIN
 
 using namespace cv;
 using namespace std;
@@ -137,7 +138,6 @@ void ArmorDetector::findLights()
 
     if (contours.size() < 2)
     {
-        lostCnt++;
         candidateLights.clear();
         return;
     }
@@ -182,7 +182,7 @@ void ArmorDetector::findLights()
                         line(lights, vertice_lights[i], vertice_lights[(i + 1) % 4], CV_RGB(0, 255, 0));
                     }
                     imshow("lights-show", lights);
-#endif DRAW_LIGHTS_CONTOURS
+#endif //DRAW_LIGHTS_CONTOURS
                 }
             }
         }
@@ -190,7 +190,6 @@ void ArmorDetector::findLights()
 
     if(candidateLights.size()<2)
     {
-        lostCnt++;
         return;
     }
 }
@@ -199,7 +198,6 @@ void ArmorDetector::matchLights()
 {
     if(candidateLights.size() < 2)
     {
-        lostCnt++;
         candidateArmors.clear();
         return;
     }
@@ -250,7 +248,6 @@ void ArmorDetector::matchLights()
     }
     if(candidateArmors.empty())
     {
-        lostCnt++;
         return;
     }
 
@@ -260,15 +257,13 @@ void ArmorDetector::chooseTarget()
 {
     if(candidateArmors.empty())
     {
-        lostCnt++;
         finalArmor = Armor();
     }
     else if(candidateArmors.size() == 1)
     {
-        candidateArmors[0].id = detectNum(candidateArmors[0]);
+        detectNum(candidateArmors[0]);
         if (candidateArmors[0].id == 0 && candidateArmors[0].id == 2)
         {
-            lostCnt++;
             finalArmor = Armor();
         }
         else if (candidateArmors[0].id == 1)
@@ -286,14 +281,14 @@ void ArmorDetector::chooseTarget()
     {
 
         int best_index = 0; // 下标
-        int best_record = armorGrade(candidateArmors[0]);
+        int best_record = 0;
 
         sort(candidateArmors.begin(),candidateArmors.end(), height_sort);
 
         // 获取每个候选装甲板的id和type
 
         for(int i = 0; i < candidateArmors.size(); ++i) {
-            candidateArmors[i].id = detectNum(candidateArmors[i]);
+            detectNum(candidateArmors[i]);
             if (candidateArmors[i].id == 0 && candidateArmors[i].id == 2) {
                 continue;
             }
@@ -303,13 +298,9 @@ void ArmorDetector::chooseTarget()
             else if (candidateArmors[i].id == 3 || candidateArmors[i].id == 4)
                 candidateArmors[i].type = SMALL;
 
-            // int best_index;  // 最佳目标
             // 装甲板中心点在屏幕中心部分，在中心部分中又是倾斜最小的，
             // 如何避免频繁切换目标：缩小矩形框就是跟踪到了，一旦陀螺则会目标丢失，
             // UI界面做数字选择，选几就是几号，可能在切换会麻烦，（不建议）
-
-//                if (finalRect.contains(candidateArmors[index].center) &&
-//                    candidateArmors[index].id == finalArmor.id) { break; }  // 追踪上一帧装甲板//??
 
             //打分制筛选装甲板优先级
             /*最高优先级数字识别英雄1号装甲板，其次3和4号（如果打分的话1给100，3和4给80大概这个比例）
@@ -333,7 +324,7 @@ void ArmorDetector::chooseTarget()
         finalArmor = candidateArmors[best_index];
     }
 
-#ifdef DRAW_FINAL_ARMOR
+#ifdef DRAW_FINAL_ARMOR_CLASS
     Mat final_armor = _src.clone();
     Point2f vertice_armor[4];
     finalArmor.points(vertice_armor);
@@ -341,10 +332,10 @@ void ArmorDetector::chooseTarget()
         line(final_armor, vertice_armor[i], vertice_armor[(i + 1) % 4], CV_RGB(0, 255, 0));
     }
     imshow("final_armor-show", final_armor);
-#endif DRAW_FINAL_ARMOR
+#endif //DRAW_FINAL_ARMOR_CLASS
 }
 
-Armor ArmorDetector::getTarget(const cv::Mat &src)
+Armor ArmorDetector::autoAim(const cv::Mat &src)
 {
 
     setImage(src);
@@ -377,15 +368,24 @@ Armor ArmorDetector::getTarget(const cv::Mat &src)
     }
     candidateArmors.clear();
     candidateLights.clear();
+
+#ifdef DRAW_FINAL_ARMOR_MAIN
+    Mat target = src.clone();
+    Point2f vertice_armor[4];
+    finalArmor.points(vertice_armor);
+    for (int i = 0; i < 4; i++) {
+        line(target, vertice_armor[i], vertice_armor[(i + 1) % 4], CV_RGB(0, 255, 0));
+    }
+    imshow("target-show", target);
+#endif //DRAW_FINAL_ARMOR_MAIN
     return finalArmor;
 }
 
 
-void ArmorDetector::detectNum(RotatedRect &f_rect, Armor& armor)
+void ArmorDetector::detectNum(Armor& armor)
 {
-    int classid = 0;
     Point2f pp[4];
-    f_rect.points(pp);
+    armor.points(pp);
 
     Mat numSrc;
     Mat dst;
@@ -409,7 +409,7 @@ void ArmorDetector::detectNum(RotatedRect &f_rect, Armor& armor)
     // 仿射变换
     Mat matrix_per = getPerspectiveTransform(src_p,dst_p);
     warpPerspective(numSrc,dst,matrix_per,Size(30,60));
-    DNN_detect::dnn_detect(dst, armor);
+    dnn_detect(dst, armor);
 }
 
 
@@ -438,8 +438,6 @@ bool ArmorDetector::conTain(RotatedRect &match_rect,vector<Light> &Lights, size_
 
 int ArmorDetector::armorGrade(const Armor& checkArmor)
 {
-    //打分前先对装甲板进行高排序
-    sort(candidateArmors.begin(),candidateArmors.end(), height_sort);
     // 看看裁判系统的通信机制，雷达的制作规范；
 
     // 选择用int截断double
