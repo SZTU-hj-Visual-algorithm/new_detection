@@ -68,7 +68,7 @@ public:
 
     void chooseTarget(); //找出优先级最高的装甲板
 
-    Armor transformPos(const cv::Mat &src); //将最终目标的坐标转换到摄像头原大小的
+    Armor getTarget(const cv::Mat &src); //将最终目标的坐标转换到摄像头原大小的
 
 private:
     int lostCnt;
@@ -91,7 +91,12 @@ private:
     double armor_ij_max_ratio;
 
     //armor_grade_condition
-    double armor_standart_wh;
+    double big_wh_standard;
+    double small_wh_standard;
+    double near_standard;
+
+    //armor_grade_project_ratio
+    double id_grade_ratio;
     double wh_grade_ratio;
     double height_grade_ratio;
     double near_grade_ratio;
@@ -108,11 +113,11 @@ private:
 
     Armor lastArmor;
 
+    int grade_standard;
 
     std::vector<Light> candidateLights; // 筛选的灯条
     std::vector<Armor> candidateArmors; // 筛选的装甲板
     Armor finalArmor;  // 最终装甲板
-    cv::Rect finalRect;  // 最终框住装甲板旋转矩形的正矩形
 
     cv::Point2f dst_p[4] = {cv::Point2f(0,60),cv::Point2f(0,0),cv::Point2f(30,0),cv::Point2f(30,60)};
 
@@ -122,97 +127,9 @@ private:
     void detectNum(cv::RotatedRect &f_rect, Armor& armor);
 
     bool conTain(cv::RotatedRect &match_rect,std::vector<Light> &Lights, size_t &i, size_t &j);
+    
+    int armorGrade(const Armor& checkArmor);
 
-    inline int whGrade(const double wh_ratio)
-    {
-        // 可以选择大装甲板，小装甲板w/h最大大约在2.45左右，大装甲板大约在4左右
-        return wh_ratio/armor_standart_wh > 1 ? 100 : (wh_ratio/armor_standart_wh) * 100;
-    }
-
-    inline int heightGrade(const double armor_height, const double begin_height, const double end_height)
-    {
-        // 都和第一个装甲板高度比较？假设第一个得分为中值，对以后的给分上下波动
-        // 可能会出现超过一百的情况，
-        // 找一个好一点的标准值，下面改成了面积
-        double hRotation = (armor_height - end_height) / (begin_height - end_height);
-        return hRotation * 100;
-    }
-
-    inline int nearGrade(const Armor &checkArmor)
-    {
-        cv::Rect img_center_rect(_src.cols * 0.3, _src.rows * 0.3, _src.cols * 0.7, _src.rows * 0.7);
-        cv::Point2f vertice[4];
-        checkArmor.points(vertice);
-        if (img_center_rect.contains(checkArmor.center) &&
-        img_center_rect.contains(vertice[0]) &&
-        img_center_rect.contains(vertice[1]) &&
-        img_center_rect.contains(vertice[2]) &&
-        img_center_rect.contains(vertice[3]) )
-        {
-            return 100;
-        }
-        else
-        {
-            return 0;
-        }
-    }
-
-    inline int angleGrade(const double armorAngle)
-    {
-        double angle_ratio = (90.0-armorAngle) / 90.0;
-        return angle_ratio*100;
-    }
-
-    int armorGrade(const Armor& checkArmor)
-    {
-        // 看看裁判系统的通信机制，雷达的制作规范；
-
-        // 选择用int截断double
-
-        // 长宽比
-        int wh_grade;
-        double big_wh_standard = 3.5; // 4左右最佳，3.5以上比较正，具体再修改
-        double small_wh_standard = 2; // 2.5左右最佳，2以上比较正，具体再修改
-        double wh_ratio = checkArmor.size.height>checkArmor.size.width ? checkArmor.size.height / checkArmor.size.width : checkArmor.size.width > checkArmor.size.height;
-        if(checkArmor.type == BIG)
-        {
-            wh_grade = wh_ratio/big_wh_standard > 1 ? 100 : (wh_ratio/big_wh_standard) * 100;
-        }
-        else
-        {
-            wh_grade = wh_ratio/small_wh_standard > 1 ? 100 : (wh_ratio/small_wh_standard) * 100;
-        }
-
-        // 最大装甲板，用面积，找一个标准值（固定距离（比如3/4米），装甲板大小（Armor.area）大约是多少，分大小装甲板）
-        // 比标准大就是100，小就是做比例，，，，可能小的得出来的值会很小
-        int area_grade;
-        double big_area_standard = 2000; // 不知道，得实测
-        double small_area_standard = 1000; // 不知道，得实测
-        if(checkArmor.type == BIG)
-        {
-            area_grade = checkArmor.area/big_area_standard > 1 ? 100 : (checkArmor.area/big_area_standard) * 100;
-        }
-        else
-        {
-            area_grade = checkArmor.area/small_area_standard > 1 ? 100 : (checkArmor.area/small_area_standard) * 100;
-        }
-
-        // 靠近中心，与中心做距离，设定标准值，看图传和摄像头看到的画面的差异
-        int near_grade;
-        double near_standard = 500;
-        double pts_distance = POINT_DIST(checkArmor.center, cv::Point2f(_src.cols * 0.5, _src.rows * 0.5));
-        near_grade = pts_distance/near_standard > 1 ? 100 : (pts_distance/near_standard) * 100;
-
-        // 角度不歪
-        int angle_grade;
-        angle_grade = (90.0 - checkArmor.angle) / 90.0 * 100;
-
-        // 下面的系数得详细调节；
-        int final_grade = wh_grade    * 0.4 +
-                          area_grade  * 0.3 +
-                          near_grade  * 0.2 +
-                          angle_grade * 0.1 ;
-    }
 
     inline bool makeRectSafe(cv::Rect & rect, cv::Size size){
         if (rect.x < 0)
