@@ -5,7 +5,7 @@
 
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc.hpp"
-#include "DNN_detect.h"
+
 #include <iostream>
 
 #include "robot_state.h"
@@ -43,10 +43,9 @@ struct Light : public cv::RotatedRect     //灯条结构体
 //装甲板结构体
 struct Armor : public cv::RotatedRect    //装甲板结构体
 {
-    Armor();
+    Armor()= default;
     explicit Armor(cv::RotatedRect &box) : cv::RotatedRect(box)
     {
-
     }
     double light_height_rate;  // 左右灯条高度比
     double confidence;
@@ -142,7 +141,7 @@ private:
     inline int nearGrade(const Armor &checkArmor)
     {
         cv::Rect img_center_rect(_src.cols * 0.3, _src.rows * 0.3, _src.cols * 0.7, _src.rows * 0.7);
-        Point2f vertice[4];
+        cv::Point2f vertice[4];
         checkArmor.points(vertice);
         if (img_center_rect.contains(checkArmor.center) &&
         img_center_rect.contains(vertice[0]) &&
@@ -201,7 +200,7 @@ private:
         // 靠近中心，与中心做距离，设定标准值，看图传和摄像头看到的画面的差异
         int near_grade;
         double near_standard = 500;
-        double pts_distance = POINT_DIST(checkArmor.center, Point2f(_src.cols * 0.5, _src.rows * 0.5));
+        double pts_distance = POINT_DIST(checkArmor.center, cv::Point2f(_src.cols * 0.5, _src.rows * 0.5));
         near_grade = pts_distance/near_standard > 1 ? 100 : (pts_distance/near_standard) * 100;
 
         // 角度不歪

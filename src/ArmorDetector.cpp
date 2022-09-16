@@ -1,5 +1,5 @@
 #include "ArmorDetector.hpp"
-
+#include "DNN_detect.h"
 #define BINARY_SHOW
 //#define DRAW_LIGHTS_CONTOURS
 //#define DRAW_FINAL_ARMOR
@@ -20,13 +20,13 @@ ArmorDetector::ArmorDetector()
 
     //light_judge_condition
     light_max_angle = 30.0;
-    light_min_hw_ratio = 3;
+    light_min_hw_ratio = 2;
     light_max_hw_ratio = 10;   // different distance and focus
     light_min_area_ratio = 0.6;   // RotatedRect / Rect
     light_max_area_ratio = 1.0;
 
     //armor_judge_condition
-    armor_max_wh_ratio = 4.5;
+    armor_max_wh_ratio = 6.5;
     armor_min_wh_ratio = 1.5;
     armor_max_angle = 20.0;
     armor_height_offset = 0.3;
@@ -39,8 +39,9 @@ ArmorDetector::ArmorDetector()
 
 void ArmorDetector::setImage(const Mat &src)
 {
-    const Point &lastCenter = lastArmor.center;
 
+    const Point &lastCenter = lastArmor.center;
+//    cout << lastCenter << endl;
     if (lastCenter.x == 0 || lastCenter.y == 0)
     {
         _src = src;
@@ -50,28 +51,29 @@ void ArmorDetector::setImage(const Mat &src)
     {
         //Rect rect = finalRect;
         Rect rect = lastArmor.boundingRect();
-
+//        cout << rect.width << " " << rect.height <<endl;
         double scale_w = 2;
         double scale_h = 2;
         int lu_x_offset = 0;
         int rd_x_offset = 0;
-        // 获取偏移量
+        // 获取偏移量(no use)
         if(lastArmor.light_height_rate > 1)
-            lu_x_offset = 6 *( pow(lastArmor.light_height_rate - 1, 0.6) + 0.09) * rect.width;
+            lu_x_offset = 9 *( pow(lastArmor.light_height_rate - 1, 0.6)) * rect.width;
         else
-            rd_x_offset = 6 * (pow(1 - lastArmor.light_height_rate, 0.6) + 0.15) * rect.width;
-
+            rd_x_offset = 15 * (pow(1 - lastArmor.light_height_rate, 0.6)) * rect.width;
+//        cout << lastArmor.light_height_rate <<endl;
+//        cout << "lu_x_offset: " << lu_x_offset << " rd_x_offset: " << rd_x_offset << endl;
         //获取当前帧的roi
         int w = int(rect.width * scale_w);
         int h = int(rect.height * scale_h);
-        int x = max(lastCenter.x - w - lu_x_offset, 0);
+        int x = max(lastCenter.x - w, 0);
         int y = max(lastCenter.y - h, 0);
         Point luPoint = Point(x,y);
-        x = std::min(lastCenter.x + w + rd_x_offset, src.cols);
+        x = std::min(lastCenter.x + w, src.cols);
         y = std::min(lastCenter.y + h, src.rows);
         Point rdPoint = Point(x,y);
         detectRoi = Rect(luPoint,rdPoint);
-
+//        cout << "luPoint: " << luPoint << " rdPoint: " << rdPoint << endl;
 
         if (!makeRectSafe(detectRoi, src.size())){
             lastArmor = Armor();
@@ -98,18 +100,21 @@ bool ArmorDetector::isLight(Light& light, vector<Point> &cnt)
 
     //高一定要大于宽
     bool standing_ok = height> width;
-
+    if (height <= 0 || width <= 0){
+        return false;
+    }
     //高宽比条件
     double hw_ratio = height / width;
     bool hw_ratio_ok = light_min_hw_ratio < hw_ratio && hw_ratio < light_max_hw_ratio;
-
+//    cout << "hw_ratio_ok: " << hw_ratio_ok << endl;
     //外接矩形面积和像素点面积之比条件
-    double area_ratio = height * width / contourArea(cnt);
+    double area_ratio =  contourArea(cnt) /(height * width) ;
+//    cout << "area_ratio: " << area_ratio << endl;
     bool area_ratio_ok = light_min_area_ratio < area_ratio && area_ratio < light_max_area_ratio;
-
+//    cout << "area_ratio_ok: " << area_ratio_ok << endl;
     //灯条角度条件
     bool angle_ok = fabs(90.0 - light.angle) < light_max_angle;
-
+//    cout << "angle_ok: " << angle_ok << endl;
     //灯条判断的条件总集
     bool is_light = hw_ratio_ok && area_ratio_ok && angle_ok && standing_ok;
 
@@ -119,15 +124,13 @@ bool ArmorDetector::isLight(Light& light, vector<Point> &cnt)
 
 void ArmorDetector::findLights()
 {
+    candidateLights.clear();
     vector<vector<cv::Point>> contours;
     vector<cv::Vec4i> hierarchy;
     cv::findContours(_binary, contours, hierarchy, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-
-
     if (contours.size() < 2)
     {
-        lostCnt++;
-        candidateLights.clear();
+//        lostCnt++;
         return;
     }
 
@@ -171,7 +174,7 @@ void ArmorDetector::findLights()
                         line(lights, vertice_lights[i], vertice_lights[(i + 1) % 4], CV_RGB(0, 255, 0));
                     }
                     imshow("lights-show", lights);
-#endif DRAW_LIGHTS_CONTOURS
+#endif //DRAW_LIGHTS_CONTOURS
                 }
             }
         }
@@ -179,17 +182,18 @@ void ArmorDetector::findLights()
 
     if(candidateLights.size()<2)
     {
-        lostCnt++;
+//        lostCnt++;
         return;
     }
 }
 
 void ArmorDetector::matchLights()
 {
+    candidateArmors.clear();
+
     if(candidateLights.size() < 2)
     {
-        lostCnt++;
-        candidateArmors.clear();
+//        lostCnt++;
         return;
     }
 
@@ -239,7 +243,7 @@ void ArmorDetector::matchLights()
     }
     if(candidateArmors.empty())
     {
-        lostCnt++;
+//        lostCnt++;
         return;
     }
 
@@ -247,10 +251,12 @@ void ArmorDetector::matchLights()
 
 void ArmorDetector::chooseTarget()
 {
+    finalArmor = Armor();
     if(candidateArmors.empty())
     {
         lostCnt++;
-        finalArmor = Armor();
+
+//        finalArmor = Armor();
     }
     else if(candidateArmors.size() == 1)
     {
@@ -281,6 +287,7 @@ void ArmorDetector::chooseTarget()
                 candidateArmors[i].type = BIG;
             if (candidateArmors[i].id == 2 || candidateArmors[i].id == 3 || candidateArmors[i].id == 4)
                 candidateArmors[i].type = SMALL;
+//            cout << candidateArmors[i].id << endl;
         }
 
 
@@ -333,6 +340,7 @@ void ArmorDetector::chooseTarget()
 
             }
         }
+//        cout << candidateArmors[min_angle_index].center << endl;
         finalArmor = candidateArmors[min_angle_index];
     }
 
@@ -344,32 +352,34 @@ void ArmorDetector::chooseTarget()
         line(final_armor, vertice_armor[i], vertice_armor[(i + 1) % 4], CV_RGB(0, 255, 0));
     }
     imshow("final_armor-show", final_armor);
-#endif DRAW_FINAL_ARMOR
+#endif //DRAW_FINAL_ARMOR
 }
 
 Armor ArmorDetector::transformPos(const cv::Mat &src)
 {
-
     setImage(src);
     findLights();
     matchLights();
     chooseTarget();
 
     finalRect = finalArmor.boundingRect();
+//    cout << finalArmor.center <<endl;
     finalRect = Rect(detectRoi.x+finalRect.x,detectRoi.y+finalRect.y,finalRect.width,finalRect.height);
 
-    if(!finalRect.empty())
+    if(finalArmor.size.width != 0)
     {
         finalArmor.center.x += detectRoi.x;
         finalArmor.center.y += detectRoi.y;
         lostCnt = 0;
         lastArmor = finalArmor;
+
     }
     else
     {
-        ++lostCnt;
+        cout << "lost: " << lostCnt << endl;
+//        ++lostCnt;
         if (lostCnt < 8)
-            lastArmor.size = Size(lastArmor.size.width * 1.1, lastArmor.size.height * 1.4);
+            lastArmor.size = Size(lastArmor.size.width * 1.3, lastArmor.size.height * 1.8);
         else if(lostCnt == 9)
             lastArmor.size = Size(lastArmor.size.width * 1.5, lastArmor.size.height * 1.5);
         else if(lostCnt == 12)
@@ -378,7 +388,7 @@ Armor ArmorDetector::transformPos(const cv::Mat &src)
             lastArmor.size = Size(lastArmor.size.width * 1.2, lastArmor.size.height * 1.2);
         else if (lostCnt == 18)
             lastArmor.size = Size(lastArmor.size.width * 1.2, lastArmor.size.height * 1.2);
-        else if (lostCnt > 33 )lastArmor.size = Size();
+        else if (lostCnt > 33 )lastArmor.center = Point2f(0,0);
     }
 
     return finalArmor;
