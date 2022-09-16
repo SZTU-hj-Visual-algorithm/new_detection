@@ -1,8 +1,9 @@
 #include "ArmorDetector.hpp"
-#include "DNN_detect.h"
+
 #define BINARY_SHOW
 //#define DRAW_LIGHTS_CONTOURS
-//#define DRAW_FINAL_ARMOR
+//#define DRAW_FINAL_ARMOR_CLASS
+#define DRAW_FINAL_ARMOR_MAIN
 
 using namespace cv;
 using namespace std;
@@ -20,13 +21,13 @@ ArmorDetector::ArmorDetector()
 
     //light_judge_condition
     light_max_angle = 30.0;
-    light_min_hw_ratio = 2;
+    light_min_hw_ratio = 3;
     light_max_hw_ratio = 10;   // different distance and focus
     light_min_area_ratio = 0.6;   // RotatedRect / Rect
     light_max_area_ratio = 1.0;
 
     //armor_judge_condition
-    armor_max_wh_ratio = 6.5;
+    armor_max_wh_ratio = 4.5;
     armor_min_wh_ratio = 1.5;
     armor_max_angle = 20.0;
     armor_height_offset = 0.3;
@@ -34,14 +35,24 @@ ArmorDetector::ArmorDetector()
     armor_ij_max_ratio = 5.0;
 
     //armor_grade_condition
-    armor_standart_wh = 1.75;
+    big_wh_standard = 3.5; // 4左右最佳，3.5以上比较正，具体再修改
+    small_wh_standard = 2; // 2.5左右最佳，2以上比较正，具体再修改
+    near_standard = 500;
+
+    //armor_grade_project_ratio
+    id_grade_ratio = 0.2;
+    wh_grade_ratio = 0.3;
+    height_grade_ratio = 0.2;
+    near_grade_ratio = 0.2;
+    angle_grade_ratio = 0.1;
+
+    grade_standard = 70; // 及格分
 }
 
 void ArmorDetector::setImage(const Mat &src)
 {
-
     const Point &lastCenter = lastArmor.center;
-//    cout << lastCenter << endl;
+
     if (lastCenter.x == 0 || lastCenter.y == 0)
     {
         _src = src;
@@ -51,29 +62,28 @@ void ArmorDetector::setImage(const Mat &src)
     {
         //Rect rect = finalRect;
         Rect rect = lastArmor.boundingRect();
-//        cout << rect.width << " " << rect.height <<endl;
+
         double scale_w = 2;
         double scale_h = 2;
         int lu_x_offset = 0;
         int rd_x_offset = 0;
-        // 获取偏移量(no use)
+        // 获取偏移量
         if(lastArmor.light_height_rate > 1)
-            lu_x_offset = 9 *( pow(lastArmor.light_height_rate - 1, 0.6)) * rect.width;
+            lu_x_offset = 6 *( pow(lastArmor.light_height_rate - 1, 0.6) + 0.09) * rect.width;
         else
-            rd_x_offset = 15 * (pow(1 - lastArmor.light_height_rate, 0.6)) * rect.width;
-        cout << lastArmor.light_height_rate <<endl;
-        cout << "lu_x_offset: " << lu_x_offset << " rd_x_offset: " << rd_x_offset << endl;
+            rd_x_offset = 6 * (pow(1 - lastArmor.light_height_rate, 0.6) + 0.15) * rect.width;
+
         //获取当前帧的roi
         int w = int(rect.width * scale_w);
         int h = int(rect.height * scale_h);
-        int x = max(lastCenter.x - w, 0);
+        int x = max(lastCenter.x - w - lu_x_offset, 0);
         int y = max(lastCenter.y - h, 0);
         Point luPoint = Point(x,y);
-        x = std::min(lastCenter.x + w, src.cols);
+        x = std::min(lastCenter.x + w + rd_x_offset, src.cols);
         y = std::min(lastCenter.y + h, src.rows);
         Point rdPoint = Point(x,y);
         detectRoi = Rect(luPoint,rdPoint);
-//        cout << "luPoint: " << luPoint << " rdPoint: " << rdPoint << endl;
+
 
         if (!makeRectSafe(detectRoi, src.size())){
             lastArmor = Armor();
@@ -100,21 +110,18 @@ bool ArmorDetector::isLight(Light& light, vector<Point> &cnt)
 
     //高一定要大于宽
     bool standing_ok = height> width;
-    if (height <= 0 || width <= 0){
-        return false;
-    }
+
     //高宽比条件
     double hw_ratio = height / width;
     bool hw_ratio_ok = light_min_hw_ratio < hw_ratio && hw_ratio < light_max_hw_ratio;
-//    cout << "hw_ratio_ok: " << hw_ratio_ok << endl;
+
     //外接矩形面积和像素点面积之比条件
-    double area_ratio =  contourArea(cnt) /(height * width) ;
-//    cout << "area_ratio: " << area_ratio << endl;
+    double area_ratio = height * width / contourArea(cnt);
     bool area_ratio_ok = light_min_area_ratio < area_ratio && area_ratio < light_max_area_ratio;
-//    cout << "area_ratio_ok: " << area_ratio_ok << endl;
+
     //灯条角度条件
     bool angle_ok = fabs(90.0 - light.angle) < light_max_angle;
-//    cout << "angle_ok: " << angle_ok << endl;
+
     //灯条判断的条件总集
     bool is_light = hw_ratio_ok && area_ratio_ok && angle_ok && standing_ok;
 
@@ -124,13 +131,14 @@ bool ArmorDetector::isLight(Light& light, vector<Point> &cnt)
 
 void ArmorDetector::findLights()
 {
-    candidateLights.clear();
     vector<vector<cv::Point>> contours;
     vector<cv::Vec4i> hierarchy;
     cv::findContours(_binary, contours, hierarchy, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+
+
     if (contours.size() < 2)
     {
-//        lostCnt++;
+        candidateLights.clear();
         return;
     }
 
@@ -182,18 +190,15 @@ void ArmorDetector::findLights()
 
     if(candidateLights.size()<2)
     {
-//        lostCnt++;
         return;
     }
 }
 
 void ArmorDetector::matchLights()
 {
-    candidateArmors.clear();
-
     if(candidateLights.size() < 2)
     {
-//        lostCnt++;
+        candidateArmors.clear();
         return;
     }
 
@@ -243,7 +248,6 @@ void ArmorDetector::matchLights()
     }
     if(candidateArmors.empty())
     {
-//        lostCnt++;
         return;
     }
 
@@ -251,100 +255,76 @@ void ArmorDetector::matchLights()
 
 void ArmorDetector::chooseTarget()
 {
-    finalArmor = Armor();
     if(candidateArmors.empty())
     {
-        lostCnt++;
-
-//        finalArmor = Armor();
+        finalArmor = Armor();
     }
     else if(candidateArmors.size() == 1)
     {
-        finalArmor = candidateArmors[0];
+        detectNum(candidateArmors[0]);
+        if (candidateArmors[0].id == 0 && candidateArmors[0].id == 2)
+        {
+            finalArmor = Armor();
+        }
+        else if (candidateArmors[0].id == 1)
+        {
+            candidateArmors[0].type = BIG;
+            finalArmor = candidateArmors[0];
+        }
+        else if (candidateArmors[0].id == 3 || candidateArmors[0].id == 4)
+        {
+            candidateArmors[0].type = SMALL;
+            finalArmor = candidateArmors[0];
+        }
     }
     else
     {
-        //vector<double> pts_dis_every;
-        //vector<int> ID_every;
 
-        // 以下舍弃
-        //double min_pts_dis;  // 屏幕中心点与识别到装甲板中心点的距离
-        //int min_dis_index;   // 下标
+        int best_index = 0; // 下标
+        int best_record = 0;
 
-        double min_angle = candidateArmors[0].angle;    // 识别到装甲板中倾斜程度最小的
-        int min_angle_index = 0; // 下标
+        sort(candidateArmors.begin(),candidateArmors.end(), height_sort);
 
         // 获取每个候选装甲板的id和type
-        for(auto i = candidateArmors.size()-1; i < 0; --i) {
-            detectNum(candidateArmors[i], candidateArmors[i]);
-            if (candidateArmors[i].id == 0) {
-                swap(candidateArmors[i], *(candidateArmors.end() -1 ));
-                candidateArmors.pop_back();
+
+        for(int i = 0; i < candidateArmors.size(); ++i) {
+            detectNum(candidateArmors[i]);
+            if (candidateArmors[i].id == 0 && candidateArmors[i].id == 2) {
                 continue;
             }
             // 暂时只有五个类别
             if (candidateArmors[i].id == 1)
                 candidateArmors[i].type = BIG;
-            if (candidateArmors[i].id == 2 || candidateArmors[i].id == 3 || candidateArmors[i].id == 4)
+            else if (candidateArmors[i].id == 3 || candidateArmors[i].id == 4)
                 candidateArmors[i].type = SMALL;
-            cout << candidateArmors[i].id << endl;
-        }
 
-
-
-        if (!finalRect.contains(candidateArmors[0].center) && candidateArmors[0].id != finalArmor.id) {   // 追踪上一帧装甲板//??
-
-            //int best_index;  // 最佳目标
             // 装甲板中心点在屏幕中心部分，在中心部分中又是倾斜最小的，
             // 如何避免频繁切换目标：缩小矩形框就是跟踪到了，一旦陀螺则会目标丢失，
             // UI界面做数字选择，选几就是几号，可能在切换会麻烦，（不建议）
-            sort(candidateArmors.begin(),candidateArmors.end(), height_sort);
-            for (int index = 1; index < candidateArmors.size(); index++) {
-                /*
-                double pts_dis = POINT_DIST(candidateArmors[index].center, Point2f(_src.cols,_src.rows));
-                if(pts_dis < min_pts_dis)
-                {
-                    min_pts_dis = pts_dis;
-                    min_dis_index = index;
-                }
-                 */
 
-                if (finalRect.contains(candidateArmors[index].center) &&
-                    candidateArmors[index].id == finalArmor.id) { break; }  // 追踪上一帧装甲板//??
-
-                //打分制筛选装甲板优先级
-                /*最高优先级数字识别英雄1号装甲板，其次3和4号（如果打分的话1给100，3和4给80大概这个比例）
-                 *1、宽高比（筛选正面和侧面装甲板，尽量打正面装甲板）
-                 *2、装甲板靠近图像中心
-                 *3、装甲板倾斜角度最小
-                 *4、装甲板高最大
-                 */
-                //1、宽高比用一个标准值和当前值做比值（大于标准值默认置为1）乘上标准分数作为得分
-                //2、在缩小roi内就给分，不在不给分（分数占比较低）
-                //3、90度减去装甲板的角度除以90得到比值乘上标准分作为得分
-                //4、在前三步打分之前对装甲板进行高由大到小排序，获取最大最小值然后归一化，用归一化的高度值乘上标准分作为得分
-                ////////////////////////////打分筛选装甲板开始////////////////////////////////////////
-                Armor checkArmor = candidateArmors[index];
-                double armor_wh_ratio = checkArmor.size.width / checkArmor.size.height;
-                double begin_h = candidateArmors.begin()->size.height;
-                double end_h = (candidateArmors.end() - 1)->size.height;
-
-                int final_record = wh_grade_ratio * whGrade(armor_wh_ratio) +
-                                   height_grade_ratio * heightGrade(checkArmor.size.height,begin_h,end_h) +
-                                   near_grade_ratio * nearGrade(checkArmor) +
-                                   angle_grade_ratio * angleGrade(checkArmor.angle);
-
-                //最后筛选出得分最高的，暂未写
-
-
-
+            //打分制筛选装甲板优先级
+            /*最高优先级数字识别英雄1号装甲板，其次3和4号（如果打分的话1给100，3和4给80大概这个比例）
+             *1、宽高比（筛选正面和侧面装甲板，尽量打正面装甲板）
+             *2、装甲板靠近图像中心
+             *3、装甲板倾斜角度最小
+             *4、装甲板高最大
+             */
+            //1、宽高比用一个标准值和当前值做比值（大于标准值默认置为1）乘上标准分数作为得分
+            //2、在缩小roi内就给分，不在不给分（分数占比较低）
+            //3、90度减去装甲板的角度除以90得到比值乘上标准分作为得分
+            //4、在前三步打分之前对装甲板进行高由大到小排序，获取最大最小值然后归一化，用归一化的高度值乘上标准分作为得分
+            Armor checkArmor = candidateArmors[i];
+            int final_record = armorGrade(checkArmor);
+            if (final_record > best_record && final_record > grade_standard)
+            {
+                best_record = final_record;
+                best_index = i;
             }
         }
-//        cout << candidateArmors[min_angle_index].center << endl;
-        finalArmor = candidateArmors[min_angle_index];
+        finalArmor = candidateArmors[best_index];
     }
 
-#ifdef DRAW_FINAL_ARMOR
+#ifdef DRAW_FINAL_ARMOR_CLASS
     Mat final_armor = _src.clone();
     Point2f vertice_armor[4];
     finalArmor.points(vertice_armor);
@@ -352,34 +332,30 @@ void ArmorDetector::chooseTarget()
         line(final_armor, vertice_armor[i], vertice_armor[(i + 1) % 4], CV_RGB(0, 255, 0));
     }
     imshow("final_armor-show", final_armor);
-#endif //DRAW_FINAL_ARMOR
+#endif //DRAW_FINAL_ARMOR_CLASS
 }
 
-Armor ArmorDetector::transformPos(const cv::Mat &src)
+Armor ArmorDetector::autoAim(const cv::Mat &src)
 {
+
     setImage(src);
     findLights();
     matchLights();
     chooseTarget();
 
-    finalRect = finalArmor.boundingRect();
-//    cout << finalArmor.center <<endl;
-    finalRect = Rect(detectRoi.x+finalRect.x,detectRoi.y+finalRect.y,finalRect.width,finalRect.height);
-
-    if(finalArmor.size.width != 0)
+    if(!finalArmor.size.empty())
     {
         finalArmor.center.x += detectRoi.x;
         finalArmor.center.y += detectRoi.y;
         lostCnt = 0;
         lastArmor = finalArmor;
-
     }
     else
     {
-        cout << "lost: " << lostCnt << endl;
-//        ++lostCnt;
+        //这里整体逻辑也要改一下
+        ++lostCnt;
         if (lostCnt < 8)
-            lastArmor.size = Size(lastArmor.size.width * 1.3, lastArmor.size.height * 1.8);
+            lastArmor.size = Size(lastArmor.size.width * 1.1, lastArmor.size.height * 1.4);
         else if(lostCnt == 9)
             lastArmor.size = Size(lastArmor.size.width * 1.5, lastArmor.size.height * 1.5);
         else if(lostCnt == 12)
@@ -388,18 +364,28 @@ Armor ArmorDetector::transformPos(const cv::Mat &src)
             lastArmor.size = Size(lastArmor.size.width * 1.2, lastArmor.size.height * 1.2);
         else if (lostCnt == 18)
             lastArmor.size = Size(lastArmor.size.width * 1.2, lastArmor.size.height * 1.2);
-        else if (lostCnt > 33 )lastArmor.center = Point2f(0,0);
+        else if (lostCnt > 33 )lastArmor.size = Size();
     }
+    candidateArmors.clear();
+    candidateLights.clear();
 
+#ifdef DRAW_FINAL_ARMOR_MAIN
+    Mat target = src.clone();
+    Point2f vertice_armor[4];
+    finalArmor.points(vertice_armor);
+    for (int i = 0; i < 4; i++) {
+        line(target, vertice_armor[i], vertice_armor[(i + 1) % 4], CV_RGB(0, 255, 0));
+    }
+    imshow("target-show", target);
+#endif //DRAW_FINAL_ARMOR_MAIN
     return finalArmor;
 }
 
 
-void ArmorDetector::detectNum(RotatedRect &f_rect, Armor& armor)
+void ArmorDetector::detectNum(Armor& armor)
 {
-    int classid = 0;
     Point2f pp[4];
-    f_rect.points(pp);
+    armor.points(pp);
 
     Mat numSrc;
     Mat dst;
@@ -423,7 +409,7 @@ void ArmorDetector::detectNum(RotatedRect &f_rect, Armor& armor)
     // 仿射变换
     Mat matrix_per = getPerspectiveTransform(src_p,dst_p);
     warpPerspective(numSrc,dst,matrix_per,Size(30,60));
-    DNN_detect::dnn_detect(dst, armor);
+    dnn_detect(dst, armor);
 }
 
 
@@ -448,4 +434,70 @@ bool ArmorDetector::conTain(RotatedRect &match_rect,vector<Light> &Lights, size_
         }
     }
     return false;
+}
+
+int ArmorDetector::armorGrade(const Armor& checkArmor)
+{
+    // 看看裁判系统的通信机制，雷达的制作规范；
+
+    // 选择用int截断double
+
+    /////////id优先级打分项目////////////////////////
+    int id_grade;
+    int check_id = checkArmor.id;
+    if (check_id == lastArmor.id)
+    {
+        id_grade = check_id == 1 ? 100 : 80;
+    }
+    else
+    {
+        id_grade = check_id == 1 ? 80 : 60;
+    }
+    ////////end///////////////////////////////////
+
+    /////////长宽比打分项目/////////////////////////
+    int wh_grade;
+    double wh_ratio = checkArmor.size.width > checkArmor.size.height;
+    if(checkArmor.type == BIG)
+    {
+        wh_grade = wh_ratio/big_wh_standard > 1 ? 100 : (wh_ratio/big_wh_standard) * 100;
+    }
+    else
+    {
+        wh_grade = wh_ratio/small_wh_standard > 1 ? 100 : (wh_ratio/small_wh_standard) * 100;
+    }
+    /////////end///////////////////////////////////
+
+    /////////最大装甲板板打分项目/////////////////////
+    // 最大装甲板，用面积，找一个标准值（固定距离（比如3/4米），装甲板大小（Armor.area）大约是多少，分大小装甲板）
+    // 比标准大就是100，小就是做比例，，，，可能小的得出来的值会很小
+    int height_grade;
+    double armor_height = checkArmor.size.height;
+    double end_height = (candidateArmors.end()-1)->size.height;
+    double begin_height = candidateArmors.begin()->size.height;
+    double hRotation = (armor_height - end_height) / (begin_height - end_height);
+    height_grade = hRotation * 100;
+    //////////end/////////////////////////////////
+
+    ////////靠近图像中心打分项目//////////////////////
+    // 靠近中心，与中心做距离，设定标准值，看图传和摄像头看到的画面的差异
+    int near_grade;
+    double pts_distance = POINT_DIST(checkArmor.center, Point2f(_src.cols * 0.5, _src.rows * 0.5));
+    near_grade = pts_distance/near_standard > 1 ? 100 : (pts_distance/near_standard) * 100;
+    ////////end//////////////////////////////////
+
+    /////////角度打分项目//////////////////////////
+    // 角度不歪
+    int angle_grade;
+    angle_grade = (90.0 - checkArmor.angle) / 90.0 * 100;
+    /////////end///////////////////////////////
+
+    // 下面的系数得详细调节；
+    int final_grade = id_grade * id_grade_ratio +
+                      wh_grade  * wh_grade_ratio +
+                      height_grade  * height_grade_ratio +
+                      near_grade  * near_grade_ratio +
+                      angle_grade * angle_grade_ratio;
+
+    return final_grade;
 }

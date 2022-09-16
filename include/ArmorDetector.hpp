@@ -50,8 +50,8 @@ struct Armor : public cv::RotatedRect    //装甲板结构体
     double light_height_rate;  // 左右灯条高度比
     double confidence;
     int id;  // 装甲板类别
-    int area;  // 装甲板面积
     EnermyType type;  // 装甲板类型
+//    int area;  // 装甲板面积
 };
 
 //主类
@@ -60,15 +60,8 @@ class ArmorDetector:public robot_state
 public:
     ArmorDetector(); //构造函数初始化
 
-    void setImage(const cv::Mat &src); //对图像进行设置
+    Armor autoAim(const cv::Mat &src); //将最终目标的坐标转换到摄像头原大小的
 
-    void findLights(); //找灯条获取候选匹配的灯条
-
-    void matchLights(); //匹配灯条获取候选装甲板
-
-    void chooseTarget(); //找出优先级最高的装甲板
-
-    Armor transformPos(const cv::Mat &src); //将最终目标的坐标转换到摄像头原大小的
 
 private:
     int lostCnt;
@@ -91,7 +84,15 @@ private:
     double armor_ij_max_ratio;
 
     //armor_grade_condition
-    double armor_standart_wh;
+
+    double big_wh_standard;
+    double small_wh_standard;
+    double near_standard;
+    int grade_standard;
+
+    //armor_grade_project_ratio
+    double id_grade_ratio;
+
     double wh_grade_ratio;
     double height_grade_ratio;
     double near_grade_ratio;
@@ -108,7 +109,6 @@ private:
 
     Armor lastArmor;
 
-
     std::vector<Light> candidateLights; // 筛选的灯条
     std::vector<Armor> candidateArmors; // 筛选的装甲板
     Armor finalArmor;  // 最终装甲板
@@ -116,10 +116,15 @@ private:
 
     cv::Point2f dst_p[4] = {cv::Point2f(0,60),cv::Point2f(0,0),cv::Point2f(30,0),cv::Point2f(30,60)};
 
+    void setImage(const cv::Mat &src); //对图像进行设置
+
+    void findLights(); //找灯条获取候选匹配的灯条
+
+    void matchLights(); //匹配灯条获取候选装甲板
+
+    void chooseTarget(); //找出优先级最高的装甲板
 
     bool isLight(Light& light, std::vector<cv::Point> &cnt);
-
-    void detectNum(cv::RotatedRect &f_rect, Armor& armor);
 
     bool conTain(cv::RotatedRect &match_rect,std::vector<Light> &Lights, size_t &i, size_t &j);
 
@@ -162,59 +167,14 @@ private:
         double angle_ratio = (90.0-armorAngle) / 90.0;
         return angle_ratio*100;
     }
+    void detectNum(Armor& armor);
 
-    int armorGrade(const Armor& checkArmor)
+    static inline void dnn_detect(cv::Mat frame, Armor& armor)// 调用该函数即可返回数字ID
     {
-        // 看看裁判系统的通信机制，雷达的制作规范；
-
-        // 选择用int截断double
-
-        // 长宽比
-        int wh_grade;
-        double big_wh_standard = 3.5; // 4左右最佳，3.5以上比较正，具体再修改
-        double small_wh_standard = 2; // 2.5左右最佳，2以上比较正，具体再修改
-        double wh_ratio = checkArmor.size.height>checkArmor.size.width ? checkArmor.size.height / checkArmor.size.width : checkArmor.size.width > checkArmor.size.height;
-        if(checkArmor.type == BIG)
-        {
-            wh_grade = wh_ratio/big_wh_standard > 1 ? 100 : (wh_ratio/big_wh_standard) * 100;
-        }
-        else
-        {
-            wh_grade = wh_ratio/small_wh_standard > 1 ? 100 : (wh_ratio/small_wh_standard) * 100;
-        }
-
-        // 最大装甲板，用面积，找一个标准值（固定距离（比如3/4米），装甲板大小（Armor.area）大约是多少，分大小装甲板）
-        // 比标准大就是100，小就是做比例，，，，可能小的得出来的值会很小
-        int area_grade;
-        double big_area_standard = 2000; // 不知道，得实测
-        double small_area_standard = 1000; // 不知道，得实测
-        if(checkArmor.type == BIG)
-        {
-            area_grade = checkArmor.area/big_area_standard > 1 ? 100 : (checkArmor.area/big_area_standard) * 100;
-        }
-        else
-        {
-            area_grade = checkArmor.area/small_area_standard > 1 ? 100 : (checkArmor.area/small_area_standard) * 100;
-        }
-
-        // 靠近中心，与中心做距离，设定标准值，看图传和摄像头看到的画面的差异
-        int near_grade;
-        double near_standard = 500;
-        double pts_distance = POINT_DIST(checkArmor.center, cv::Point2f(_src.cols * 0.5, _src.rows * 0.5));
-        near_grade = pts_distance/near_standard > 1 ? 100 : (pts_distance/near_standard) * 100;
-
-        // 角度不歪
-        int angle_grade;
-        angle_grade = (90.0 - checkArmor.angle) / 90.0 * 100;
-
-        // 下面的系数得详细调节；
-        int final_grade = wh_grade    * 0.4 +
-                          area_grade  * 0.3 +
-                          near_grade  * 0.2 +
-                          angle_grade * 0.1 ;
+        return DNN_detect::net_forward(DNN_detect::img_processing(std::move(frame), TO_GRAY), DNN_detect::read_net(NET_PATH), armor.id, armor.confidence);
     }
 
-    inline bool makeRectSafe(cv::Rect & rect, cv::Size size){
+    static inline bool makeRectSafe(cv::Rect & rect, cv::Size size){
         if (rect.x < 0)
             rect.x = 0;
         if (rect.x + rect.width > size.width)
@@ -229,17 +189,10 @@ private:
         return true;
     }
 
-    static inline bool area_sort(std::vector<cv::Point> &cnt1,std::vector<cv::Point> &cnt2)
-    {
-        return cv::contourArea(cnt1) > cv::contourArea(cnt2);
-    }
-
     static inline bool height_sort(Armor &candidate1,Armor &candidate2)
     {
         return candidate1.size.height > candidate2.size.height;
     }
-
-
 };
 
 

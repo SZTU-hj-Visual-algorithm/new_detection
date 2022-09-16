@@ -189,6 +189,54 @@ src/ArmorDetector.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\SRCSO.dir\build.make CMakeFiles/SRCSO.dir/src/ArmorDetector.cpp.s
 .PHONY : src/ArmorDetector.cpp.s
 
+src/DNN_detect.obj: src/DNN_detect.cpp.obj
+.PHONY : src/DNN_detect.obj
+
+# target to build an object file
+src/DNN_detect.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\SRCSO.dir\build.make CMakeFiles/SRCSO.dir/src/DNN_detect.cpp.obj
+.PHONY : src/DNN_detect.cpp.obj
+
+src/DNN_detect.i: src/DNN_detect.cpp.i
+.PHONY : src/DNN_detect.i
+
+# target to preprocess a source file
+src/DNN_detect.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\SRCSO.dir\build.make CMakeFiles/SRCSO.dir/src/DNN_detect.cpp.i
+.PHONY : src/DNN_detect.cpp.i
+
+src/DNN_detect.s: src/DNN_detect.cpp.s
+.PHONY : src/DNN_detect.s
+
+# target to generate assembly for a file
+src/DNN_detect.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\SRCSO.dir\build.make CMakeFiles/SRCSO.dir/src/DNN_detect.cpp.s
+.PHONY : src/DNN_detect.cpp.s
+
+src/camera.obj: src/camera.cpp.obj
+.PHONY : src/camera.obj
+
+# target to build an object file
+src/camera.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\SRCSO.dir\build.make CMakeFiles/SRCSO.dir/src/camera.cpp.obj
+.PHONY : src/camera.cpp.obj
+
+src/camera.i: src/camera.cpp.i
+.PHONY : src/camera.i
+
+# target to preprocess a source file
+src/camera.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\SRCSO.dir\build.make CMakeFiles/SRCSO.dir/src/camera.cpp.i
+.PHONY : src/camera.cpp.i
+
+src/camera.s: src/camera.cpp.s
+.PHONY : src/camera.s
+
+# target to generate assembly for a file
+src/camera.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\SRCSO.dir\build.make CMakeFiles/SRCSO.dir/src/camera.cpp.s
+.PHONY : src/camera.cpp.s
+
 # Help Target
 help:
 	@echo The following are some of the valid targets for this Makefile:
@@ -205,6 +253,12 @@ help:
 	@echo ... src/ArmorDetector.obj
 	@echo ... src/ArmorDetector.i
 	@echo ... src/ArmorDetector.s
+	@echo ... src/DNN_detect.obj
+	@echo ... src/DNN_detect.i
+	@echo ... src/DNN_detect.s
+	@echo ... src/camera.obj
+	@echo ... src/camera.i
+	@echo ... src/camera.s
 .PHONY : help
 
 

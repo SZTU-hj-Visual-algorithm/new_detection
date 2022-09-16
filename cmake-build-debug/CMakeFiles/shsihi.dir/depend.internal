@@ -4,6 +4,10 @@
 CMakeFiles/shsihi.dir/main.cpp.obj
  ../include/ArmorDetector.hpp
  ../include/DNN_detect.h
+ ../include/camera/camera.h
+ ../include/camera/camera_api.h
+ ../include/camera/camera_define.h
+ ../include/camera/camera_status.h
  ../include/robot_state.h
  E:/opencv-4.5.4/opencv/build/x64/MinGW/cv_cpu_config.h
  E:/opencv-4.5.4/opencv/build/x64/MinGW/cvconfig.h
@@ -16,6 +20,7 @@ CMakeFiles/shsihi.dir/main.cpp.obj
  E:/opencv-4.5.4/opencv/sources/modules/core/include/opencv2/core/base.hpp
  E:/opencv-4.5.4/opencv/sources/modules/core/include/opencv2/core/bufferpool.hpp
  E:/opencv-4.5.4/opencv/sources/modules/core/include/opencv2/core/check.hpp
+ E:/opencv-4.5.4/opencv/sources/modules/core/include/opencv2/core/core_c.h
  E:/opencv-4.5.4/opencv/sources/modules/core/include/opencv2/core/cuda.hpp
  E:/opencv-4.5.4/opencv/sources/modules/core/include/opencv2/core/cuda.inl.hpp
  E:/opencv-4.5.4/opencv/sources/modules/core/include/opencv2/core/cuda_types.hpp
@@ -39,6 +44,7 @@ CMakeFiles/shsihi.dir/main.cpp.obj
  E:/opencv-4.5.4/opencv/sources/modules/core/include/opencv2/core/saturate.hpp
  E:/opencv-4.5.4/opencv/sources/modules/core/include/opencv2/core/traits.hpp
  E:/opencv-4.5.4/opencv/sources/modules/core/include/opencv2/core/types.hpp
+ E:/opencv-4.5.4/opencv/sources/modules/core/include/opencv2/core/types_c.h
  E:/opencv-4.5.4/opencv/sources/modules/core/include/opencv2/core/utility.hpp
  E:/opencv-4.5.4/opencv/sources/modules/core/include/opencv2/core/utils/instrumentation.hpp
  E:/opencv-4.5.4/opencv/sources/modules/core/include/opencv2/core/utils/tls.hpp

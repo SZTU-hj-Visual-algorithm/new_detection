@@ -24,6 +24,30 @@ opencv2/opencv.hpp
 iostream
 -
 
+../include/camera/camera.h
+camera_api.h
+../include/camera/camera_api.h
+opencv2/opencv.hpp
+-
+opencv2/core/core_c.h
+../include/camera/opencv2/core/core_c.h
+
+../include/camera/camera_api.h
+windows.h
+-
+camera_status.h
+-
+camera_define.h
+-
+
+../include/camera/camera_define.h
+camera_status.h
+../include/camera/camera_status.h
+windows.h
+-
+
+../include/camera/camera_status.h
+
 ../include/robot_state.h
 
 E:/opencv-4.5.4/opencv/build/x64/MinGW/cv_cpu_config.h
@@ -133,6 +157,16 @@ E:/opencv-4.5.4/opencv/sources/modules/core/include/opencv2/core/bufferpool.hpp
 E:/opencv-4.5.4/opencv/sources/modules/core/include/opencv2/core/check.hpp
 opencv2/core/base.hpp
 -
+
+E:/opencv-4.5.4/opencv/sources/modules/core/include/opencv2/core/core_c.h
+opencv2/core/types_c.h
+E:/opencv-4.5.4/opencv/sources/modules/core/include/opencv2/core/opencv2/core/types_c.h
+cxcore.h
+E:/opencv-4.5.4/opencv/sources/modules/core/include/opencv2/core/cxcore.h
+cxcore.h
+E:/opencv-4.5.4/opencv/sources/modules/core/include/opencv2/core/cxcore.h
+opencv2/core/utility.hpp
+E:/opencv-4.5.4/opencv/sources/modules/core/include/opencv2/core/opencv2/core/utility.hpp
 
 E:/opencv-4.5.4/opencv/sources/modules/core/include/opencv2/core/cuda.hpp
 opencv2/core.hpp
@@ -387,6 +421,24 @@ opencv2/core/cvstd.hpp
 E:/opencv-4.5.4/opencv/sources/modules/core/include/opencv2/core/opencv2/core/cvstd.hpp
 opencv2/core/matx.hpp
 E:/opencv-4.5.4/opencv/sources/modules/core/include/opencv2/core/opencv2/core/matx.hpp
+
+E:/opencv-4.5.4/opencv/sources/modules/core/include/opencv2/core/types_c.h
+ipl.h
+-
+ipl/ipl.h
+-
+opencv2/core/cvdef.h
+E:/opencv-4.5.4/opencv/sources/modules/core/include/opencv2/core/opencv2/core/cvdef.h
+assert.h
+-
+stdlib.h
+-
+string.h
+-
+float.h
+-
+opencv2/core.hpp
+E:/opencv-4.5.4/opencv/sources/modules/core/include/opencv2/core/opencv2/core.hpp
 
 E:/opencv-4.5.4/opencv/sources/modules/core/include/opencv2/core/utility.hpp
 opencv2/core.hpp
@@ -1059,4 +1111,6 @@ opencv2/opencv.hpp
 -
 ArmorDetector.hpp
 F:/SZTU-hj-algorithm/new_detection/ArmorDetector.hpp
+camera.h
+F:/SZTU-hj-algorithm/new_detection/camera.h
 

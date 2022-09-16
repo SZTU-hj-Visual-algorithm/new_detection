@@ -15,6 +15,7 @@ set(CMAKE_CXX_COMPILER_ID "GNU")
 # The include file search paths:
 set(CMAKE_CXX_TARGET_INCLUDE_PATH
   "../include"
+  "../include/camera"
   "E:/opencv-4.5.4/opencv/build/x64/MinGW"
   "E:/opencv-4.5.4/opencv/sources/include"
   "E:/opencv-4.5.4/opencv/sources/modules/core/include"

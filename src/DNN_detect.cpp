@@ -1,10 +1,8 @@
 #include "DNN_detect.h"
 
-void DNN_detect::dnn_detect(Mat frame, Armor& armor) {
-    return net_forward(img_processing(std::move(frame), TO_GRAY), read_net(NET_PATH), armor.id, armor.confidence);
-}
+using namespace cv;
 
-dnn::Net DNN_detect::read_net(const String& net_path) {
+dnn::Net DNN_detect::read_net(const std::string& net_path) {
     return dnn::readNetFromONNX(net_path);
 }
 
