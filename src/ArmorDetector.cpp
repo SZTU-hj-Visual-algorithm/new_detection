@@ -138,7 +138,6 @@ void ArmorDetector::findLights()
 
     if (contours.size() < 2)
     {
-        lostCnt++;
         candidateLights.clear();
         return;
     }
@@ -191,7 +190,6 @@ void ArmorDetector::findLights()
 
     if(candidateLights.size()<2)
     {
-        lostCnt++;
         return;
     }
 }
@@ -200,7 +198,6 @@ void ArmorDetector::matchLights()
 {
     if(candidateLights.size() < 2)
     {
-        lostCnt++;
         candidateArmors.clear();
         return;
     }
@@ -251,7 +248,6 @@ void ArmorDetector::matchLights()
     }
     if(candidateArmors.empty())
     {
-        lostCnt++;
         return;
     }
 
@@ -261,7 +257,6 @@ void ArmorDetector::chooseTarget()
 {
     if(candidateArmors.empty())
     {
-        lostCnt++;
         finalArmor = Armor();
     }
     else if(candidateArmors.size() == 1)
@@ -269,7 +264,6 @@ void ArmorDetector::chooseTarget()
         detectNum(candidateArmors[0]);
         if (candidateArmors[0].id == 0 && candidateArmors[0].id == 2)
         {
-            lostCnt++;
             finalArmor = Armor();
         }
         else if (candidateArmors[0].id == 1)
