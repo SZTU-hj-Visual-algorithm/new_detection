@@ -1,0 +1,2 @@
+/usr/bin/ar qc libSRCSO.a CMakeFiles/SRCSO.dir/src/ArmorDetector.cpp.o CMakeFiles/SRCSO.dir/src/DNN_detect.cpp.o CMakeFiles/SRCSO.dir/src/camera.cpp.o
+/usr/bin/ranlib libSRCSO.a

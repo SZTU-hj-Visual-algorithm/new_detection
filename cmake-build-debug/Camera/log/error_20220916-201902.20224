@@ -1,0 +1,4 @@
+Log file created at: 2022/09/16 20:19:02
+Running on machine: lmx-virtual-machine
+Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
+E0916 20:19:02.528975 20224 MVCAMAPI.cpp:352] CameraInit Failed, err:-19,Version:2.1.0.27,FriendlyName:`,SN: 3O´U
