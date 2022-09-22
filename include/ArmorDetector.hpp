@@ -28,7 +28,6 @@ struct Light : public cv::RotatedRect     //灯条结构体
         height = POINT_DIST(top, bottom);
         width = POINT_DIST(p[0], p[1]);
         angle = top.x <= bottom.x ? box.angle : 90 + box.angle;
-        //angle = atan2(fabs(centerI.y - centerJ.y),(centerI.x - centerJ.x));
     }
     int lightColor;
     cv::Point2f top;

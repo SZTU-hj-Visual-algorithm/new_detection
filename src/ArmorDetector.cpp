@@ -124,20 +124,18 @@ bool ArmorDetector::isLight(Light& light, vector<Point> &cnt)
     double hw_ratio = height / width;
     bool hw_ratio_ok = light_min_hw_ratio < hw_ratio && hw_ratio < light_max_hw_ratio;
 
-    //外接矩形面积和像素点面积之比条件  remove
-    double area_ratio = height * width / contourArea(cnt);
-    bool area_ratio_ok = light_min_area_ratio < area_ratio && area_ratio < light_max_area_ratio;
-
-    area_ratio_ok = true;
+    //矩形面积和像素面积之比
+    double area_ratio = (height*width) / contourArea(cnt);
+    bool area_rario_ok = light_min_area_ratio < area_ratio && area_ratio < light_max_area_ratio;
 
     //灯条角度条件
     bool angle_ok = fabs(90.0 - light.angle) < light_max_angle || light.angle == 0;
 
     //灯条判断的条件总集
-    bool is_light = hw_ratio_ok && area_ratio_ok && angle_ok && standing_ok;
+    bool is_light = hw_ratio_ok && area_rario_ok && angle_ok && standing_ok;
 
 
-    if(is_light == false)
+    if(!is_light)
     {
         //cout<<hw_ratio<<"    "<<area_ratio<<"    "<<light.angle<<endl;
     }
@@ -161,7 +159,6 @@ void ArmorDetector::findLights()
     if (contours.size() < 2)
     {
         printf("no 2 contours\n");
-        lostCnt++;
         candidateLights.clear();
         return;
     }
@@ -197,12 +194,8 @@ void ArmorDetector::findLights()
                 // Sum of red pixels > sum of blue pixels ?
                 light.lightColor = sum_r > sum_b ? RED : BLUE;
 
-                //enermy_color ==  BLUE;
-                //cout<<"enermy_color  ==  "<<enermy_color<<endl;
-                //cout<<"light.lightColor  ==  "<<light.lightColor<<endl;
-
                 // 颜色不符合电控发的就不放入
-                if(light.lightColor == )
+                if(light.lightColor == enermy_color)
                 {
                     candidateLights.emplace_back(light);
 #ifdef DRAW_LIGHTS_RRT
@@ -221,7 +214,6 @@ void ArmorDetector::findLights()
     //cout<<"dengtiao  geshu:  "<<candidateLights.size()<<endl;
     if(candidateLights.size()<2)
     {
-        lostCnt++;
         return;
     }
 }
@@ -231,7 +223,6 @@ void ArmorDetector::matchLights()
     if(candidateLights.size() < 2)
     {
         printf("no 2 lights\n");
-        lostCnt++;
         candidateLights.clear();
         return;
     }
@@ -279,10 +270,6 @@ void ArmorDetector::matchLights()
                                                       Size2f(armorWidth,armorHeight),
                                                       -armorAngle * 180 / CV_PI);
 
-                //test    the same
-                vector<Point2f> pts={lightI.bottom,lightI.top,lightJ.bottom,lightJ.top};
-                RotatedRect test = minAreaRect(pts);
-
                 if (!conTain(armor_rrect,candidateLights,i,j))
                 {
                     candidateArmors.emplace_back(armor_rrect);
@@ -311,7 +298,6 @@ void ArmorDetector::matchLights()
 
     if(candidateArmors.empty())
     {
-        lostCnt++;
         return;
     }
 
@@ -322,7 +308,6 @@ void ArmorDetector::chooseTarget()
     if(candidateArmors.empty())
     {
         cout<<"no target!!"<<endl;
-        lostCnt++;
         finalArmor = Armor();
     }
     else if(candidateArmors.size() == 1)
@@ -355,8 +340,6 @@ void ArmorDetector::chooseTarget()
 
         sort(candidateArmors.begin(),candidateArmors.end(), height_sort);
 
-        // 获取每个候选装甲板的id和type
-
         for(int i = 0; i < candidateArmors.size(); ++i) {
             detectNum(candidateArmors[i]);
             if (candidateArmors[i].id == 0 && candidateArmors[i].id == 2) {
@@ -367,10 +350,6 @@ void ArmorDetector::chooseTarget()
                 candidateArmors[i].type = BIG;
             else if (candidateArmors[i].id == 3 || candidateArmors[i].id == 4)
                 candidateArmors[i].type = SMALL;
-
-            // 装甲板中心点在屏幕中心部分，在中心部分中又是倾斜最小的，
-            // 如何避免频繁切换目标：缩小矩形框就是跟踪到了，一旦陀螺则会目标丢失，
-            // UI界面做数字选择，选几就是几号，可能在切换会麻烦，（不建议）
 
             //打分制筛选装甲板优先级
             /*最高优先级数字识别英雄1号装甲板，其次3和4号（如果打分的话1给100，3和4给80大概这个比例）
@@ -425,7 +404,6 @@ Armor ArmorDetector::autoAim(const cv::Mat &src)
     }
     else
     {
-        //这里整体逻辑也要改一下
         ++lostCnt;
         if (lostCnt < 8)
             lastArmor.size = Size(lastArmor.size.width * 1.1, lastArmor.size.height * 1.4);
@@ -543,8 +521,6 @@ int ArmorDetector::armorGrade(const Armor& checkArmor)
     /////////end///////////////////////////////////
 
     /////////最大装甲板板打分项目/////////////////////
-    // 最大装甲板，用面积，找一个标准值（固定距离（比如3/4米），装甲板大小（Armor.area）大约是多少，分大小装甲板）
-    // 比标准大就是100，小就是做比例，，，，可能小的得出来的值会很小
     int height_grade;
     double armor_height = checkArmor.size.height;
     double end_height = (candidateArmors.end()-1)->size.height;
@@ -563,7 +539,7 @@ int ArmorDetector::armorGrade(const Armor& checkArmor)
     /////////角度打分项目//////////////////////////
     // 角度不歪
     int angle_grade;
-    angle_grade = (90.0 - checkArmor.angle) / 90.0 * 100;
+    angle_grade = (90.0 - fabs(checkArmor.angle)) / 90.0 * 100;
     /////////end///////////////////////////////
 
     // 下面的系数得详细调节；
