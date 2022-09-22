@@ -1,7 +1,11 @@
 #include "ArmorDetector.hpp"
 
 #define BINARY_SHOW
+
 //#define DRAW_LIGHTS_CONTOURS
+#define DRAW_LIGHTS_RRT
+
+#define DRAW_ARMORS_RRT
 //#define DRAW_FINAL_ARMOR_CLASS
 #define DRAW_FINAL_ARMOR_MAIN
 
@@ -16,23 +20,25 @@ ArmorDetector::ArmorDetector()
     lostCnt = 0;
     Lost = true;
 
+
+
     //binary_thresh
-    binThresh = 150;
+    binThresh = 100;   // blue 100  red  70
 
     //light_judge_condition
-    light_max_angle = 30.0;
-    light_min_hw_ratio = 3;
-    light_max_hw_ratio = 10;   // different distance and focus
+    light_max_angle = 45.0;
+    light_min_hw_ratio = 1;
+    light_max_hw_ratio = 15;   // different distance and focus
     light_min_area_ratio = 0.6;   // RotatedRect / Rect
     light_max_area_ratio = 1.0;
 
     //armor_judge_condition
-    armor_max_wh_ratio = 4.5;
+    armor_max_wh_ratio = 3;
     armor_min_wh_ratio = 1.5;
     armor_max_angle = 20.0;
-    armor_height_offset = 0.3;
+    armor_height_offset = 0.1;
     armor_ij_min_ratio = 0.5;
-    armor_ij_max_ratio = 5.0;
+    armor_ij_max_ratio = 2.0;
 
     //armor_grade_condition
     big_wh_standard = 3.5; // 4左右最佳，3.5以上比较正，具体再修改
@@ -102,32 +108,41 @@ void ArmorDetector::setImage(const Mat &src)
 #endif //BINARY_SHOW
 }
 
-
 bool ArmorDetector::isLight(Light& light, vector<Point> &cnt)
 {
-    int height = light.height;
-    int width = light.width;
+
+    double height = light.height;
+    double width = light.width;
+
+    if(height <= 0 || width <= 0)
+        return false;
 
     //高一定要大于宽
-    bool standing_ok = height> width;
+    bool standing_ok = height > width;
 
     //高宽比条件
     double hw_ratio = height / width;
     bool hw_ratio_ok = light_min_hw_ratio < hw_ratio && hw_ratio < light_max_hw_ratio;
 
-    //外接矩形面积和像素点面积之比条件
-    double area_ratio = height * width / contourArea(cnt);
-    bool area_ratio_ok = light_min_area_ratio < area_ratio && area_ratio < light_max_area_ratio;
+    //矩形面积和像素面积之比
+    double area_ratio = (height*width) / contourArea(cnt);
+    bool area_rario_ok = light_min_area_ratio < area_ratio && area_ratio < light_max_area_ratio;
 
     //灯条角度条件
-    bool angle_ok = fabs(90.0 - light.angle) < light_max_angle;
+    bool angle_ok = fabs(90.0 - light.angle) < light_max_angle || light.angle == 0;
 
     //灯条判断的条件总集
-    bool is_light = hw_ratio_ok && area_ratio_ok && angle_ok && standing_ok;
+    bool is_light = hw_ratio_ok && area_rario_ok && angle_ok && standing_ok;
+
+
+    if(!is_light)
+    {
+        //cout<<hw_ratio<<"    "<<area_ratio<<"    "<<light.angle<<endl;
+    }
+
 
     return is_light;
 }
-
 
 void ArmorDetector::findLights()
 {
@@ -135,9 +150,15 @@ void ArmorDetector::findLights()
     vector<cv::Vec4i> hierarchy;
     cv::findContours(_binary, contours, hierarchy, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 
+#ifdef DRAW_LIGHTS_CONTOURS
+    for(int i=0;i< contours.size();i++)
+        cv::drawContours(_src,contours,i,Scalar(255,0,0),2,LINE_8);
+    imshow("contours_src",_src);
+#endif
 
     if (contours.size() < 2)
     {
+        printf("no 2 contours\n");
         candidateLights.clear();
         return;
     }
@@ -149,10 +170,11 @@ void ArmorDetector::findLights()
 
         if (isLight(light, contour))
         {
+            //cout<<"is_Light   "<<endl;
             cv::Rect rect = r_rect.boundingRect();
 
             if (0 <= rect.x && 0 <= rect.width  && rect.x + rect.width  <= _src.cols &&
-                0 <= rect.y && 0 <= rect.height && rect.y + rect.height <= _src.rows)
+            0 <= rect.y && 0 <= rect.height && rect.y + rect.height <= _src.rows)
             {
                 int sum_r = 0, sum_b = 0;
                 cv::Mat roi = _src(rect);
@@ -162,32 +184,34 @@ void ArmorDetector::findLights()
                     for (int j = 0; j < roi.cols; j++)
                     {
                         if (cv::pointPolygonTest(contour, cv::Point2f(j + rect.x, i + rect.y), false) >= 0) // 只加正矩形中的轮廓！！！
-                        {
+                            {
                             sum_r += roi.at<cv::Vec3b>(i, j)[2];
                             sum_b += roi.at<cv::Vec3b>(i, j)[0];
-                        }
+                            }
                     }
                 }
+                //cout<<sum_r<<"           "<<sum_b<<endl;
                 // Sum of red pixels > sum of blue pixels ?
                 light.lightColor = sum_r > sum_b ? RED : BLUE;
+
                 // 颜色不符合电控发的就不放入
                 if(light.lightColor == enermy_color)
                 {
                     candidateLights.emplace_back(light);
-#ifdef DRAW_LIGHTS_CONTOURS
-                    Mat lights = _src.clone();
+#ifdef DRAW_LIGHTS_RRT
                     Point2f vertice_lights[4];
                     light.points(vertice_lights);
                     for (int i = 0; i < 4; i++) {
-                        line(lights, vertice_lights[i], vertice_lights[(i + 1) % 4], CV_RGB(0, 255, 0));
+                        line(_src, vertice_lights[i], vertice_lights[(i + 1) % 4], CV_RGB(255, 0, 0),2,LINE_8);
                     }
-                    imshow("lights-show", lights);
-#endif //DRAW_LIGHTS_CONTOURS
+                    //circle(_src,light.center,5,Scalar(0,0,0),-1);
+                    imshow("lights-show-_src", _src);
+#endif //DRAW_LIGHTS_RRT
                 }
             }
         }
     }
-
+    //cout<<"dengtiao  geshu:  "<<candidateLights.size()<<endl;
     if(candidateLights.size()<2)
     {
         return;
@@ -198,19 +222,25 @@ void ArmorDetector::matchLights()
 {
     if(candidateLights.size() < 2)
     {
-        candidateArmors.clear();
+        printf("no 2 lights\n");
+        candidateLights.clear();
         return;
     }
 
+    // 将旋转矩形从左到右排序
+    sort(candidateLights.begin(), candidateLights.end(),
+         [](RotatedRect& a1, RotatedRect& a2) {
+        return a1.center.x < a2.center.x; });
 
     for (size_t i=0;i<candidateLights.size()-1;i++)
     {
         Light lightI = candidateLights[i];
-        Point centerI = lightI.center;
-        for (size_t j=1;j<candidateLights.size();j++)
+        Point2f centerI = lightI.center;
+
+        for (size_t j=i+1;j<candidateLights.size();j++)
         {
             Light lightJ = candidateLights[j];
-            Point centerJ = lightJ.center;
+            Point2f centerJ = lightJ.center;
             double armorWidth = POINT_DIST(centerI,centerJ) - (lightI.width + lightJ.width)/2.0;
             double armorHeight = (lightI.height + lightJ.height) / 2.0;
             double armor_ij_ratio = lightI.height / lightJ.height;
@@ -230,22 +260,42 @@ void ArmorDetector::matchLights()
             //条件集合
             bool is_like_Armor = whratio_ok && angle_ok && height_offset_ok && ij_ratio_ok;
 
+
             if (is_like_Armor)
             {
+                //origin
                 Point2f armorCenter = (centerI + centerJ) / 2.0;
-                double armorAngle = atan2(fabs(centerI.y - centerJ.y),fabs(centerI.x - centerJ.x));
+                double armorAngle = atan2((centerI.y - centerJ.y),fabs(centerI.x - centerJ.x));
                 RotatedRect armor_rrect = RotatedRect(armorCenter,
                                                       Size2f(armorWidth,armorHeight),
-                                                      armorAngle * 180 / CV_PI);
+                                                      -armorAngle * 180 / CV_PI);
+
                 if (!conTain(armor_rrect,candidateLights,i,j))
                 {
                     candidateArmors.emplace_back(armor_rrect);
+#ifdef DRAW_ARMORS_RRT
+                    //cout<<"LightI_angle :   "<<lightI.angle<<"   LightJ_angle :   "<<lightJ.angle<<"     "<<fabs(lightI.angle - lightJ.angle)<<endl;
+                    //cout<<"armorAngle   :   "<<armorAngle * 180 / CV_PI <<endl;
+                    //cout<<"    w/h      :   "<<armorWidth/armorHeight<<endl;
+                    //cout<<"height-offset:   "<<fabs(lightI.height - lightJ.height) / armorHeight<<endl;
+                    //cout<<" height-ratio:   "<<armor_ij_ratio<<endl;
+
+                    Point2f vertice_armors[4];
+                    armor_rrect.points(vertice_armors);
+                    for (int i = 0; i < 4; i++) {
+                        line(_src, vertice_armors[i], vertice_armors[(i + 1) % 4], CV_RGB(0, 255, 0),2,LINE_8);
+                    }
+                    circle(_src,armorCenter,15,Scalar(0,255,255),-1);
+                    imshow("armors-show-_src", _src);
+#endif //DRAW_ARMORS_RRT
                     (candidateArmors.end()-1)->light_height_rate = armor_ij_ratio;
                 }
-
             }
+
         }
     }
+
+
     if(candidateArmors.empty())
     {
         return;
@@ -257,13 +307,16 @@ void ArmorDetector::chooseTarget()
 {
     if(candidateArmors.empty())
     {
+        cout<<"no target!!"<<endl;
         finalArmor = Armor();
     }
     else if(candidateArmors.size() == 1)
     {
+        cout<<"get 1 target!!"<<endl;
         detectNum(candidateArmors[0]);
-        if (candidateArmors[0].id == 0 && candidateArmors[0].id == 2)
+        if (candidateArmors[0].id == 0 || candidateArmors[0].id == 2)
         {
+            lostCnt++;
             finalArmor = Armor();
         }
         else if (candidateArmors[0].id == 1)
@@ -280,12 +333,12 @@ void ArmorDetector::chooseTarget()
     else
     {
 
+        cout<<"get "<<candidateArmors.size()<<" target!!"<<endl;
+
         int best_index = 0; // 下标
         int best_record = 0;
 
         sort(candidateArmors.begin(),candidateArmors.end(), height_sort);
-
-        // 获取每个候选装甲板的id和type
 
         for(int i = 0; i < candidateArmors.size(); ++i) {
             detectNum(candidateArmors[i]);
@@ -297,10 +350,6 @@ void ArmorDetector::chooseTarget()
                 candidateArmors[i].type = BIG;
             else if (candidateArmors[i].id == 3 || candidateArmors[i].id == 4)
                 candidateArmors[i].type = SMALL;
-
-            // 装甲板中心点在屏幕中心部分，在中心部分中又是倾斜最小的，
-            // 如何避免频繁切换目标：缩小矩形框就是跟踪到了，一旦陀螺则会目标丢失，
-            // UI界面做数字选择，选几就是几号，可能在切换会麻烦，（不建议）
 
             //打分制筛选装甲板优先级
             /*最高优先级数字识别英雄1号装甲板，其次3和4号（如果打分的话1给100，3和4给80大概这个比例）
@@ -338,6 +387,9 @@ void ArmorDetector::chooseTarget()
 Armor ArmorDetector::autoAim(const cv::Mat &src)
 {
 
+    candidateArmors.clear();
+    candidateLights.clear();
+
     setImage(src);
     findLights();
     matchLights();
@@ -352,7 +404,6 @@ Armor ArmorDetector::autoAim(const cv::Mat &src)
     }
     else
     {
-        //这里整体逻辑也要改一下
         ++lostCnt;
         if (lostCnt < 8)
             lastArmor.size = Size(lastArmor.size.width * 1.1, lastArmor.size.height * 1.4);
@@ -366,8 +417,7 @@ Armor ArmorDetector::autoAim(const cv::Mat &src)
             lastArmor.size = Size(lastArmor.size.width * 1.2, lastArmor.size.height * 1.2);
         else if (lostCnt > 33 )lastArmor.size = Size();
     }
-    candidateArmors.clear();
-    candidateLights.clear();
+
 
 #ifdef DRAW_FINAL_ARMOR_MAIN
     Mat target = src.clone();
@@ -378,6 +428,8 @@ Armor ArmorDetector::autoAim(const cv::Mat &src)
     }
     imshow("target-show", target);
 #endif //DRAW_FINAL_ARMOR_MAIN
+
+
     return finalArmor;
 }
 
@@ -421,10 +473,10 @@ bool ArmorDetector::conTain(RotatedRect &match_rect,vector<Light> &Lights, size_
         Point2f lightPs[4];
         // 灯条五等份位置的点
         if (matchRoi.contains(Lights[k].top)    ||
-            matchRoi.contains(Lights[k].bottom) ||
-            matchRoi.contains(Point2f(Lights[k].top.x+Lights[k].height*0.25 , Lights[k].top.y+Lights[k].height*0.25)) ||
-            matchRoi.contains(Point2f(Lights[k].bottom.x-Lights[k].height*0.25 , Lights[k].bottom.y-Lights[k].height*0.25)) ||
-            matchRoi.contains(Lights[k].center)  )
+        matchRoi.contains(Lights[k].bottom) ||
+        matchRoi.contains(Point2f(Lights[k].top.x+Lights[k].height*0.25 , Lights[k].top.y+Lights[k].height*0.25)) ||
+        matchRoi.contains(Point2f(Lights[k].bottom.x-Lights[k].height*0.25 , Lights[k].bottom.y-Lights[k].height*0.25)) ||
+        matchRoi.contains(Lights[k].center)  )
         {
             return true;
         }
@@ -469,8 +521,6 @@ int ArmorDetector::armorGrade(const Armor& checkArmor)
     /////////end///////////////////////////////////
 
     /////////最大装甲板板打分项目/////////////////////
-    // 最大装甲板，用面积，找一个标准值（固定距离（比如3/4米），装甲板大小（Armor.area）大约是多少，分大小装甲板）
-    // 比标准大就是100，小就是做比例，，，，可能小的得出来的值会很小
     int height_grade;
     double armor_height = checkArmor.size.height;
     double end_height = (candidateArmors.end()-1)->size.height;
@@ -489,15 +539,15 @@ int ArmorDetector::armorGrade(const Armor& checkArmor)
     /////////角度打分项目//////////////////////////
     // 角度不歪
     int angle_grade;
-    angle_grade = (90.0 - checkArmor.angle) / 90.0 * 100;
+    angle_grade = (90.0 - fabs(checkArmor.angle)) / 90.0 * 100;
     /////////end///////////////////////////////
 
     // 下面的系数得详细调节；
     int final_grade = id_grade * id_grade_ratio +
-                      wh_grade  * wh_grade_ratio +
-                      height_grade  * height_grade_ratio +
-                      near_grade  * near_grade_ratio +
-                      angle_grade * angle_grade_ratio;
+            wh_grade  * wh_grade_ratio +
+            height_grade  * height_grade_ratio +
+            near_grade  * near_grade_ratio +
+            angle_grade * angle_grade_ratio;
 
     return final_grade;
 }

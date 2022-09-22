@@ -27,8 +27,7 @@ struct Light : public cv::RotatedRect     //灯条结构体
         bottom = (p[2] + p[3]) / 2;
         height = POINT_DIST(top, bottom);
         width = POINT_DIST(p[0], p[1]);
-        angle = top.x < bottom.x ? box.angle : 90 + box.angle;
-
+        angle = top.x <= bottom.x ? box.angle : 90 + box.angle;
     }
     int lightColor;
     cv::Point2f top;
@@ -61,7 +60,7 @@ struct Armor : public cv::RotatedRect    //装甲板结构体
     double confidence;
     int id;  // 装甲板类别
     EnermyType type;  // 装甲板类型
-//    int area;  // 装甲板面积
+    //    int area;  // 装甲板面积
 };
 
 //主类
