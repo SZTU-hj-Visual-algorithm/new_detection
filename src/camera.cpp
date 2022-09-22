@@ -5,128 +5,128 @@
 
 bool Camera::init()
 {
-	//³õÊ¼»¯sdkÏà»ú
-	CameraSdkInit(1);
-	//»ñÈ¡Á¬½Óµ½µ±Ç°pc¶ËµÄÏà»úÉè±¸
-	int camera_status = CameraEnumerateDevice(camera_list, &pid);
-	if (camera_status != CAMERA_STATUS_SUCCESS)
-	{
-		std::cout << "CameraEnumerateDevice fail with" << camera_status << "!" << std::endl;
-	}
+    //ï¿½ï¿½Ê¼ï¿½ï¿½sdkï¿½ï¿½ï¿½
+    CameraSdkInit(1);
+    //ï¿½ï¿½È¡ï¿½ï¿½ï¿½Óµï¿½ï¿½ï¿½Ç°pcï¿½Ëµï¿½ï¿½ï¿½ï¿½ï¿½è±¸
+    int camera_status = CameraEnumerateDevice(camera_list, &pid);
+    if (camera_status != CAMERA_STATUS_SUCCESS)
+    {
+        std::cout << "CameraEnumerateDevice fail with" << camera_status << "!" << std::endl;
+    }
 
-	//³õÊ¼»¯Ïà»úÉè±¸²¢´´½¨Ïà»ú¾ä±ú
-	if (CameraInit(camera_list, -1, -1, &h_camera) != CAMERA_STATUS_SUCCESS)
-	{
-		CameraUnInit(h_camera);
-	}
+    //ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½è±¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    if (CameraInit(camera_list, -1, -1, &h_camera) != CAMERA_STATUS_SUCCESS)
+    {
+        CameraUnInit(h_camera);
+    }
 	
-	//»ñÈ¡Ïà»úÉè±¸µÄÌØĞÔ½á¹¹Ìå
-	auto status = CameraGetCapability(h_camera, &capbility);
+    //ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½è±¸ï¿½ï¿½ï¿½ï¿½ï¿½Ô½á¹¹ï¿½ï¿½
+    auto status = CameraGetCapability(h_camera, &capbility);
 	
-	if (status != CAMERA_STATUS_SUCCESS)
-	{
-		std:: cout << "get capbility failed" << std::endl;
-	}
+    if (status != CAMERA_STATUS_SUCCESS)
+    {
+        std:: cout << "get capbility failed" << std::endl;
+    }
 
-	//´´½¨rgbÍ¼ÏñÊı¾İ»º³åÇø
-	rgb_buffer = (unsigned char*)malloc(capbility.sResolutionRange.iHeightMax *
-		capbility.sResolutionRange.iWidthMax * 3
-	);
+    //ï¿½ï¿½ï¿½ï¿½rgbÍ¼ï¿½ï¿½ï¿½ï¿½ï¿½İ»ï¿½ï¿½ï¿½ï¿½ï¿½
+    rgb_buffer = (unsigned char*)malloc(capbility.sResolutionRange.iHeightMax *
+            capbility.sResolutionRange.iWidthMax * 3
+            );
 
 
-//    CameraSetContrast(h_camera,200);
-//    CameraSetSaturation(h_camera,1200);
-//    CameraSetSharpness(h_camera,10)£»
-    CameraSetExposureTime(h_camera,1100);
+    //    CameraSetContrast(h_camera,200);
+    //    CameraSetSaturation(h_camera,1200);
+    //    CameraSetSharpness(h_camera,10)ï¿½ï¿½
+    CameraSetExposureTime(h_camera,1700);
+    CameraSetAnalogGain(h_camera,100);
 
-	//Ïà»ú¿ªÊ¼Í¼Ïñ²É¼¯
-	CameraPlay(h_camera);
+    //ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼Í¼ï¿½ï¿½É¼ï¿½
+    CameraPlay(h_camera);
 
-	//ÉèÖÃgetimagebufferµÄÊä³ö¸ñÊ½
-	if (capbility.sIspCapacity.bMonoSensor)
-	{
-		channel = 1;
-		CameraSetIspOutFormat(h_camera, CAMERA_MEDIA_TYPE_MONO8);
+    //ï¿½ï¿½ï¿½ï¿½getimagebufferï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê½
+    if (capbility.sIspCapacity.bMonoSensor)
+    {
+        channel = 1;
+        CameraSetIspOutFormat(h_camera, CAMERA_MEDIA_TYPE_MONO8);
 
-	}
-	else
-	{
-		channel = 3;
-		CameraSetIspOutFormat(h_camera, CAMERA_MEDIA_TYPE_BGR8);
+    }
+    else
+    {
+        channel = 3;
+        CameraSetIspOutFormat(h_camera, CAMERA_MEDIA_TYPE_BGR8);
 
-	}
-	init_done = true;
-	return true;
+    }
+    return true;
 }
 
 bool Camera::read_frame_raw(cv::Mat &src)
 {
-	//»ñÈ¡Ïà»ú¾ä±ú¶ÔÓ¦µØÏà»úÉè±¸²É»ñµÄÍ¼ÏñÍ·Ö¸ÕëºÍ½«Í¼ÏñÊı¾İ´æ´¢µ½»º´æÇøÖĞ
-	if (CameraGetImageBuffer(h_camera, &frame_h, &pbybuffer, 1000) == CAMERA_STATUS_SUCCESS)
-	{
-		if (ipiimage)
-		{
-			//½«Í¼ÏñÊı¾İÍ·Ö¸ÕëÊÍ·Å
-			cvReleaseImageHeader(&ipiimage);
-		}
-		//´´½¨rawÍ¼ÏñÊı¾İµÄÍ·Ö¸Õë
-		ipiimage = cvCreateImageHeader(cvSize(frame_h.iWidth, frame_h.iHeight), IPL_DEPTH_8U, 1);
+    //ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó¦ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½è±¸ï¿½É»ï¿½ï¿½Í¼ï¿½ï¿½Í·Ö¸ï¿½ï¿½Í½ï¿½Í¼ï¿½ï¿½ï¿½ï¿½ï¿½İ´æ´¢ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    if (CameraGetImageBuffer(h_camera, &frame_h, &pbybuffer, 1000) == CAMERA_STATUS_SUCCESS)
+    {
+        if (ipiimage)
+        {
+            //ï¿½ï¿½Í¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í·Ö¸ï¿½ï¿½ï¿½Í·ï¿½
+            cvReleaseImageHeader(&ipiimage);
+        }
+        //ï¿½ï¿½ï¿½ï¿½rawÍ¼ï¿½ï¿½ï¿½ï¿½ï¿½İµï¿½Í·Ö¸ï¿½ï¿½
+        ipiimage = cvCreateImageHeader(cvSize(frame_h.iWidth, frame_h.iHeight), IPL_DEPTH_8U, 1);
 
 
-		CameraFlipFrameBuffer(rgb_buffer, &frame_h, 1);
+        CameraFlipFrameBuffer(rgb_buffer, &frame_h, 3);
 
-		//½«Ô­Ê¼Í¼ÏñÊı¾İ»º³åÇøÖĞµÄÍ¼ÏñÊı¾İ¸³¸øÍ·Ö¸Õë
-		cvSetData(ipiimage, pbybuffer, frame_h.iWidth);
+        //ï¿½ï¿½Ô­Ê¼Í¼ï¿½ï¿½ï¿½ï¿½ï¿½İ»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ğµï¿½Í¼ï¿½ï¿½ï¿½ï¿½ï¿½İ¸ï¿½ï¿½ï¿½Í·Ö¸ï¿½ï¿½
+        cvSetData(ipiimage, pbybuffer, frame_h.iWidth);
 
-		//½«IPIImageÔ­Ê¼Êı¾İÍ¼Ïñ×ª»¯ÎªopencvµÄMatÍ¼ÏñÀàĞÍ
-		src = cv::cvarrToMat(ipiimage);
-		//½«Í¼Ïñ»º³åÇøÖĞµÄÍ¼ÏñÊı¾İÊÍ·Åµô
-		CameraReleaseImageBuffer(h_camera, pbybuffer);
+        //ï¿½ï¿½IPIImageÔ­Ê¼ï¿½ï¿½ï¿½ï¿½Í¼ï¿½ï¿½×ªï¿½ï¿½Îªopencvï¿½ï¿½MatÍ¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+        src = cv::cvarrToMat(ipiimage);
+        //ï¿½ï¿½Í¼ï¿½ñ»º³ï¿½ï¿½ï¿½ï¿½Ğµï¿½Í¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í·Åµï¿½
+        CameraReleaseImageBuffer(h_camera, pbybuffer);
 
-		return true;
+        return true;
 
-	}
+    }
 
-	else
-	{
-		src = cv::Mat();
-		return false;
-	}
+    else
+    {
+        src = cv::Mat();
+        return false;
+    }
 }
 
 bool Camera::read_frame_rgb(cv::Mat& src)
 {
-	//´ÓÏà»ú¾ä±ú¶ÔÓ¦µÄÏà»úÉè±¸ÖĞ»ñÈ¡Í¼ÏñÊı¾İÍ·Ö¸ÕëºÍ½«Í¼ÏñÊı¾İ±£´æÔÚÊı¾İ»º³åÇøÖĞ
-	if (CameraGetImageBuffer(h_camera, &frame_h, &pbybuffer, 1000) == CAMERA_STATUS_SUCCESS)
-	{
-		CameraImageProcess(h_camera, pbybuffer, rgb_buffer, &frame_h);
-		if (ipiimage)
-		{
-			//ÊÍ·ÅµôÍ¼ÏñÊı¾İµÄÍ·Ö¸Õë£¬Ïàµ±ÓÚÊÍ·ÅÈ«²¿Êı¾İ
-			cvReleaseImageHeader(&ipiimage);
-		}
+    //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó¦ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½è±¸ï¿½Ğ»ï¿½È¡Í¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í·Ö¸ï¿½ï¿½Í½ï¿½Í¼ï¿½ï¿½ï¿½ï¿½ï¿½İ±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½İ»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    if (CameraGetImageBuffer(h_camera, &frame_h, &pbybuffer, 1000) == CAMERA_STATUS_SUCCESS)
+    {
+        CameraImageProcess(h_camera, pbybuffer, rgb_buffer, &frame_h);
+        if (ipiimage)
+        {
+            //ï¿½Í·Åµï¿½Í¼ï¿½ï¿½ï¿½ï¿½ï¿½İµï¿½Í·Ö¸ï¿½ë£¬ï¿½àµ±ï¿½ï¿½ï¿½Í·ï¿½È«ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+            cvReleaseImageHeader(&ipiimage);
+        }
 
-		//ĞÂ½¨Ò»¸öÍ¼ÏñÊı¾İÍ·Ö¸Õë
-		ipiimage = cvCreateImageHeader(cvSize(frame_h.iWidth, frame_h.iHeight), IPL_DEPTH_8U, channel);
+        //ï¿½Â½ï¿½Ò»ï¿½ï¿½Í¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í·Ö¸ï¿½ï¿½
+        ipiimage = cvCreateImageHeader(cvSize(frame_h.iWidth, frame_h.iHeight), IPL_DEPTH_8U, channel);
 
-		CameraFlipFrameBuffer(rgb_buffer, &frame_h, 1);
+        CameraFlipFrameBuffer(rgb_buffer, &frame_h, 4);
 
-		//½«rgbÍ¼ÏñÊı¾İ»º³åÇøÀïµÄÍ¼ÏñÊı¾İ¸øÍ·Ö¸ÕëÖ¸Ïò
-		cvSetData(ipiimage, rgb_buffer, frame_h.iWidth * channel);
+        //ï¿½ï¿½rgbÍ¼ï¿½ï¿½ï¿½ï¿½ï¿½İ»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¼ï¿½ï¿½ï¿½ï¿½ï¿½İ¸ï¿½Í·Ö¸ï¿½ï¿½Ö¸ï¿½ï¿½
+        cvSetData(ipiimage, rgb_buffer, frame_h.iWidth * channel);
 
-		//½«IPIImage¸ñÊ½µÄÍ¼ÏñÊı¾İ×ªÎªopencvµÄMatÍ¼ÏñÀàĞÍ
-		src = cv::cvarrToMat(ipiimage);
+        //ï¿½ï¿½IPIImageï¿½ï¿½Ê½ï¿½ï¿½Í¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×ªÎªopencvï¿½ï¿½MatÍ¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+        src = cv::cvarrToMat(ipiimage);
 
-		//ÊÍ·ÅµôÍ¼ÏñÊı¾İ»º³åÇøµÄÊı¾İ£¬·ÀÖ¹ÒıÆğÊı¾İ×èÈû
-		CameraReleaseImageBuffer(h_camera, pbybuffer);
+        //ï¿½Í·Åµï¿½Í¼ï¿½ï¿½ï¿½ï¿½ï¿½İ»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½İ£ï¿½ï¿½ï¿½Ö¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+        CameraReleaseImageBuffer(h_camera, pbybuffer);
 
-		return true;
-	}
-	else
-	{
-		src = cv::Mat();
-		return false;
-	}
+        return true;
+    }
+    else
+    {
+        src = cv::Mat();
+        return false;
+    }
 
 	
 }
@@ -134,5 +134,5 @@ bool Camera::read_frame_rgb(cv::Mat& src)
 
 Camera::~Camera()
 {
-	CameraUnInit(h_camera);
+    CameraUnInit(h_camera);
 }
