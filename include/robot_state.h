@@ -7,6 +7,7 @@
 
 enum EnermyColor { RED = 0, BLUE = 1 };
 enum EnermyType  { SMALL = 0, BIG = 1 };
+enum SpinHeading {UNKNOWN, CLOCKWISE, COUNTER_CLOCKWISE};
 
 
 class robot_state

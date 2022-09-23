@@ -3,7 +3,7 @@
 #define BINARY_SHOW
 
 //#define DRAW_LIGHTS_CONTOURS
-#define DRAW_LIGHTS_RRT
+//#define DRAW_LIGHTS_RRT
 
 #define DRAW_ARMORS_RRT
 //#define DRAW_FINAL_ARMOR_CLASS
@@ -58,7 +58,7 @@ ArmorDetector::ArmorDetector()
 void ArmorDetector::setImage(const Mat &src)
 {
     const Point &lastCenter = lastArmor.center;
-
+//    cout << lastCenter.x << endl;
     if (lastCenter.x == 0 || lastCenter.y == 0)
     {
         _src = src;
@@ -124,9 +124,10 @@ bool ArmorDetector::isLight(Light& light, vector<Point> &cnt)
     double hw_ratio = height / width;
     bool hw_ratio_ok = light_min_hw_ratio < hw_ratio && hw_ratio < light_max_hw_ratio;
 
-    //矩形面积和像素面积之比
     double area_ratio = (height*width) / contourArea(cnt);
     bool area_rario_ok = light_min_area_ratio < area_ratio && area_ratio < light_max_area_ratio;
+    
+    area_ratio_ok = true;
 
     //灯条角度条件
     bool angle_ok = fabs(90.0 - light.angle) < light_max_angle || light.angle == 0;
@@ -136,6 +137,13 @@ bool ArmorDetector::isLight(Light& light, vector<Point> &cnt)
 
 
     if(!is_light)
+    {
+        //cout<<hw_ratio<<"    "<<area_ratio<<"    "<<light.angle<<endl;
+    }
+
+
+
+    if(is_light == false)
     {
         //cout<<hw_ratio<<"    "<<area_ratio<<"    "<<light.angle<<endl;
     }
@@ -195,7 +203,7 @@ void ArmorDetector::findLights()
                 light.lightColor = sum_r > sum_b ? RED : BLUE;
 
                 // 颜色不符合电控发的就不放入
-                if(light.lightColor == enermy_color)
+                if(light.lightColor == 1)
                 {
                     candidateLights.emplace_back(light);
 #ifdef DRAW_LIGHTS_RRT
@@ -298,12 +306,13 @@ void ArmorDetector::matchLights()
 
     if(candidateArmors.empty())
     {
+//        cout << "return" << endl;
         return;
     }
 
 }
 
-void ArmorDetector::chooseTarget()
+void ArmorDetector::chooseTarget(int timestamp)
 {
     if(candidateArmors.empty())
     {
@@ -340,16 +349,51 @@ void ArmorDetector::chooseTarget()
 
         sort(candidateArmors.begin(),candidateArmors.end(), height_sort);
 
+        new_armors_cnt_map.clear();
+
         for(int i = 0; i < candidateArmors.size(); ++i) {
+            // 获取每个候选装甲板的id和type
             detectNum(candidateArmors[i]);
-            if (candidateArmors[i].id == 0 && candidateArmors[i].id == 2) {
-                continue;
+            int armor_id = candidateArmors[i].id;
+            if (armor_id == 0 || armor_id == 2) {
+                candidateArmors[i].type = SMALL;
+
+//                continue;
             }
             // 暂时只有五个类别
-            if (candidateArmors[i].id == 1)
+            if (armor_id == 1)
                 candidateArmors[i].type = BIG;
-            else if (candidateArmors[i].id == 3 || candidateArmors[i].id == 4)
+            else if (armor_id == 3 || armor_id == 4)
                 candidateArmors[i].type = SMALL;
+
+
+            auto predictors_with_same_key = trackers_map.count(armor_id);  // 已存在类型的预测器数量
+
+            if (predictors_with_same_key == 0)
+            {
+                SpinTracker tracker(candidateArmors[i], timestamp);
+                auto target_predictor = trackers_map.insert(make_pair(armor_id, tracker));
+                new_armors_cnt_map[armor_id]++;  // 新类型创建
+            }
+            else if (predictors_with_same_key == 1)
+            {
+                auto candidate = trackers_map.find(armor_id);  // 原有的同ID装甲板
+                auto delta_dist = POINT_DIST(candidateArmors[i].center, (*candidate).second.last_armor.center);  // 距离
+
+                //若匹配则使用此ArmorTracker
+                if (delta_dist <= max_delta_dist && (*candidate).second.last_armor.boundingRect().contains(candidateArmors[i].center))
+                {
+                    (*candidate).second.update_tracker(candidateArmors[i], timestamp);  // 更新装甲板
+                }
+                //若不匹配则创建新ArmorTracker
+                else
+                {
+                    SpinTracker tracker(candidateArmors[i], timestamp);
+                    trackers_map.insert(make_pair(armor_id, tracker));
+                    new_armors_cnt_map[armor_id]++;  // 同类型不同位置创建
+                }
+            }
+
 
             //打分制筛选装甲板优先级
             /*最高优先级数字识别英雄1号装甲板，其次3和4号（如果打分的话1给100，3和4给80大概这个比例）
@@ -362,15 +406,154 @@ void ArmorDetector::chooseTarget()
             //2、在缩小roi内就给分，不在不给分（分数占比较低）
             //3、90度减去装甲板的角度除以90得到比值乘上标准分作为得分
             //4、在前三步打分之前对装甲板进行高由大到小排序，获取最大最小值然后归一化，用归一化的高度值乘上标准分作为得分
-            Armor checkArmor = candidateArmors[i];
-            int final_record = armorGrade(checkArmor);
+
+            int final_record = armorGrade(candidateArmors[i]);
             if (final_record > best_record && final_record > grade_standard)
             {
                 best_record = final_record;
                 best_index = i;
             }
         }
-        finalArmor = candidateArmors[best_index];
+
+
+//        cout << "tracker size: " << trackers_map.size() << endl;
+        if (!trackers_map.empty())
+        {
+            //维护预测器Map，删除过久之前的装甲板
+            for (auto iter = trackers_map.begin(); iter != trackers_map.end();)
+            {
+                //删除元素后迭代器会失效，需先行获取下一元素
+                auto next = iter;
+                // cout<<(*iter).second.last_timestamp<<"  "<<src.timestamp<<endl;
+                if ((timestamp - (*iter).second.last_timestamp) > max_delta_t)
+                    next = trackers_map.erase(iter);
+                else
+                    ++next;
+                iter = next;
+            }
+        }
+
+
+        for (const auto& cnt : new_armors_cnt_map)
+        {
+            // 新增装甲板数量为1时计算陀螺分数
+            if (cnt.second == 1)
+            {
+                auto same_armors_cnt = trackers_map.count(cnt.first);  // 相同的装甲板数量
+                if (same_armors_cnt == 2)
+                {
+                    cout << "spin detect" << endl;
+                    //遍历所有同Key预测器，确定左右侧的Tracker
+                    SpinTracker *new_tracker = nullptr;
+                    SpinTracker *last_tracker = nullptr;
+                    double last_armor_center;
+                    double last_armor_timestamp;
+                    double new_armor_center;
+                    double new_armor_timestamp;
+                    int best_prev_timestamp = 0;    //候选ArmorTracker的最近时间戳
+                    auto candiadates = trackers_map.equal_range(cnt.first);  // 获取同类型的装甲板
+                    for (auto iter = candiadates.first; iter != candiadates.second; ++iter)
+                    {
+                        //若未完成初始化则视为新增tracker
+                        if (!(*iter).second.is_initialized && (*iter).second.last_timestamp == timestamp)
+                        {
+                            new_tracker = &(*iter).second;
+                        }
+                        else if ((*iter).second.last_timestamp > best_prev_timestamp && (*iter).second.is_initialized)
+                        {
+                            best_prev_timestamp = (*iter).second.last_timestamp;
+                            last_tracker = &(*iter).second;
+                        }
+
+                    }
+                    if (new_tracker != nullptr && last_tracker != nullptr)
+                    {
+                        new_armor_center = new_tracker->last_armor.center.x;
+                        new_armor_timestamp = new_tracker->last_timestamp;
+                        last_armor_center = last_tracker->last_armor.center.x;
+                        last_armor_timestamp = last_tracker->last_timestamp;
+                        auto spin_movement = new_armor_center - last_armor_center;  // 中心x坐标： 新 - 旧
+
+                        cout <<cnt.first<<" : "<<spin_movement << endl;
+                        if (abs(spin_movement) > 10 && new_armor_timestamp == timestamp && last_armor_timestamp == timestamp)
+                        {
+
+                            // 若无该元素则插入新元素
+                            if (spin_score_map.count(cnt.first) == 0)
+                            {
+                                spin_score_map[cnt.first] = 1000 * spin_movement / abs(spin_movement);
+                            }
+                            //  若已有该元素且目前旋转方向与记录不同,则对目前分数进行减半惩罚
+                            else if (spin_movement * spin_score_map[cnt.first] < 0)
+                            {
+                                spin_score_map[cnt.first] *= 0.5;
+                            }
+                            // 若已有该元素则更新元素
+                            else
+                            {
+                                spin_score_map[cnt.first] = anti_spin_max_r_multiple * spin_score_map[cnt.first];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        updateSpinScore();
+
+        bool is_target_spinning;
+        std::vector<Armor> final_armors;
+        SpinHeading spin_status;
+
+        if (spin_status_map.count(candidateArmors[best_index].id) == 0)
+        {
+            spin_status = UNKNOWN;
+            is_target_spinning = false;
+        }
+        else
+        {
+            spin_status = spin_status_map[candidateArmors[best_index].id];
+            if (spin_status != UNKNOWN)
+                is_target_spinning = true;
+            else
+                is_target_spinning = false;
+        }
+//        cout << "is target spinning: " << is_target_spinning << endl;
+        if (is_target_spinning)
+        {
+            auto ID_candiadates = trackers_map.equal_range(candidateArmors[best_index].id);
+
+            for (auto iter = ID_candiadates.first; iter != ID_candiadates.second; ++iter)
+            {
+                if ((*iter).second.last_timestamp == timestamp)  // 同一帧图像的装甲板
+                {
+                    final_armors.push_back((*iter).second.last_armor);
+                }
+                else
+                {
+                    continue;
+                }
+            }
+
+            //若存在一块装甲板
+            if (final_armors.size() == 1)
+            {
+                finalArmor = final_armors.at(0);
+            }
+                // 若存在两块装甲板
+            else if (final_armors.size() == 2)
+            {
+                // 对最终装甲板进行排序，选取与旋转方向相同的装甲板进行更新
+                sort(final_armors.begin(),final_armors.end(),[](Armor& prev, Armor& next)
+                {return prev.center.x < next.center.x;});
+                // 若顺时针旋转选取右侧装甲板更新
+                if (spin_status == CLOCKWISE)
+                    finalArmor = final_armors.at(1);
+                // 若逆时针旋转选取左侧装甲板更新
+                else if (spin_status == COUNTER_CLOCKWISE)
+                    finalArmor = final_armors.at(0);
+            }
+        }
     }
 
 #ifdef DRAW_FINAL_ARMOR_CLASS
@@ -384,7 +567,7 @@ void ArmorDetector::chooseTarget()
 #endif //DRAW_FINAL_ARMOR_CLASS
 }
 
-Armor ArmorDetector::autoAim(const cv::Mat &src)
+Armor ArmorDetector::autoAim(const Mat &src, int timestamp)
 {
 
     candidateArmors.clear();
@@ -393,8 +576,7 @@ Armor ArmorDetector::autoAim(const cv::Mat &src)
     setImage(src);
     findLights();
     matchLights();
-    chooseTarget();
-
+    chooseTarget(timestamp);
     if(!finalArmor.size.empty())
     {
         finalArmor.center.x += detectRoi.x;
@@ -404,7 +586,9 @@ Armor ArmorDetector::autoAim(const cv::Mat &src)
     }
     else
     {
-        ++lostCnt;
+
+//        cout << "lostCnt: " <<lostCnt <<endl;
+
         if (lostCnt < 8)
             lastArmor.size = Size(lastArmor.size.width * 1.1, lastArmor.size.height * 1.4);
         else if(lostCnt == 9)
@@ -415,7 +599,7 @@ Armor ArmorDetector::autoAim(const cv::Mat &src)
             lastArmor.size = Size(lastArmor.size.width * 1.2, lastArmor.size.height * 1.2);
         else if (lostCnt == 18)
             lastArmor.size = Size(lastArmor.size.width * 1.2, lastArmor.size.height * 1.2);
-        else if (lostCnt > 33 )lastArmor.size = Size();
+        else if (lostCnt > 33 )lastArmor.center = Point2f(0,0);
     }
 
 
@@ -550,4 +734,54 @@ int ArmorDetector::armorGrade(const Armor& checkArmor)
             angle_grade * angle_grade_ratio;
 
     return final_grade;
+
+}
+bool ArmorDetector::updateSpinScore()
+{
+    for (auto score = spin_score_map.begin(); score != spin_score_map.end();)
+    {
+        SpinHeading spin_status;
+
+        //若Status_Map不存在该元素
+        if (spin_status_map.count((*score).first) == 0)
+            spin_status = UNKNOWN;
+        else
+            spin_status = spin_status_map[(*score).first];
+        // 若分数过低移除此元素
+        if (abs((*score).second) <= anti_spin_judge_low_thres && spin_status != UNKNOWN)
+        {
+            spin_status_map.erase((*score).first);
+            score = spin_score_map.erase(score);
+            continue;
+        }
+
+        if (spin_status != UNKNOWN)
+            (*score).second = 0.838 * (*score).second - 1 * abs((*score).second) / (*score).second;
+        else
+            (*score).second = 0.997 * (*score).second - 1 * abs((*score).second) / (*score).second;
+        // 当小于该值时移除该元素
+//        cout << "score: " << (*score).second << endl;
+        if (abs((*score).second) < 20 || isnan((*score).second))
+        {
+            spin_status_map.erase((*score).first);
+            score = spin_score_map.erase(score);
+            continue;
+        }
+        else if (abs((*score).second) >= anti_spin_judge_high_thres)
+        {
+            (*score).second = anti_spin_judge_high_thres * abs((*score).second) / (*score).second;
+            if ((*score).second > 0)
+                spin_status_map[(*score).first] = CLOCKWISE;
+            else if((*score).second < 0)
+                spin_status_map[(*score).first] = COUNTER_CLOCKWISE;
+        }
+        ++score;
+    }
+
+    // cout<<"++++++++++++++++++++++++++"<<endl;
+    // for (auto status : spin_status_map)
+    // {
+    //     cout<<status.first<<" : "<<status.second<<endl;
+    // }
+    return true;
 }
