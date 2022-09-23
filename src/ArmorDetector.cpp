@@ -325,7 +325,6 @@ void ArmorDetector::chooseTarget(int timestamp)
         detectNum(candidateArmors[0]);
         if (candidateArmors[0].id == 0 || candidateArmors[0].id == 2)
         {
-            lostCnt++;
             finalArmor = Armor();
         }
         else if (candidateArmors[0].id == 1)

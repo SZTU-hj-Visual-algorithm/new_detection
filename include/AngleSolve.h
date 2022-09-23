@@ -28,6 +28,8 @@ private:
     cv::Mat F_MAT;
     cv::Mat C_MAT;
 
+    double getGravity(Eigen::Vector3d &transedPos);
+
     headAngle send;
 };
 
