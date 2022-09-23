@@ -125,15 +125,14 @@ bool ArmorDetector::isLight(Light& light, vector<Point> &cnt)
     bool hw_ratio_ok = light_min_hw_ratio < hw_ratio && hw_ratio < light_max_hw_ratio;
 
     double area_ratio = (height*width) / contourArea(cnt);
-    bool area_rario_ok = light_min_area_ratio < area_ratio && area_ratio < light_max_area_ratio;
-    
-    area_ratio_ok = true;
+    bool area_ratio_ok = light_min_area_ratio < area_ratio && area_ratio < light_max_area_ratio;
+
 
     //灯条角度条件
     bool angle_ok = fabs(90.0 - light.angle) < light_max_angle || light.angle == 0;
 
     //灯条判断的条件总集
-    bool is_light = hw_ratio_ok && area_rario_ok && angle_ok && standing_ok;
+    bool is_light = hw_ratio_ok && area_ratio_ok && angle_ok && standing_ok;
 
 
     if(!is_light)
