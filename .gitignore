@@ -7,7 +7,7 @@
 *.log
 
 #ignore all file in cmake-build-debug
-cmake-build-debug/
+/cmake-build-debug/
 
 #ignore all file in .idea
-.idea/
+/.idea/
