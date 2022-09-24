@@ -37,8 +37,8 @@ bool Camera::init()
 //    CameraSetContrast(h_camera,200);
 //    CameraSetSaturation(h_camera,1200);
 //    CameraSetSharpness(h_camera,10)；
-    CameraSetExposureTime(h_camera,1700);
-    CameraSetAnalogGain(h_camera,100);
+    CameraSetExposureTime(h_camera,1400);
+    CameraSetAnalogGain(h_camera,150);
 
 	//相机开始图像采集
 	CameraPlay(h_camera);

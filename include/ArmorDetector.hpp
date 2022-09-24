@@ -57,6 +57,7 @@ struct Armor : public cv::RotatedRect    //装甲板结构体
         id = 0;
         type = SMALL;
     }
+    vector<cv::Point2f> pts_4; //
     double light_height_rate;  // 左右灯条高度比
     double confidence;
     int id;  // 装甲板类别
@@ -72,7 +73,7 @@ public:
 
     Armor autoAim(const cv::Mat &src); //将最终目标的坐标转换到摄像头原大小的
 
-
+double cnt;
 
 private:
     int lostCnt;
@@ -122,7 +123,7 @@ private:
     std::vector<Armor> candidateArmors; // 筛选的装甲板
     Armor finalArmor;  // 最终装甲板
 
-    cv::Point2f dst_p[4] = {cv::Point2f(0,60),cv::Point2f(0,0),cv::Point2f(30,0),cv::Point2f(30,60)};
+    cv::Point2f dst_p[4] = {cv::Point2f(0,80),cv::Point2f(0,0),cv::Point2f(40,0),cv::Point2f(40,80)};
 
     void setImage(const cv::Mat &src); //对图像进行设置
 
