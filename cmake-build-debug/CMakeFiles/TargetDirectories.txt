@@ -1,4 +1,0 @@
-F:/SZTU-hj-algorithm/new_detection/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-F:/SZTU-hj-algorithm/new_detection/cmake-build-debug/CMakeFiles/shsihi.dir
-F:/SZTU-hj-algorithm/new_detection/cmake-build-debug/CMakeFiles/SRCSO.dir
-F:/SZTU-hj-algorithm/new_detection/cmake-build-debug/CMakeFiles/edit_cache.dir
