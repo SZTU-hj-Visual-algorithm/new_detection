@@ -94,6 +94,7 @@ private:
     double armor_height_offset;
     double armor_ij_min_ratio;
     double armor_ij_max_ratio;
+    double armor_max_offset_angle;
 
     //armor_grade_condition
     double big_wh_standard;
