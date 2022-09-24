@@ -1,4 +1,10 @@
+#需要忽略版本更新的文件
 
+#ignore all .json file
 *.json
+
+#ignore all .log file
 *.log
-cmake-build-debug
+
+#ignore all file in cmake-build-debug
+cmake-build-debug/
