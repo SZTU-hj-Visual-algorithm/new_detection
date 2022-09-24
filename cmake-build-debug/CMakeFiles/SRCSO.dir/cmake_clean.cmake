@@ -1,10 +1,7 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/SRCSO.dir/src/ArmorDetector.cpp.o"
-  "CMakeFiles/SRCSO.dir/src/ArmorDetector.cpp.o.d"
-  "CMakeFiles/SRCSO.dir/src/DNN_detect.cpp.o"
-  "CMakeFiles/SRCSO.dir/src/DNN_detect.cpp.o.d"
-  "CMakeFiles/SRCSO.dir/src/camera.cpp.o"
-  "CMakeFiles/SRCSO.dir/src/camera.cpp.o.d"
+  "CMakeFiles/SRCSO.dir/src/ArmorDetector.cpp.obj"
+  "CMakeFiles/SRCSO.dir/src/DNN_detect.cpp.obj"
+  "CMakeFiles/SRCSO.dir/src/camera.cpp.obj"
   "libSRCSO.a"
   "libSRCSO.pdb"
 )

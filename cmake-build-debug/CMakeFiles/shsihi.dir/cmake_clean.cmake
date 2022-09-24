@@ -1,7 +1,8 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/shsihi.dir/main.cpp.o"
-  "CMakeFiles/shsihi.dir/main.cpp.o.d"
-  "shsihi"
+  "CMakeFiles/shsihi.dir/main.cpp.obj"
+  "libshsihi.dll.a"
+  "shsihi.exe"
+  "shsihi.exe.manifest"
   "shsihi.pdb"
 )
 
