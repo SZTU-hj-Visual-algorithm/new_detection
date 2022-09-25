@@ -11,4 +11,4 @@
 
 #ignore all file in .idea
 /.idea/
-cmakelist.txt
+CMakeList.txt
