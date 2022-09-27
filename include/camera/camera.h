@@ -1,8 +1,7 @@
 #pragma once
-#include "camera_api.h"
+#include "CameraApi.h"
 #include <opencv2/opencv.hpp>
-#include "opencv2/core/core_c.h"
-//using namespace cv;
+#include <opencv2/core/types_c.h>
 
 class Camera
 {
@@ -10,21 +9,32 @@ public:
 	Camera() = default;
 	
 	bool init();
-	bool read_frame_rgb(cv::Mat &src);
-	bool read_frame_raw(cv::Mat& src);
-
+	bool read_frame_rgb();
+	bool read_frame_raw();
+//	bool transform_src_data(cv::Mat &src);
+	bool release_data();
+	bool camera_record();
+    bool record_start2();
+    bool record_end2();
+	bool record_start();
+	
 	~Camera();
+	
+	
+	int record_state = RECORD_STOP;//用来记录录像状态
+	IplImage* ipiimage = nullptr;    //储存在缓存区地原始图像数据
+
 private:
-	IplImage* ipiimage = nullptr;    //�����ڻ�������ԭʼͼ������
+	
 	tSdkCameraDevInfo camera_list[1];
 	INT pid = 1;
 	CameraHandle h_camera;
 	tSdkCameraCapbility capbility;
-	tSdkFrameHead frame_h;//ͼ��ͷָ��
-	unsigned char* rgb_buffer = nullptr;//rgbͼ�����ݻ�����
-	int channel;
-	bool init_done;
-	BYTE* pbybuffer = nullptr;//ԭʼͼ�����ݻ�����
-	tSdkImageResolution *pImageResolution;
-
+	tSdkFrameHead frame_h;//图像头指针
+	tSdkFrameHead record_hframe;//录像所使用的图像头指针
+	unsigned char* rgb_buffer = nullptr;//rgb图像数据缓冲区
+	int channel = 3 ;
+	BYTE* pbybuffer = nullptr;//原始图像数据缓冲区
+	char path[50] = "/home/insppp/Desktop/zimiao/src/1.avi";
+	
 };

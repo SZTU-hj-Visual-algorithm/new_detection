@@ -1,16 +1,17 @@
 #include "SpinTracker.h"
-#include "ArmorDetector.hpp"
+
 SpinTracker::SpinTracker(const Armor& src, int src_timestamp)
 {
     last_armor = src;
     last_timestamp = src_timestamp;
-    is_initialized = false;
+    is_initialized = false;  // 创建时为完成初始化
     history_info.push_back(src);
 
 }
 
 bool SpinTracker::update_tracker(const Armor& new_armor, int new_timestamp)
 {
+    // 储存历史装甲板，暂未使用
     if (history_info.size() <= max_history_len)
     {
         history_info.push_back(new_armor);
@@ -21,7 +22,7 @@ bool SpinTracker::update_tracker(const Armor& new_armor, int new_timestamp)
         history_info.push_back(new_armor);
     }
 
-    is_initialized = true;
+    is_initialized = true;  // 更新装甲板后已完成初始化
     last_armor = new_armor;
     last_timestamp = new_timestamp;
 

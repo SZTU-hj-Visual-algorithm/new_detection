@@ -4,7 +4,7 @@
 #include <opencv2/opencv.hpp>
 #include <iostream>
 
-#define NET_PATH "../my_module/1_1.0_16_4.onnx"
+#define NET_PATH "../my_module/1_2.0_16_7.onnx"
 #define IMG_SIZE 16
 #define TO_GRAY 1
 

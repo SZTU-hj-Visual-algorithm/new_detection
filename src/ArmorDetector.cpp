@@ -1,12 +1,14 @@
 #include "ArmorDetector.hpp"
 
-#define BINARY_SHOW
+//#define BINARY_SHOW
 
 //#define DRAW_LIGHTS_CONTOURS
 //#define DRAW_LIGHTS_RRT
 
 //#define DRAW_ARMORS_RRT
 //#define DRAW_FINAL_ARMOR_CLASS
+//#define DRAW_CANDIDATE_AFTER_NUMBER_DETECT
+
 #define DRAW_FINAL_ARMOR_MAIN
 
 using namespace cv;
@@ -27,16 +29,16 @@ ArmorDetector::ArmorDetector()
 
     //light_judge_condition
     light_max_angle = 45.0;
-    light_min_hw_ratio = 1;
-    light_max_hw_ratio = 15;   // different distance and focus
-    light_min_area_ratio = 0.6;   // RotatedRect / Rect
+    light_min_hw_ratio = 2.5;
+    light_max_hw_ratio = 200;   // different distance and focus
+    light_min_area_ratio = 0.3;   // RotatedRect / Rect
     light_max_area_ratio = 1.0;
 
     //armor_judge_condition
-    armor_max_wh_ratio = 3;
+    armor_max_wh_ratio = 4.0;
     armor_min_wh_ratio = 1.0;
-    armor_max_angle = 20.0;
-    armor_height_offset = 0.25;
+    armor_max_angle = 35.0;
+    armor_height_offset = 0.28;
     armor_ij_min_ratio = 0.5;
     armor_ij_max_ratio = 2.0;
 
@@ -68,15 +70,15 @@ void ArmorDetector::setImage(const Mat &src)
         //Rect rect = finalRect;
         Rect rect = lastArmor.boundingRect();
 
-        double scale_w = 2;
+        double scale_w = 4;
         double scale_h = 2;
         int lu_x_offset = 0;
         int rd_x_offset = 0;
         // 获取偏移量
-        if(lastArmor.light_height_rate > 1)
-            lu_x_offset = 6 *( pow(lastArmor.light_height_rate - 1, 0.6) + 0.09) * rect.width;
-        else
-            rd_x_offset = 6 * (pow(1 - lastArmor.light_height_rate, 0.6) + 0.15) * rect.width;
+//        if(lastArmor.light_height_rate > 1)
+//            lu_x_offset = 6 *( pow(lastArmor.light_height_rate - 1, 0.6) + 0.09) * rect.width;
+//        else
+//            rd_x_offset = 6 * (pow(1 - lastArmor.light_height_rate, 0.6) + 0.15) * rect.width;
 
         //获取当前帧的roi
         int w = int(rect.width * scale_w);
@@ -101,6 +103,7 @@ void ArmorDetector::setImage(const Mat &src)
     //二值化
     Mat gray;
     cvtColor(_src,gray,COLOR_BGR2GRAY);
+
     threshold(gray,_binary,binThresh,255,THRESH_BINARY);
 #ifdef BINARY_SHOW
     imshow("_binary",_binary);
@@ -136,7 +139,7 @@ bool ArmorDetector::isLight(Light& light, vector<Point> &cnt)
 
 //    if(!is_light)
 //    {
-//        cout<<hw_ratio<<"    "<<area_ratio<<"    "<<light.angle<<endl;
+//    cout<<hw_ratio<<"    "<<area_ratio<<"    "<<light.angle<<endl;
 //    }
 
 
@@ -147,23 +150,31 @@ void ArmorDetector::findLights()
 {
     vector<vector<cv::Point>> contours;
     vector<cv::Vec4i> hierarchy;
+//    auto time_1 = std::chrono::steady_clock::now();
     cv::findContours(_binary, contours, hierarchy, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-
+//    auto time_2 = std::chrono::steady_clock::now();
+//    cout << "find Contours use time: " << (int)(std::chrono::duration<double,std::milli>(time_2 - time_1).count()) << endl;
 #ifdef DRAW_LIGHTS_CONTOURS
     for(int i=0;i< contours.size();i++)
         cv::drawContours(_src,contours,i,Scalar(255,0,0),2,LINE_8);
     imshow("contours_src",_src);
 #endif
-
+//    cout << "contours size: " << contours.size() << endl;
     if (contours.size() < 2)
     {
-        printf("no 2 contours\n");
+//        printf("no 2 contours\n");
         candidateLights.clear();
         return;
     }
+//    auto time_3 = std::chrono::steady_clock::now();
 
     for (auto & contour : contours)
     {
+
+//        cout << "contour area: " << contourArea(contour) << endl;
+//        auto time_5 = std::chrono::steady_clock::now();
+
+
         RotatedRect r_rect = minAreaRect(contour);
         Light light = Light(r_rect);
 
@@ -209,7 +220,13 @@ void ArmorDetector::findLights()
                 }
             }
         }
+//        auto time_6 = std::chrono::steady_clock::now();
+//        cout << "Each loop use time: " << (int)(std::chrono::duration<double,std::micro>(time_6 - time_5).count()) << endl;
+
     }
+//    auto time_4 = std::chrono::steady_clock::now();
+//    cout << "For loop use time: " << (int)(std::chrono::duration<double,std::milli>(time_4 - time_3).count()) << endl;
+
     //cout<<"dengtiao  geshu:  "<<candidateLights.size()<<endl;
     if(candidateLights.size()<2)
     {
@@ -221,7 +238,7 @@ void ArmorDetector::matchLights()
 {
     if(candidateLights.size() < 2)
     {
-        printf("no 2 lights\n");
+//        printf("no 2 lights\n");
         candidateLights.clear();
         return;
     }
@@ -249,7 +266,7 @@ void ArmorDetector::matchLights()
             bool whratio_ok = armor_min_wh_ratio < armorWidth/armorHeight && armorWidth/armorHeight < armor_max_wh_ratio;
 
             //角度筛选条件
-//            bool angle_ok = fabs(lightI.angle - lightJ.angle) < armor_max_angle;
+            bool angle_ok = fabs(lightI.angle - lightJ.angle) < armor_max_angle;
 
             //左右亮灯条中心点高度差筛选条件
             bool height_offset_ok = fabs(lightI.height - lightJ.height) / armorHeight < armor_height_offset;
@@ -258,8 +275,8 @@ void ArmorDetector::matchLights()
             bool ij_ratio_ok = armor_ij_min_ratio < armor_ij_ratio && armor_ij_ratio < armor_ij_max_ratio;
 
             //条件集合
-            bool is_like_Armor = whratio_ok  && height_offset_ok && ij_ratio_ok;
-//            cout << "-----------------------------------------------------------------" << endl;
+            bool is_like_Armor = whratio_ok  && height_offset_ok && ij_ratio_ok && angle_ok;
+////            cout << "-----------------------------------------------------------------" << endl;
 //            cout << "is_like_Armor: " << is_like_Armor << endl;
 //            cout << "LightI_angle :   "<<lightI.angle<<"   LightJ_angle :   "<<lightJ.angle<<"     "<<fabs(lightI.angle - lightJ.angle)<<endl;
 //            cout << "    w/h      :   "<<armorWidth/armorHeight<<endl;
@@ -278,21 +295,21 @@ void ArmorDetector::matchLights()
                 if (!conTain(armor_rrect,candidateLights,i,j))
                 {
                     candidateArmors.emplace_back(armor_rrect);
-//#ifdef DRAW_ARMORS_RRT
-////                    cout<<"LightI_angle :   "<<lightI.angle<<"   LightJ_angle :   "<<lightJ.angle<<"     "<<fabs(lightI.angle - lightJ.angle)<<endl;
-////                    cout<<"armorAngle   :   "<<armorAngle * 180 / CV_PI <<endl;
-////                    cout<<"    w/h      :   "<<armorWidth/armorHeight<<endl;
-////                    cout<<"height-offset:   "<<fabs(lightI.height - lightJ.height) / armorHeight<<endl;
-////                    cout<<" height-ratio:   "<<armor_ij_ratio<<endl;
-//
-//                    Point2f vertice_armors[4];
-//                    armor_rrect.points(vertice_armors);
-//                    for (int i = 0; i < 4; i++) {
-//                        line(_src, vertice_armors[i], vertice_armors[(i + 1) % 4], CV_RGB(0, 255, 0),2,LINE_8);
-//                    }
+#ifdef DRAW_ARMORS_RRT
+//                    cout<<"LightI_angle :   "<<lightI.angle<<"   LightJ_angle :   "<<lightJ.angle<<"     "<<fabs(lightI.angle - lightJ.angle)<<endl;
+//                    cout<<"armorAngle   :   "<<armorAngle * 180 / CV_PI <<endl;
+//                    cout<<"    w/h      :   "<<armorWidth/armorHeight<<endl;
+//                    cout<<"height-offset:   "<<fabs(lightI.height - lightJ.height) / armorHeight<<endl;
+//                    cout<<" height-ratio:   "<<armor_ij_ratio<<endl;
+
+                    Point2f vertice_armors[4];
+                    armor_rrect.points(vertice_armors);
+                    for (int i = 0; i < 4; i++) {
+                        line(_src, vertice_armors[i], vertice_armors[(i + 1) % 4], CV_RGB(0, 255, 0),2,LINE_8);
+                    }
 //                    circle(_src,armorCenter,15,Scalar(0,255,255),-1);
-//                    imshow("armors-show-_src", _src);
-//#endif //DRAW_ARMORS_RRT
+                    imshow("armors-show-_src", _src);
+#endif //DRAW_ARMORS_RRT
                     (candidateArmors.end()-1)->light_height_rate = armor_ij_ratio;
                 }
             }
@@ -313,14 +330,14 @@ void ArmorDetector::chooseTarget(int timestamp)
 {
     if(candidateArmors.empty())
     {
-        cout<<"no target!!"<<endl;
+//        cout<<"no target!!"<<endl;
         finalArmor = Armor();
         lostCnt += 1;
     }
     else
     {
 
-        cout<<"get "<<candidateArmors.size()<<" target!!"<<endl;
+//        cout<<"get "<<candidateArmors.size()<<" target!!"<<endl;
 
         int best_index = -1; // 下标
         int best_record = 0;
@@ -332,40 +349,48 @@ void ArmorDetector::chooseTarget(int timestamp)
         for(int i = 0; i < candidateArmors.size(); ++i) {
             // 获取每个候选装甲板的id和type
             detectNum(candidateArmors[i]);
-//            candidateArmors[i].id = 4;
-//            candidateArmors[i].confidence = 99;
-
             int armor_id = candidateArmors[i].id;
-            if (candidateArmors[i].confidence < 0.95){
+            if (candidateArmors[i].confidence < 0.98){
                 continue;
             }
-            if (armor_id == 0 || armor_id == 2) {
+            if (armor_id == 2) {
                 candidateArmors[i].type = SMALL;
                 continue;
             }
 
-            // 暂时只有五个类别
+            // 暂时只有4个类别
             if (armor_id == 1)
                 candidateArmors[i].type = BIG;
             else if (armor_id == 3 || armor_id == 4)
                 candidateArmors[i].type = SMALL;
+            // ---------------------------------------------
+#ifdef DRAW_CANDIDATE_AFTER_NUMBER_DETECT
+            Point2f vertice_lights[4];
+            candidateArmors[i].points(vertice_lights);
+            for (int m = 0; m < 4; m++) {
+                line(_src, vertice_lights[m], vertice_lights[(m + 1) % 4], CV_RGB(255, 0, 0),2,LINE_8);
+            }
+            //circle(_src,light.center,5,Scalar(0,0,0),-1);
+            imshow("lights-show-_src", _src);
+            // ---------------------------------------------
+#endif
+            auto predictors_with_same_id = trackers_map.count(armor_id);  // 已存在类型的预测器数量
 
-
-            auto predictors_with_same_key = trackers_map.count(armor_id);  // 已存在类型的预测器数量
-
-            if (predictors_with_same_key == 0)
+            if (predictors_with_same_id == 0)
             {
                 SpinTracker tracker(candidateArmors[i], timestamp);
                 auto target_predictor = trackers_map.insert(make_pair(armor_id, tracker));
                 new_armors_cnt_map[armor_id]++;  // 新类型创建
             }
-            else if (predictors_with_same_key == 1)
+            else if (predictors_with_same_id == 1)
             {
                 auto candidate = trackers_map.find(armor_id);  // 原有的同ID装甲板
-                auto delta_dist = POINT_DIST(candidateArmors[i].center, (*candidate).second.last_armor.center);  // 距离
+                auto delta_t = timestamp - (*candidate).second.last_timestamp;  // 同一ID的装甲板时间戳差值
+
+//                auto delta_dist = POINT_DIST(candidateArmors[i].center, (*candidate).second.last_armor.center);  // 距离
 
                 //若匹配则使用此ArmorTracker
-                if (delta_dist <= max_delta_dist && (*candidate).second.last_armor.boundingRect().contains(candidateArmors[i].center))
+                if (delta_t > 0 && IOU_compute(candidateArmors[i].boundingRect(), (*candidate).second.last_armor.boundingRect())>0.3)
                 {
                     (*candidate).second.update_tracker(candidateArmors[i], timestamp);  // 更新装甲板
 //                    cout << "updata tracker" << endl;
@@ -377,6 +402,52 @@ void ArmorDetector::chooseTarget(int timestamp)
                     trackers_map.insert(make_pair(armor_id, tracker));
                     new_armors_cnt_map[armor_id]++;  // 同类型不同位置创建
 //                    cout << "create tracker" << endl;
+
+                }
+            }
+            else
+            {
+                //1e9无实际意义，仅用于以非零初始化
+                double min_delta_dist = 1e9;
+                int min_delta_t = 1e9;
+
+                bool is_best_candidate_exist = false;
+                std::multimap<int, SpinTracker>::iterator best_candidate;
+                auto candiadates = trackers_map.equal_range(armor_id);
+                //遍历所有同ID预测器，匹配速度最小且更新时间最近的ArmorTracker
+                for (auto iter = candiadates.first; iter != candiadates.second; ++iter)
+                {
+                    auto delta_t = timestamp - (*iter).second.last_timestamp;
+                    auto delta_dist = POINT_DIST(candidateArmors[i].center, (*iter).second.last_armor.center);  // 距离
+//                    cout << "IOU out: " << IOU_compute(candidateArmors[i].boundingRect(), (*iter).second.last_armor.boundingRect()) << endl;
+
+                    if (IOU_compute(candidateArmors[i].boundingRect(), (*iter).second.last_armor.boundingRect()) > 0.3 && delta_t > 0)
+                    {
+                        {
+                        // 在同一位置存在过装甲板且时间最接近设为最高优先级，
+                        if (delta_dist <= max_delta_dist && delta_dist <= min_delta_dist &&
+                            delta_t <= min_delta_t)
+
+
+                            min_delta_t = delta_t;
+                            min_delta_dist = delta_dist;
+                            best_candidate = iter;
+                            is_best_candidate_exist = true;
+                        }
+                    }
+                }
+                if (is_best_candidate_exist)
+                {
+                    (*best_candidate).second.update_tracker(candidateArmors[i], timestamp);
+//                    cout << "more than 1 updata tracker" << endl;
+
+                }
+                else
+                {
+                    SpinTracker tracker(candidateArmors[i], timestamp);
+                    trackers_map.insert(make_pair(candidateArmors[i].id, tracker));
+                    new_armors_cnt_map[candidateArmors[i].id]++;
+//                    cout << "more than 1 create tracker" << endl;
 
                 }
             }
@@ -400,20 +471,17 @@ void ArmorDetector::chooseTarget(int timestamp)
             {
                 best_record = final_record;
                 best_index = i;
-//                cout << "best_index: " << best_index <<endl;
             }
         }
 
 
-//        cout << "tracker size: " << trackers_map.size() << endl;
         if (!trackers_map.empty())
         {
-            //维护预测器Map，删除过久之前的装甲板
+            // 维护预测器Map，删除过久之前的装甲板
             for (auto iter = trackers_map.begin(); iter != trackers_map.end();)
             {
-                //删除元素后迭代器会失效，需先行获取下一元素
+                // 删除元素后迭代器会失效，需先行获取下一元素
                 auto next = iter;
-                // cout<<(*iter).second.last_timestamp<<"  "<<src.timestamp<<endl;
                 if ((timestamp - (*iter).second.last_timestamp) > max_delta_t)
                     next = trackers_map.erase(iter);
                 else
@@ -431,19 +499,18 @@ void ArmorDetector::chooseTarget(int timestamp)
                 auto same_armors_cnt = trackers_map.count(cnt.first);  // 相同的装甲板数量
                 if (same_armors_cnt == 2)
                 {
-                    cout << "spin detect" << endl;
-                    //遍历所有同Key预测器，确定左右侧的Tracker
+                    // 遍历所有同ID预测器，确定左右侧的Tracker
                     SpinTracker *new_tracker = nullptr;
                     SpinTracker *last_tracker = nullptr;
                     double last_armor_center;
                     double last_armor_timestamp;
                     double new_armor_center;
                     double new_armor_timestamp;
-                    int best_prev_timestamp = 0;    //候选ArmorTracker的最近时间戳
+                    int best_prev_timestamp = 0;    // 距候选ArmorTracker的最近时间戳
                     auto candiadates = trackers_map.equal_range(cnt.first);  // 获取同类型的装甲板
                     for (auto iter = candiadates.first; iter != candiadates.second; ++iter)
                     {
-                        //若未完成初始化则视为新增tracker
+                        // 若未完成初始化则视为新增tracker
                         if (!(*iter).second.is_initialized && (*iter).second.last_timestamp == timestamp)
                         {
                             new_tracker = &(*iter).second;
@@ -463,7 +530,6 @@ void ArmorDetector::chooseTarget(int timestamp)
                         last_armor_timestamp = last_tracker->last_timestamp;
                         auto spin_movement = new_armor_center - last_armor_center;  // 中心x坐标： 新 - 旧
 
-                        cout <<cnt.first<<" : "<<spin_movement << endl;
                         if (abs(spin_movement) > 10 && new_armor_timestamp == timestamp && last_armor_timestamp == timestamp)
                         {
 
@@ -506,12 +572,14 @@ void ArmorDetector::chooseTarget(int timestamp)
                 is_target_spinning = true;
             else
                 is_target_spinning = false;
+//                cout << "score: " << spin_score_map[candidateArmors[best_index].id] << endl;
         }
-//        cout << "is target spinning: " << is_target_spinning << endl;
+
+//        cout << "spin state: " << spin_status << endl;
         if(best_index != -1) {
 //            cout << "ID: " << candidateArmors[best_index].id << endl;
 //            cout << "Confidence: " << candidateArmors[best_index].confidence << endl;
-//            cout << "type: " << candidateArmors[best_index].type << endl;
+
             if (is_target_spinning) {
                 auto ID_candiadates = trackers_map.equal_range(candidateArmors[best_index].id);
 
@@ -557,16 +625,26 @@ void ArmorDetector::chooseTarget(int timestamp)
 #endif //DRAW_FINAL_ARMOR_CLASS
 }
 
-Armor ArmorDetector::autoAim(const Mat &src, int timestamp)
+Armor ArmorDetector::autoAim(const Mat &src, int timestamp, std::chrono::_V2::steady_clock::time_point now_time)
 {
 
     candidateArmors.clear();
     candidateLights.clear();
     finalArmor = Armor();
+
     setImage(src);
+//    auto time_1 = std::chrono::steady_clock::now();
+//    cout << "set image use time: " << (int)(std::chrono::duration<double,std::milli>(time_1 - now_time).count()) << endl;
     findLights();
+//    auto time_2 = std::chrono::steady_clock::now();
+//    cout << "find Lights use time: " << (int)(std::chrono::duration<double,std::milli>(time_2 - time_1).count()) << endl;
     matchLights();
+//    auto time_3 = std::chrono::steady_clock::now();
+//    cout << "match Lights use time: " << (int)(std::chrono::duration<double,std::milli>(time_3 - time_2).count()) << endl;
     chooseTarget(timestamp);
+//    auto time_4 = std::chrono::steady_clock::now();
+//    cout << "choose Target use time: " << (int)(std::chrono::duration<double,std::milli>(time_4 - time_3).count()) << endl;
+
     if(!finalArmor.size.empty())
     {
 //        cout << "finalarmor height: " << finalArmor.size.height << endl;
@@ -578,7 +656,7 @@ Armor ArmorDetector::autoAim(const Mat &src, int timestamp)
     else
     {
 
-        cout << "lostCnt: " <<lostCnt <<endl;
+//        cout << "lostCnt: " <<lostCnt <<endl;
 
         if (lostCnt < 8)
             lastArmor.size = Size(lastArmor.size.width * 1.1, lastArmor.size.height * 1.4);
@@ -636,6 +714,7 @@ void ArmorDetector::detectNum(Armor& armor)
     // 仿射变换
     Mat matrix_per = getPerspectiveTransform(src_p,dst_p);
     warpPerspective(numSrc,dst,matrix_per,Size(30,60));
+
 //    imshow("dst_num", dst);
     dnn_detect(dst, armor);
 }
@@ -681,7 +760,7 @@ int ArmorDetector::armorGrade(const Armor& checkArmor)
     {
         id_grade = check_id == 1 ? 80 : 60;
     }
-    id_grade=100;
+//    id_grade=100;
     ////////end///////////////////////////////////
 
     /////////长宽比打分项目/////////////////////////
@@ -720,7 +799,7 @@ int ArmorDetector::armorGrade(const Armor& checkArmor)
     // 角度不歪
     int angle_grade;
     angle_grade = (90.0 - fabs(checkArmor.angle)) / 90.0 * 100;
-    //cout<<fabs(checkArmor.angle)<<"    "<<angle_grade<<endl;  //55~100
+//    cout<<fabs(checkArmor.angle)<<"    "<<angle_grade<<endl;  //55~100
     /////////end///////////////////////////////
 
     // 下面的系数得详细调节；
@@ -755,14 +834,14 @@ bool ArmorDetector::updateSpinScore()
             score = spin_score_map.erase(score);
             continue;
         }
-
+//        cout << "score discount" << endl;
         if (spin_status != UNKNOWN)
-            (*score).second = 0.838 * (*score).second - 1 * abs((*score).second) / (*score).second;
+            (*score).second = 0.933 * (*score).second - 1 * abs((*score).second) / (*score).second;
         else
             (*score).second = 0.997 * (*score).second - 1 * abs((*score).second) / (*score).second;
         // 当小于该值时移除该元素
 //        cout << "score: " << (*score).second << endl;
-        if (abs((*score).second) < 20 || isnan((*score).second))
+        if (abs((*score).second) < 4 || isnan((*score).second))
         {
             spin_status_map.erase((*score).first);
             score = spin_score_map.erase(score);
@@ -785,4 +864,20 @@ bool ArmorDetector::updateSpinScore()
     //     cout<<status.first<<" : "<<status.second<<endl;
     // }
     return true;
+}
+float ArmorDetector::IOU_compute(const cv::Rect& box1,const cv::Rect& box2)
+{
+    if (box1.x > box2.x+box2.width) { return 0.0; }
+    if (box1.y > box2.y+box2.height) { return 0.0; }
+    if (box1.x+box1.width < box2.x) { return 0.0; }
+    if (box1.y+box1.height < box2.y) { return 0.0; }
+    int colInt =  min(box1.x+box1.width,box2.x+box2.width) - max(box1.x, box2.x);
+    int rowInt =  min(box1.y+box1.height,box2.y+box2.height) - max(box1.y,box2.y);
+    float intersection = colInt * rowInt;
+    int area1 = box1.width*box1.height;
+    int area2 = box2.width*box2.height;
+
+//    cout << "IOU in: " << intersection / (area1 + area2 - intersection) << endl;
+
+    return intersection / (area1 + area2 - intersection);
 }
