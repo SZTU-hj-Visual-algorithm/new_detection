@@ -26,6 +26,7 @@ struct Armor : public cv::RotatedRect    //装甲板结构体
         id = 0;
         type = SMALL;
     }
+    vector<cv::Point2f> pts_4;
     double light_height_rate;  // 左右灯条高度比
     double confidence;
     int id;  // 装甲板类别

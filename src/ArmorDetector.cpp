@@ -251,12 +251,13 @@ void ArmorDetector::matchLights()
             double armorWidth = POINT_DIST(centerI,centerJ) - (lightI.width + lightJ.width)/2.0;
             double armorHeight = (lightI.height + lightJ.height) / 2.0;
             double armor_ij_ratio = lightI.height / lightJ.height;
+            double armorAngle = atan2((centerI.y - centerJ.y),fabs(centerI.x - centerJ.x));
 
             //宽高比筛选条件
             bool whratio_ok = armor_min_wh_ratio < armorWidth/armorHeight && armorWidth/armorHeight < armor_max_wh_ratio;
 
-            //角度筛选条件
-            bool angle_ok = fabs(lightI.angle - lightJ.angle) < armor_max_angle;
+            //左右灯条角度差筛选条件
+            bool ij_angle_offset_ok = fabs(lightI.angle - lightJ.angle) < armor_max_angle;
 
             //左右亮灯条中心点高度差筛选条件
             bool height_offset_ok = fabs(lightI.height - lightJ.height) / armorHeight < armor_height_offset;
@@ -264,15 +265,20 @@ void ArmorDetector::matchLights()
             //左右灯条的高度比
             bool ij_ratio_ok = armor_ij_min_ratio < armor_ij_ratio && armor_ij_ratio < armor_ij_max_ratio;
 
+            //候选装甲板角度筛选条件
+            bool angle_ok = fabs(armorAngle) < armor_max_angle;
+
             //条件集合
             bool is_like_Armor = whratio_ok && angle_ok && height_offset_ok && ij_ratio_ok;
+
+
 
 
             if (is_like_Armor)
             {
                 //origin
                 Point2f armorCenter = (centerI + centerJ) / 2.0;
-                double armorAngle = atan2((centerI.y - centerJ.y),fabs(centerI.x - centerJ.x));
+
                 RotatedRect armor_rrect = RotatedRect(armorCenter,
                                                       Size2f(armorWidth,armorHeight),
                                                       -armorAngle * 180 / CV_PI);
