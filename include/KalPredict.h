@@ -5,7 +5,7 @@
 #ifndef SHSIHI_KALPREDICT_H
 #define SHSIHI_KALPREDICT_H
 
-#include "AngleSolve.h"
+#include "AngleSolve.hpp"
 
 class KalPredict : public AngleSolve
 {
