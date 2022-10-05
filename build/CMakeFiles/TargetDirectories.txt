@@ -1,4 +1,0 @@
-/home/lmx/new_detection/build/CMakeFiles/shsihi.dir
-/home/lmx/new_detection/build/CMakeFiles/SRCSO.dir
-/home/lmx/new_detection/build/CMakeFiles/edit_cache.dir
-/home/lmx/new_detection/build/CMakeFiles/rebuild_cache.dir
