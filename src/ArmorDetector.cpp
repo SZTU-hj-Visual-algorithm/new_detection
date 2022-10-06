@@ -19,38 +19,6 @@ string convertToString(double d) {
     return "invalid conversion";
 }
 
-void key_demo(Mat& image)
-{
-    Mat dst=Mat::zeros(image.size(),image.type());
-    while (true)
-    {
-        int c = waitKey(100);
-        //cout << c << endl;
-        if (c == 27)//esc键
-        {
-            break;
-        }
-        if (c == 49)
-        {
-            cout << "you enter key #1" << endl;
-            cvtColor(image, dst, COLOR_BGR2GRAY);//灰度转换
-
-        }
-        if (c == 50)
-        {
-            cout << "you enter key #2" << endl;
-            cvtColor(image, dst, COLOR_BGR2HSV);
-        }
-        if (c == 51)
-        {
-            cout << "you enter key #3" << endl;
-            dst = Scalar(50, 50, 50);
-            add(image, dst, dst);
-        }
-        imshow("键盘响应", dst);
-    }
-}
-
 ArmorDetector::ArmorDetector()
 {
     lastArmor = Armor();
@@ -115,11 +83,12 @@ void ArmorDetector::setImage(const Mat &src)
         double scale_h = 2;
         int lu_x_offset = 0;
         int rd_x_offset = 0;
+
         // 获取偏移量
-        if(lastArmor.light_height_rate > 1)
-            lu_x_offset = 6 *( pow(lastArmor.light_height_rate - 1, 0.6) + 0.09) * rect.width;
-        else
-            rd_x_offset = 6 * (pow(1 - lastArmor.light_height_rate, 0.6) + 0.15) * rect.width;
+        //if(lastArmor.light_height_rate > 1)
+        //    lu_x_offset = 6 *( pow(lastArmor.light_height_rate - 1, 0.6) + 0.09) * rect.width;
+        //else
+        //    rd_x_offset = 6 * (pow(1 - lastArmor.light_height_rate, 0.6) + 0.15) * rect.width;
 
         //获取当前帧的roi
         int w = int(rect.width * scale_w);
@@ -524,7 +493,7 @@ Armor ArmorDetector::autoAim(const cv::Mat &src)
             lastArmor.size = Size(lastArmor.size.width * 1.2, lastArmor.size.height * 1.2);
         else if (lostCnt > 33 )lastArmor.size = Size();
     }
-
+*/
 
 #ifdef DRAW_FINAL_ARMOR_MAIN
     Mat target = src.clone();
@@ -536,7 +505,7 @@ Armor ArmorDetector::autoAim(const cv::Mat &src)
     imshow("target-show", target);
 #endif //DRAW_FINAL_ARMOR_MAIN
 
-*/
+
     return finalArmor;
 }
 
