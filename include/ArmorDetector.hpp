@@ -109,9 +109,6 @@ private:
     double near_grade_ratio;
     double angle_grade_ratio;
 
-    bool Lost;
-    bool smallArmor;
-
     cv::Mat _src;  // 裁剪src后的ROI
     cv::Mat _binary;
     std::vector<cv::Mat> temps;

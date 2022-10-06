@@ -19,45 +19,11 @@ string convertToString(double d) {
     return "invalid conversion";
 }
 
-void key_demo(Mat& image)
-{
-    Mat dst=Mat::zeros(image.size(),image.type());
-    while (true)
-    {
-        int c = waitKey(100);
-        //cout << c << endl;
-        if (c == 27)//esc键
-        {
-            break;
-        }
-        if (c == 49)
-        {
-            cout << "you enter key #1" << endl;
-            cvtColor(image, dst, COLOR_BGR2GRAY);//灰度转换
-
-        }
-        if (c == 50)
-        {
-            cout << "you enter key #2" << endl;
-            cvtColor(image, dst, COLOR_BGR2HSV);
-        }
-        if (c == 51)
-        {
-            cout << "you enter key #3" << endl;
-            dst = Scalar(50, 50, 50);
-            add(image, dst, dst);
-        }
-        imshow("键盘响应", dst);
-    }
-}
-
 ArmorDetector::ArmorDetector()
 {
     lastArmor = Armor();
     detectRoi = cv::Rect();
-    smallArmor = false;
     lostCnt = 0;
-    Lost = true;
 
     cnt=0;
 
@@ -170,7 +136,7 @@ bool ArmorDetector::isLight(Light& light, vector<Point> &cnt)
     double area_ratio = height * width / contourArea(cnt);
     bool area_ratio_ok = light_min_area_ratio < area_ratio && area_ratio < light_max_area_ratio;
 
-    area_ratio_ok = true;
+//    area_ratio_ok = true;
 
     //灯条角度条件
     bool angle_ok = fabs(90.0 - light.angle) < light_max_angle || light.angle == 0;
@@ -179,7 +145,7 @@ bool ArmorDetector::isLight(Light& light, vector<Point> &cnt)
     bool is_light = hw_ratio_ok && area_ratio_ok && angle_ok && standing_ok;
 
 
-    if(is_light == false)
+    if(!is_light)
     {
         //cout<<hw_ratio<<"    "<<area_ratio<<"    "<<light.angle<<endl;
     }
@@ -203,8 +169,6 @@ void ArmorDetector::findLights()
     if (contours.size() < 2)
     {
         printf("no 2 contours\n");
-        lostCnt++;
-        candidateLights.clear();
         return;
     }
 
@@ -268,8 +232,6 @@ void ArmorDetector::matchLights()
     if(candidateLights.size() < 2)
     {
         printf("no 2 lights\n");
-        lostCnt++;
-        candidateLights.clear();
         return;
     }
 
@@ -356,7 +318,6 @@ void ArmorDetector::chooseTarget()
     if(candidateArmors.empty())
     {
         cout<<"no target!!"<<endl;
-        lostCnt++;
         finalArmor = Armor();
     }
     else if(candidateArmors.size() == 1)
@@ -500,7 +461,7 @@ Armor ArmorDetector::autoAim(const cv::Mat &src)
     matchLights();
     chooseTarget();
 
-    /*
+
     if(!finalArmor.size.empty())
     {
         finalArmor.center.x += detectRoi.x;
@@ -536,7 +497,7 @@ Armor ArmorDetector::autoAim(const cv::Mat &src)
     imshow("target-show", target);
 #endif //DRAW_FINAL_ARMOR_MAIN
 
-*/
+
     return finalArmor;
 }
 
