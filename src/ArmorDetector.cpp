@@ -133,7 +133,7 @@ bool ArmorDetector::isLight(Light& light, vector<Point> &cnt)
     bool hw_ratio_ok = light_min_hw_ratio < hw_ratio && hw_ratio < light_max_hw_ratio;
 
     //外接矩形面积和像素点面积之比条件  remove
-    double area_ratio = height * width / contourArea(cnt);
+    double area_ratio = contourArea(cnt) / (height * width);
     bool area_ratio_ok = light_min_area_ratio < area_ratio && area_ratio < light_max_area_ratio;
 
 //    area_ratio_ok = true;
@@ -325,7 +325,6 @@ void ArmorDetector::chooseTarget()
         cout<<"get 1 target!!"<<endl;
         detectNum(candidateArmors[0]);
 
-        int final_record = armorGrade(candidateArmors[0]);
 
         if (candidateArmors[0].id == 0 || candidateArmors[0].id == 2)
         {
@@ -379,7 +378,6 @@ void ArmorDetector::chooseTarget()
         string nn= convertToString(cnt);
         string path="/home/lmx/number/"+nn+".jpg";
         if(c==113){
-
             imwrite(path,num);
             cnt++;
         }
@@ -427,8 +425,6 @@ void ArmorDetector::chooseTarget()
             double ff=final_record;
             string fff=convertToString(ff);
             //putText(_src,fff,checkArmor.center,FONT_HERSHEY_COMPLEX, 1.0, Scalar(12, 23, 200), 1, 8);
-
-
 
             if (final_record > best_record && final_record > grade_standard)
             {
@@ -513,17 +509,17 @@ void ArmorDetector::detectNum(Armor& armor)
 
     //找到能框住整个数字的四个点
     Point2f src_p[4];
-    src_p[0].x = pp[1].x + (pp[0].x - pp[1].x)*1;
-    src_p[0].y = pp[1].y + (pp[0].y - pp[1].y)*1;
+    src_p[0].x = pp[1].x + (pp[0].x - pp[1].x)*1.8;
+    src_p[0].y = pp[1].y + (pp[0].y - pp[1].y)*1.8;
 
-    src_p[1].x = pp[0].x + (pp[1].x - pp[0].x)*1;
-    src_p[1].y = pp[0].y + (pp[1].y - pp[0].y)*1;
+    src_p[1].x = pp[0].x + (pp[1].x - pp[0].x)*1.8;
+    src_p[1].y = pp[0].y + (pp[1].y - pp[0].y)*1.8;
 
-    src_p[2].x = pp[3].x + (pp[2].x - pp[3].x)*1;
-    src_p[2].y = pp[3].y + (pp[2].y - pp[3].y)*1;
+    src_p[2].x = pp[3].x + (pp[2].x - pp[3].x)*1.8;
+    src_p[2].y = pp[3].y + (pp[2].y - pp[3].y)*1.8;
 
-    src_p[3].x = pp[2].x + (pp[3].x - pp[2].x)*1;
-    src_p[3].y = pp[2].y + (pp[3].y - pp[2].y)*1;
+    src_p[3].x = pp[2].x + (pp[3].x - pp[2].x)*1.8;
+    src_p[3].y = pp[2].y + (pp[3].y - pp[2].y)*1.8;
 
  /*
     src_p[0].x = armor.pts_4[0].x - (armor.pts_4[1].x - armor.pts_4[0].x) * 0.5;
