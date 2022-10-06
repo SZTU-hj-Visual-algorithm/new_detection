@@ -23,9 +23,7 @@ ArmorDetector::ArmorDetector()
 {
     lastArmor = Armor();
     detectRoi = cv::Rect();
-    smallArmor = false;
     lostCnt = 0;
-    Lost = true;
 
     cnt=0;
 
@@ -136,10 +134,10 @@ bool ArmorDetector::isLight(Light& light, vector<Point> &cnt)
     bool hw_ratio_ok = light_min_hw_ratio < hw_ratio && hw_ratio < light_max_hw_ratio;
 
     //外接矩形面积和像素点面积之比条件  remove
-    double area_ratio = height * width / contourArea(cnt);
+    double area_ratio = contourArea(cnt) / (height * width);
     bool area_ratio_ok = light_min_area_ratio < area_ratio && area_ratio < light_max_area_ratio;
 
-    area_ratio_ok = true;
+//    area_ratio_ok = true;
 
     //灯条角度条件
     bool angle_ok = fabs(90.0 - light.angle) < light_max_angle || light.angle == 0;
@@ -148,7 +146,7 @@ bool ArmorDetector::isLight(Light& light, vector<Point> &cnt)
     bool is_light = hw_ratio_ok && area_ratio_ok && angle_ok && standing_ok;
 
 
-    if(is_light == false)
+    if(!is_light)
     {
         //cout<<hw_ratio<<"    "<<area_ratio<<"    "<<light.angle<<endl;
     }
@@ -172,8 +170,6 @@ void ArmorDetector::findLights()
     if (contours.size() < 2)
     {
         printf("no 2 contours\n");
-        lostCnt++;
-        candidateLights.clear();
         return;
     }
 
@@ -237,8 +233,6 @@ void ArmorDetector::matchLights()
     if(candidateLights.size() < 2)
     {
         printf("no 2 lights\n");
-        lostCnt++;
-        candidateLights.clear();
         return;
     }
 
@@ -325,7 +319,6 @@ void ArmorDetector::chooseTarget()
     if(candidateArmors.empty())
     {
         cout<<"no target!!"<<endl;
-        lostCnt++;
         finalArmor = Armor();
     }
     else if(candidateArmors.size() == 1)
@@ -333,7 +326,6 @@ void ArmorDetector::chooseTarget()
         cout<<"get 1 target!!"<<endl;
         detectNum(candidateArmors[0]);
 
-        int final_record = armorGrade(candidateArmors[0]);
 
         if (candidateArmors[0].id == 0 || candidateArmors[0].id == 2)
         {
@@ -387,7 +379,6 @@ void ArmorDetector::chooseTarget()
         string nn= convertToString(cnt);
         string path="/home/lmx/number/"+nn+".jpg";
         if(c==113){
-
             imwrite(path,num);
             cnt++;
         }
@@ -436,8 +427,6 @@ void ArmorDetector::chooseTarget()
             string fff=convertToString(ff);
             //putText(_src,fff,checkArmor.center,FONT_HERSHEY_COMPLEX, 1.0, Scalar(12, 23, 200), 1, 8);
 
-
-
             if (final_record > best_record && final_record > grade_standard)
             {
                 best_record = final_record;
@@ -469,7 +458,7 @@ Armor ArmorDetector::autoAim(const cv::Mat &src)
     matchLights();
     chooseTarget();
 
-    /*
+
     if(!finalArmor.size.empty())
     {
         finalArmor.center.x += detectRoi.x;
@@ -521,17 +510,17 @@ void ArmorDetector::detectNum(Armor& armor)
 
     //找到能框住整个数字的四个点
     Point2f src_p[4];
-    src_p[0].x = pp[1].x + (pp[0].x - pp[1].x)*1;
-    src_p[0].y = pp[1].y + (pp[0].y - pp[1].y)*1;
+    src_p[0].x = pp[1].x + (pp[0].x - pp[1].x)*1.8;
+    src_p[0].y = pp[1].y + (pp[0].y - pp[1].y)*1.8;
 
-    src_p[1].x = pp[0].x + (pp[1].x - pp[0].x)*1;
-    src_p[1].y = pp[0].y + (pp[1].y - pp[0].y)*1;
+    src_p[1].x = pp[0].x + (pp[1].x - pp[0].x)*1.8;
+    src_p[1].y = pp[0].y + (pp[1].y - pp[0].y)*1.8;
 
-    src_p[2].x = pp[3].x + (pp[2].x - pp[3].x)*1;
-    src_p[2].y = pp[3].y + (pp[2].y - pp[3].y)*1;
+    src_p[2].x = pp[3].x + (pp[2].x - pp[3].x)*1.8;
+    src_p[2].y = pp[3].y + (pp[2].y - pp[3].y)*1.8;
 
-    src_p[3].x = pp[2].x + (pp[3].x - pp[2].x)*1;
-    src_p[3].y = pp[2].y + (pp[3].y - pp[2].y)*1;
+    src_p[3].x = pp[2].x + (pp[3].x - pp[2].x)*1.8;
+    src_p[3].y = pp[2].y + (pp[3].y - pp[2].y)*1.8;
 
  /*
     src_p[0].x = armor.pts_4[0].x - (armor.pts_4[1].x - armor.pts_4[0].x) * 0.5;
