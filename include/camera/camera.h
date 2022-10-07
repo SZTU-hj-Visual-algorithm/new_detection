@@ -1,36 +1,30 @@
 #pragma once
 #include "CameraApi.h"
 #include <opencv2/opencv.hpp>
-#include <opencv2/core/types_c.h>
-#include <opencv2/core/core_c.h> //ipiimage
+#include "opencv2/core/core_c.h"
+//using namespace cv;
+
 class Camera
 {
 public:
     Camera() = default;
 
-    void re();
     bool init();
-    bool read_frame_rgb(cv::Mat& src);
+    bool read_frame_rgb(cv::Mat &src);
+    bool read_frame_raw(cv::Mat& src);
 
     ~Camera();
-
-
 private:
-    CameraSdkStatus status; //函数返回的错误类型。
+    IplImage* ipiimage = nullptr;    //�����ڻ�������ԭʼͼ������
+    tSdkCameraDevInfo camera_list[1];
+    INT pid = 1;
+    CameraHandle h_camera;
+    tSdkCameraCapbility capbility;
+    tSdkFrameHead frame_h;//ͼ��ͷָ��
+    unsigned char* rgb_buffer = nullptr;//rgbͼ�����ݻ�����
+    int channel;
+    bool init_done;
+    BYTE* pbybuffer = nullptr;//ԭʼͼ�����ݻ�����
+    tSdkImageResolution *pImageResolution;
 
-    // 调用CameraEnumerateDevice前，先设置CameraNums = 16，表示最多只读取16个设备。
-    // 如果需要枚举更多的设备，请更改CameraList数组的大小和CameraNums的值。
-    tSdkCameraDevInfo CameraList[1];
-
-    int hCamera = 0; //相机的句柄。
-
-    tSdkCameraCapbility CameraInfo; //相机的特性。
-
-    BYTE* pFrameBuffer = NULL; //分配 RGB buffer。
-
-    // 获得一帧图像数据。
-    tSdkFrameHead FrameHead;
-    BYTE* pRawData;
-
-    IplImage* iplImage = nullptr;    //储存在缓存区地原始图像数据。
 };

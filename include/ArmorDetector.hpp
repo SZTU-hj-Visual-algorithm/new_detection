@@ -27,9 +27,12 @@ struct Light : public cv::RotatedRect     //灯条结构体
         bottom = (p[2] + p[3]) / 2;
         height = POINT_DIST(top, bottom);
         width = POINT_DIST(p[0], p[1]);
-        angle = top.x <= bottom.x ? box.angle : 90 + box.angle;
+        angle = top.x < bottom.x ? box.angle : 90 + box.angle;
+        if(fabs(bottom.x - top.x) < 0.01) angle = 90;
         //angle = atan2(fabs(centerI.y - centerJ.y),(centerI.x - centerJ.x));
     }
+
+
     int lightColor;
     cv::Point2f top;
     cv::Point2f bottom;
@@ -49,6 +52,7 @@ struct Armor : public cv::RotatedRect    //装甲板结构体
         confidence = 0;
         id = 0;
         type = SMALL;
+        grade = 0;
     }
     explicit Armor(cv::RotatedRect &box) : cv::RotatedRect(box)
     {
@@ -56,11 +60,14 @@ struct Armor : public cv::RotatedRect    //装甲板结构体
         confidence = 0;
         id = 0;
         type = SMALL;
+        grade = 0;
     }
-    vector<cv::Point2f> pts_4; //
+    cv::Point2f armor_pt4[4]; //左下角开始逆时针
     double light_height_rate;  // 左右灯条高度比
     double confidence;
     int id;  // 装甲板类别
+    int grade;
+
     EnermyType type;  // 装甲板类型
 //    int area;  // 装甲板面积
 };
@@ -71,9 +78,9 @@ class ArmorDetector:public robot_state
 public:
     ArmorDetector(); //构造函数初始化
 
-    Armor autoAim(const cv::Mat &src); //将最终目标的坐标转换到摄像头原大小的
+    vector<Armor> autoAim(const cv::Mat &src); //将最终目标的坐标转换到摄像头原大小的
 
-double cnt;
+    double cnt;
 
 private:
     int lostCnt;
@@ -88,8 +95,10 @@ private:
 
 
     //armor_judge_condition
-    double armor_max_wh_ratio;
-    double armor_min_wh_ratio;
+    double armor_big_max_wh_ratio;
+    double armor_big_min_wh_ratio;
+    double armor_small_max_wh_ratio;
+    double armor_small_min_wh_ratio;
     double armor_max_angle;
     double armor_height_offset;
     double armor_ij_min_ratio;
@@ -119,9 +128,10 @@ private:
 
     std::vector<Light> candidateLights; // 筛选的灯条
     std::vector<Armor> candidateArmors; // 筛选的装甲板
+    vector<Armor> finalArmors;
     Armor finalArmor;  // 最终装甲板
 
-    cv::Point2f dst_p[4] = {cv::Point2f(0,80),cv::Point2f(0,0),cv::Point2f(40,0),cv::Point2f(40,80)};
+    cv::Point2f dst_pt[4] = {cv::Point2f(0,0),cv::Point2f(0,80),cv::Point2f(40,80),cv::Point2f(0,40)};
 
     void setImage(const cv::Mat &src); //对图像进行设置
 

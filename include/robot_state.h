@@ -12,8 +12,8 @@
 #define BIG_LIGHT_AIR_K 0.00530
 
 //robot basic classes
-enum EnermyColor { RED = 0, BLUE = 1 };
-enum EnermyType  { SMALL = 0, BIG = 1 };
+enum EnermyColor { RED = 1, BLUE = 2 };
+enum EnermyType  { SMALL = 1, BIG = 2 };
 enum SpinHeading {UNKNOWN, CLOCKWISE, COUNTER_CLOCKWISE};
 
 //robot state information from electronic control group
