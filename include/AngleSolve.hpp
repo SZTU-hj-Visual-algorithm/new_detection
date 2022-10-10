@@ -45,7 +45,7 @@ private:
 
     Eigen::Vector3d transformPos2_Camera(Eigen::Vector3d &Pos);
 
-    Eigen::Vector3d pnpSolve(vector<cv::Point2f> &p, EnermyType type, int method);
+    Eigen::Vector3d pnpSolve(cv::Point2f *p, EnermyType type, int method);
 
     Eigen::Vector3d gravitySolve(Eigen::Vector3d &Pos);//just consider gravity no air resistance consider
 

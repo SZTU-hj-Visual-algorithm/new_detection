@@ -106,17 +106,13 @@ private:
     double armor_max_offset_angle;
 
     //armor_grade_condition
-    double big_wh_standard;
-    double small_wh_standard;
     double near_standard;
     int grade_standard;
 
     //armor_grade_project_ratio
     double id_grade_ratio;
-    double wh_grade_ratio;
     double height_grade_ratio;
     double near_grade_ratio;
-    double angle_grade_ratio;
 
     cv::Mat _src;  // 裁剪src后的ROI
     cv::Mat _binary;

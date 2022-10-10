@@ -18,7 +18,7 @@ include_directories(${PROJECT_SOURCE_DIR}/include/camera)
 
 aux_source_directory(${PROJECT_SOURCE_DIR}/src DIR_SRC)
 
-add_executable(shsihi main.cpp)
+add_executable(shsihi main_debug.cpp)
 
 target_link_libraries(shsihi SRCSO)
 target_link_libraries(shsihi ${OpenCV_LIBS})

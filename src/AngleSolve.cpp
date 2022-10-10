@@ -74,7 +74,7 @@ Eigen::Vector3d AngleSolve::airResistanceSolve(Vector3d &Pos)
     return Vector3d(Pos(0,0),Pos(1,0), y_temp);
 }
 
-Eigen::Vector3d AngleSolve::pnpSolve(vector<Point2f> &p, EnermyType type, int method = SOLVEPNP_IPPE)
+Eigen::Vector3d AngleSolve::pnpSolve(Point2f *p, EnermyType type, int method = SOLVEPNP_IPPE)
 {
     double w = type == SMALL ? small_w : big_w;
     double h = type == SMALL ? small_h : big_h;
@@ -117,6 +117,8 @@ Eigen::Vector3d AngleSolve::pnpSolve(vector<Point2f> &p, EnermyType type, int me
 
 
     cv::cv2eigen(tvec, tv);
+
+    return tv;
 }
 
 void AngleSolve::yawPitchSolve(Vector3d &Pos)
@@ -134,7 +136,7 @@ void AngleSolve::getAngle(Armor &aimArmor)
     po << 1,0,0;
     /////////////
     Vector3d aimPosition,worldPosition,world_dropPosition,camera_dropPosition;
-    aimPosition = pnpSolve(aimArmor.pts_4,aimArmor.type);//use PnP to get aim position
+    aimPosition = pnpSolve(aimArmor.armor_pt4,aimArmor.type);//use PnP to get aim position
 
     worldPosition = transformPos2_World(aimPosition);//transform aim position to world coordinate system
 
