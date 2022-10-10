@@ -9,7 +9,7 @@ int main()
 {
     auto camera_warrper = new Camera;
     ArmorDetector autoShoot;
-    Armor autoTarget;
+    vector<Armor> autoTarget;
     Mat src;
     if (camera_warrper->init())
     {
@@ -18,7 +18,7 @@ int main()
             camera_warrper->read_frame_rgb(src);
             autoTarget = autoShoot.autoAim(src);
             imshow("src",src);
-            if (!autoTarget.size.empty())
+            if (!autoTarget.empty())
             {
                 printf("main get target!!!\n");
             }
