@@ -54,10 +54,10 @@ ArmorDetector::ArmorDetector()
     near_standard = 200;
 
     //armor_grade_project_ratio
-    id_grade_ratio = 0.2;
-    wh_grade_ratio = 0.3;
-    height_grade_ratio = 0.2;
-    near_grade_ratio = 0.2;
+    id_grade_ratio = 0.5;
+    wh_grade_ratio = 0.15;
+    height_grade_ratio = 0.15;
+    near_grade_ratio = 0.1;
     angle_grade_ratio = 0.1;
 
     grade_standard = 70; // 及格分
