@@ -45,7 +45,7 @@ ArmorDetector::ArmorDetector()
     armor_height_offset = 1;
     armor_ij_min_ratio = 0.5;
     armor_ij_max_ratio = 2.0;
-    armor_max_angle = 30.0;
+    armor_max_angle = 20.0;
 
 
     //armor_grade_condition
