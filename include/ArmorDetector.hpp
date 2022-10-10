@@ -115,6 +115,7 @@ private:
     double near_grade_ratio;
 
     cv::Mat _src;  // 裁剪src后的ROI
+    cv::Mat originSrc;
     cv::Mat _binary;
     std::vector<cv::Mat> temps;
 

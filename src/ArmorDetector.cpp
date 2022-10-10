@@ -46,7 +46,7 @@ ArmorDetector::ArmorDetector()
     armor_height_offset = 1;
     armor_ij_min_ratio = 0.5;
     armor_ij_max_ratio = 2.0;
-    armor_max_angle = 20.0;
+    armor_max_angle = 28.0;
 
 
 
@@ -54,8 +54,8 @@ ArmorDetector::ArmorDetector()
     near_standard = 200;
 
     //armor_grade_project_ratio
-    id_grade_ratio = 0.5;
-    height_grade_ratio = 0.3;
+    id_grade_ratio = 0.6;
+    height_grade_ratio = 0.2;
     near_grade_ratio = 0.2;
     grade_standard = 60; // 及格分
 }
@@ -429,7 +429,7 @@ void ArmorDetector::chooseTarget()
 
         double ff = finalArmors[i].grade;
         string fff = convertToString(ff);
-//        putText(final_armors_src,fff,finalArmors[i].center,FONT_HERSHEY_COMPLEX, 1.0, Scalar(12, 23, 200), 1, 8);
+        putText(final_armors_src,fff,finalArmors[i].center,FONT_HERSHEY_COMPLEX, 1.0, Scalar(12, 23, 200), 1, 8);
     }
 
     imshow("final_armors-show", final_armors_src);
@@ -438,10 +438,13 @@ void ArmorDetector::chooseTarget()
 
 vector<Armor> ArmorDetector::autoAim(const cv::Mat &src)
 {
+    //init
     finalArmors.clear();
     candidateArmors.clear();
     candidateLights.clear();
+    originSrc = src.clone();
 
+    //do autoaim task
     setImage(src);
     findLights();
     matchLights();
@@ -574,6 +577,7 @@ int ArmorDetector::armorGrade(const Armor& checkArmor)
     {
         id_grade = check_id == 1 ? 80 : 60;
     }
+    id_grade=100;
     ////////end///////////////////////////////////
 
     /////////最大装甲板板打分项目/////////////////////
@@ -591,7 +595,7 @@ int ArmorDetector::armorGrade(const Armor& checkArmor)
     ////////靠近图像中心打分项目//////////////////////
     // 靠近中心，与中心做距离，设定标准值，看图传和摄像头看到的画面的差异
     int near_grade;
-    double pts_distance = POINT_DIST(checkArmor.center, Point2f(_src.cols * 0.5, _src.rows * 0.5));
+    double pts_distance = POINT_DIST(checkArmor.center, Point2f(originSrc.cols * 0.5, originSrc.rows * 0.5));
     near_grade = pts_distance/near_standard < 1 ? 100 : (near_standard/pts_distance) * 100;
     ////////end//////////////////////////////////
 
