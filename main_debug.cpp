@@ -15,6 +15,7 @@ int main()
     vector<Armor> autoTarget;
     Mat src;
     VideoCapture v("../material/record.avi");
+    int lost_count = 0;
 //    if (camera_warrper->init())
 //    {
         while(true)
@@ -31,7 +32,13 @@ int main()
 //            imshow("src",src);
             if (!autoTarget.empty())
             {
-                printf("main get target!!!\n");
+                printf("---------------main get target!!!---------------\n");
+            }
+            else
+            {
+                lost_count++;
+                printf("----------------no target\n---------------");
+                waitKey(0);
             }
             if (waitKey(10) == 27)
             {
@@ -42,7 +49,7 @@ int main()
 //    }
 
 
-
+    printf("lost_count:%d\n",lost_count);
 
 
     return 0;

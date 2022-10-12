@@ -128,8 +128,6 @@ private:
     vector<Armor> finalArmors;
     Armor finalArmor;  // 最终装甲板
 
-    cv::Point2f dst_pt[4] = {cv::Point2f(0,0),cv::Point2f(0,80),cv::Point2f(40,80),cv::Point2f(0,40)};
-
     void setImage(const cv::Mat &src); //对图像进行设置
 
     void findLights(); //找灯条获取候选匹配的灯条

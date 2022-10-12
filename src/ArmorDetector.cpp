@@ -4,8 +4,8 @@
 
 //#define DRAW_LIGHTS_CONTOURS
 //#define DRAW_LIGHTS_RRT
-
-#define DRAW_ARMORS_RRT
+#define SHOW_NUMROI
+//#define DRAW_ARMORS_RRT
 #define DRAW_FINAL_ARMOR_S_CLASS
 //#define DRAW_FINAL_ARMOR_MAIN
 
@@ -31,32 +31,30 @@ ArmorDetector::ArmorDetector()
     binThresh = 180;   // blue 100  red  70
 
     //light_judge_condition
-    light_max_angle = 30.0;
+    light_max_angle = 27.0;
     light_min_hw_ratio = 1;
     light_max_hw_ratio = 25;   // different distance and focus
     light_min_area_ratio = 0.6;   // contourArea / RotatedRect
     light_max_area_ratio = 1.0;
 
     //armor_judge_condition
-    armor_big_max_wh_ratio = 5;
-    armor_big_min_wh_ratio = 3;
-    armor_small_max_wh_ratio = 3;
-    armor_small_min_wh_ratio = 0.5;//装甲板宽高比真的这么设吗
-    armor_max_offset_angle = 40.0;
+    armor_big_max_wh_ratio = 4;
+    armor_big_min_wh_ratio = 2.5;
+    armor_small_max_wh_ratio = 2.5;
+    armor_small_min_wh_ratio = 0.8;//装甲板宽高比真的这么设吗
+    armor_max_offset_angle = 30.0;
     armor_height_offset = 1;
     armor_ij_min_ratio = 0.5;
     armor_ij_max_ratio = 2.0;
-    armor_max_angle = 28.0;
-
-
+    armor_max_angle = 35.0;
 
     //armor_grade_condition
-    near_standard = 200;
+    near_standard = 300;
 
     //armor_grade_project_ratio
     id_grade_ratio = 0.6;
-    height_grade_ratio = 0.2;
     near_grade_ratio = 0.2;
+    height_grade_ratio = 0.2;
     grade_standard = 60; // 及格分
 }
 
@@ -140,11 +138,10 @@ bool ArmorDetector::isLight(Light& light, vector<Point> &cnt)
     //灯条判断的条件总集
     bool is_light = hw_ratio_ok && area_ratio_ok && angle_ok && standing_ok;
 
-
-    if(!is_light)
-    {
-        //cout<<hw_ratio<<"    "<<area_ratio<<"    "<<light.angle<<endl;
-    }
+//    if(!is_light)
+//    {
+//        cout<<hw_ratio<<"    "<<area_ratio<<"    "<<light.angle<<endl;
+//    }
 
 
     return is_light;
@@ -334,17 +331,20 @@ void ArmorDetector::chooseTarget()
     if(candidateArmors.empty())
     {
         cout<<"no target!!"<<endl;
-        finalArmor = Armor();
+//        finalArmor = Armor();
+        return;
     }
     else if(candidateArmors.size() == 1)
     {
         cout<<"get 1 target!!"<<endl;
         detectNum(candidateArmors[0]);
+        if(candidateArmors[0].confidence < THRESH_CONFIDENCE)
+            return;
         if(candidateArmors[0].id == 2)
         {
-            finalArmor = Armor();
+//            finalArmor = Armor();
+            return;
         }
-
         candidateArmors[0].grade = armorGrade(candidateArmors[0]);
         if (candidateArmors[0].grade > grade_standard)
         {
@@ -364,21 +364,16 @@ void ArmorDetector::chooseTarget()
 
         for(int i = 0; i < candidateArmors.size(); ++i) {
             detectNum(candidateArmors[i]);
-
-            if (candidateArmors[i].id == 2) {
+            if(candidateArmors[i].confidence < THRESH_CONFIDENCE)
                 continue;
-            }
-//            // 暂时只有五个类别
-//            if (candidateArmors[i].id == 1)
-//                candidateArmors[i].type = BIG;
-//            else if (candidateArmors[i].id == 3 || candidateArmors[i].id == 4)
-//                candidateArmors[i].type = SMALL;
+            if (candidateArmors[i].id == 2)
+                continue;
 
             // 装甲板中心点在屏幕中心部分，在中心部分中又是倾斜最小的，
             // 如何避免频繁切换目标：缩小矩形框就是跟踪到了，一旦陀螺则会目标丢失，
             // UI界面做数字选择，选几就是几号，可能在切换会麻烦，（不建议）
 
-            //打分制筛选装甲板优先级
+            //打分制筛选装甲板优先级(！！！！最后只保留了优先级条件2和4和id优先级，其他有些冗余！！！！)
             /*最高优先级数字识别英雄1号装甲板，其次3和4号（如果打分的话1给100，3和4给80大概这个比例）
              *1、宽高比（筛选正面和侧面装甲板，尽量打正面装甲板）
              *2、装甲板靠近图像中心
@@ -424,12 +419,13 @@ void ArmorDetector::chooseTarget()
 //        finalArmors[i].points(armor_pts);
         for (int j = 0; j < 4; j++)
         {
-            line(final_armors_src, finalArmors[i].armor_pt4[j], finalArmors[i].armor_pt4[(j + 1) % 4], CV_RGB(0, 255, 255), 2);
+            line(final_armors_src, finalArmors[i].armor_pt4[j], finalArmors[i].armor_pt4[(j + 1) % 4], CV_RGB(255, 255, 0), 2);
         }
 
         double ff = finalArmors[i].grade;
-        string fff = convertToString(ff);
-        putText(final_armors_src,fff,finalArmors[i].center,FONT_HERSHEY_COMPLEX, 1.0, Scalar(12, 23, 200), 1, 8);
+        string information = convertToString(finalArmors[i].id) + ":" + convertToString(finalArmors[i].confidence*100) + "%";
+//        putText(final_armors_src,ff,finalArmors[i].center,FONT_HERSHEY_COMPLEX, 1.0, Scalar(12, 23, 200), 1, 8);
+        putText(final_armors_src, information,Point(finalArmors[i].center.x-30,finalArmors[i].center.y),FONT_HERSHEY_COMPLEX,0.5,Scalar(255,0,255));
     }
 
     imshow("final_armors-show", final_armors_src);
@@ -500,13 +496,13 @@ void ArmorDetector::detectNum(Armor& armor)
     Mat num;
 
     // Light length in image
-    const int light_length = 30;
+    const int light_length = 14;//大致为高的一半
     // Image size after warp
-    const int warp_height = 60;
-    const int small_armor_width = 48;
-    const int large_armor_width = 80;
+    const int warp_height = 30;
+    const int small_armor_width = 32;//为48/3*2
+    const int large_armor_width = 44;//约为70/3*2
     // Number ROI size
-    const cv::Size roi_size(30, 60);
+    const cv::Size roi_size(20, 30);
 
     const int top_light_y = (warp_height - light_length) / 2;
     const int bottom_light_y = top_light_y + light_length;
@@ -525,16 +521,19 @@ void ArmorDetector::detectNum(Armor& armor)
     numDst = numDst(cv::Rect(cv::Point((warp_width - roi_size.width) / 2, 0), roi_size));
 
     // Binarize
-    //cvtColor(numDst, numDst, cv::COLOR_RGB2GRAY);
-    //threshold(numDst, numDst, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
+//    cvtColor(numDst, numDst, cv::COLOR_RGB2GRAY);
+//    threshold(numDst, numDst, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
+
 
     dnn_detect(numDst, armor);
-
-
-    resize(numDst,numDst,Size(30,60));
-    imshow("number_show",numDst);
-
-    cout<<"number:   "<<armor.id<<"   type:   "<<armor.type<<endl;
+#ifdef SHOW_NUMROI
+    if ((armor.id!=2)&&(armor.confidence > THRESH_CONFIDENCE))
+    {
+        resize(numDst,numDst,Size(200,300));
+        imshow("number_show",numDst);
+        cout<<"number:   "<<armor.id<<"   type:   "<<armor.type<<endl;
+    }
+#endif
 }
 
 bool ArmorDetector::conTain(RotatedRect &match_rect,vector<Light> &Lights, size_t &i, size_t &j)
