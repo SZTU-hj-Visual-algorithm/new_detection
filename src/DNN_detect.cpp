@@ -29,6 +29,6 @@ void DNN_detect::net_forward(const Mat& blob, dnn::Net net, int& id, double& con
     softmax_prob /= sum;
     cv::Point class_id;
     minMaxLoc(softmax_prob, nullptr, &confidence, nullptr, &class_id);
-    if (class_id.x)
-    id = class_id.x + 1;
+    if(class_id.x)
+    id = class_id.x;
 }

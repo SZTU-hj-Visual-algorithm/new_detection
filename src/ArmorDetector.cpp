@@ -5,7 +5,7 @@
 //#define DRAW_LIGHTS_CONTOURS
 //#define DRAW_LIGHTS_RRT
 #define SHOW_NUMROI
-//#define DRAW_ARMORS_RRT
+#define DRAW_ARMORS_RRT
 #define DRAW_FINAL_ARMOR_S_CLASS
 //#define DRAW_FINAL_ARMOR_MAIN
 
@@ -38,9 +38,9 @@ ArmorDetector::ArmorDetector()
     light_max_area_ratio = 1.0;
 
     //armor_judge_condition
-    armor_big_max_wh_ratio = 4;
-    armor_big_min_wh_ratio = 2.5;
-    armor_small_max_wh_ratio = 2.5;
+    armor_big_max_wh_ratio = 5;
+    armor_big_min_wh_ratio = 3;
+    armor_small_max_wh_ratio = 3;
     armor_small_min_wh_ratio = 0.8;//装甲板宽高比真的这么设吗
     armor_max_offset_angle = 30.0;
     armor_height_offset = 1;
@@ -340,7 +340,7 @@ void ArmorDetector::chooseTarget()
         detectNum(candidateArmors[0]);
         if(candidateArmors[0].confidence < THRESH_CONFIDENCE)
             return;
-        if(candidateArmors[0].id == 2)
+        if(candidateArmors[0].id == 2 || candidateArmors[0].id == 0)
         {
 //            finalArmor = Armor();
             return;
@@ -366,7 +366,7 @@ void ArmorDetector::chooseTarget()
             detectNum(candidateArmors[i]);
             if(candidateArmors[i].confidence < THRESH_CONFIDENCE)
                 continue;
-            if (candidateArmors[i].id == 2)
+            if (candidateArmors[i].id == 2 || candidateArmors[i].id == 0)
                 continue;
 
             // 装甲板中心点在屏幕中心部分，在中心部分中又是倾斜最小的，
@@ -527,7 +527,7 @@ void ArmorDetector::detectNum(Armor& armor)
 
     dnn_detect(numDst, armor);
 #ifdef SHOW_NUMROI
-    if ((armor.id!=2)&&(armor.confidence > THRESH_CONFIDENCE))
+    if ((armor.id!=0)&&(armor.confidence > THRESH_CONFIDENCE))
     {
         resize(numDst,numDst,Size(200,300));
         imshow("number_show",numDst);
