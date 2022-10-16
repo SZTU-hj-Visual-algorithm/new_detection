@@ -1,98 +1,84 @@
-#ifndef _KALMAN_H_
-#define _KALMAN_H_
-
 #include <Eigen/Dense>
 
-template<int V_Z = 3, int V_X = 6>
-class Kalman {
+class KalmanFilter {
+
 public:
-    using Matrix_zzd = Eigen::Matrix<double, V_Z, V_Z>;
-    using Matrix_xxd = Eigen::Matrix<double, V_X, V_X>;
-    using Matrix_zxd = Eigen::Matrix<double, V_Z, V_X>;
-    using Matrix_xzd = Eigen::Matrix<double, V_X, V_Z>;
-    using Matrix_x1d = Eigen::Matrix<double, V_X, 1>;
-    using Matrix_z1d = Eigen::Matrix<double, V_Z, 1>;
-private:
-    Matrix_x1d x_k1; // k-1Ê±¿ÌµÄÂË²¨Öµ£¬¼´ÊÇk-1Ê±¿ÌµÄÖµ
-    Matrix_xzd K;    // KalmanÔöÒæ
-    Matrix_xxd F;    // ×ªÒÆ¾ØÕó
-    Matrix_zxd H;    // ¹Û²â¾ØÕó
-    Matrix_xxd Q;    // Ô¤²â¹ı³ÌÔëÉùÆ«²îµÄ·½²î
-    Matrix_zzd R;    // ²âÁ¿ÔëÉùÆ«²î£¬(ÏµÍ³´î½¨ºÃÒÔºó£¬Í¨¹ı²âÁ¿Í³¼ÆÊµÑé»ñµÃ)
-    Matrix_xxd P;    // ¹À¼ÆÎó²îĞ­·½²î
-    double last_t{ 0 };
-public:
-    Kalman() = default;
+    Eigen::VectorXd x_k1; // k-1æ—¶åˆ»çš„æ»¤æ³¢å€¼ï¼Œå³æ˜¯k-1æ—¶åˆ»çš„å€¼
+    Eigen::MatrixXd K;    // Kalmanå¢ç›Š
+    Eigen::MatrixXd F;    // è½¬ç§»çŸ©é˜µ
+    Eigen::MatrixXd H;    // è§‚æµ‹çŸ©é˜µ
+    Eigen::MatrixXd Q;    // é¢„æµ‹è¿‡ç¨‹å™ªå£°åå·®çš„æ–¹å·®
+    Eigen::MatrixXd R;    // æµ‹é‡å™ªå£°åå·®ï¼Œ(ç³»ç»Ÿæ­å»ºå¥½ä»¥åï¼Œé€šè¿‡æµ‹é‡ç»Ÿè®¡å®éªŒè·å¾—)
+    Eigen::MatrixXd P;    // ä¼°è®¡è¯¯å·®åæ–¹å·®
 
-    Kalman() {
-        t = 0.01;
-
-        F << 1,  0,  0,  t,  0,  0,
-             0,  1,  0,  0,  t,  0,
-             0,  0,  1,  0,  0,  t,
-             0,  0,  0,  1,  0,  0,
-             0,  0,  0,  0,  1,  0,
-             0,  0,  0,  0,  0,  1;
-
+    KalmanFilter()
+    {
         H << 1, 0, 0, 0, 0, 0,
-             0, 1, 0, 0, 0, 0,
-             0, 0, 1, 0, 0, 0;
+                0, 1, 0, 0, 0, 0,
+                0, 0, 1, 0, 0, 0;
 
         R << 0.01,    0,    0,
                 0, 0.01,    0,
                 0,    0, 0.01;
 
         Q << 10,  0,  0,  0,  0,  0,
-              0, 10,  0,  0,  0,  0,
-              0,  0, 10,  0,  0,  0,
-              0,  0,  0,  2,  0,  0,
-              0,  0,  0,  0,  2,  0,
-              0,  0,  0,  0,  0,  2;
-        
-        x_k1 << 0, 0.0001, 0.001, 0, 0.0000001, 0.000001;
+                0, 10,  0,  0,  0,  0,
+                0,  0, 10,  0,  0,  0,
+                0,  0,  0,  2,  0,  0,
+                0,  0,  0,  0,  2,  0,
+                0,  0,  0,  0,  0,  2;
 
+        P << 1,  0,  0,  0,  0,  0,
+                0, 1,  0,  0,  0,  0,
+                0,  0, 1,  0,  0,  0,
+                0,  0,  0,  1,  0,  0,
+                0,  0,  0,  0,  1,  0,
+                0,  0,  0,  0,  0,  1;
     }
 
-    void reset(Matrix_xxd F, Matrix_zxd H, Matrix_xxd Q, Matrix_zzd R, Matrix_x1d init, double t) {
-        this->F = F;
-        this->H = H;
-        this->P = Matrix_xxd::Zero();
-        this->Q = Q;
-        this->R = R;
-        x_k1 = init;
-        last_t = t;
+    void initial(Eigen::Vector3d position)
+    {
+        x_k1 << position[0], position[1], position[2], 0, 0, 0;
     }
 
-    void reset(Matrix_x1d init, double t) {
-        x_k1 = init;
-        last_t = t;
+    void initial(Eigen::Vector3d position, Eigen::Vector3d speed)
+    {
+        x_k1 << position[0], position[1], position[2], speed[0], speed[1], speed[2];
     }
 
-    Matrix_x1d update(Matrix_z1d z_k, double t) {
-        // ÉèÖÃ×ªÒÆ¾ØÕóÖĞµÄÊ±¼äÏî
-        for (int i = 0; i < V_X; i++) {
-            F(i + 3, i) = t - last_t;
-        }
-        last_t = t;
+    void setF(double t)
+    {
+        P << 1,  0,  0,  t,  0,  0,
+                0, 1,  0,  0,  t,  0,
+                0,  0, 1,  0,  0,  t,
+                0,  0,  0,  1,  0,  0,
+                0,  0,  0,  0,  1,  0,
+                0,  0,  0,  0,  0,  1;
+    }
 
-        // Ô¤²âÏÂÒ»Ê±¿ÌµÄÖµ
-        Matrix_x1d p_x_k = F * x_k1;   //xµÄÏÈÑé¹À¼ÆÓÉÉÏÒ»¸öÊ±¼äµãµÄºóÑé¹À¼ÆÖµºÍÊäÈëĞÅÏ¢¸ø³ö
+    void setP(Eigen::MatrixXd P_last)
+    {
+        this->P = P_last;
+    }
 
-        //ÇóĞ­·½²î
-        P = F * P * F.transpose() + Q;  //¼ÆËãÏÈÑé¾ù·½²î p(n|n-1)=F^2*p(n-1|n-1)+q
+    Eigen::VectorXd update(Eigen::Vector3d z_k) {
 
-        //¼ÆËãkalmanÔöÒæ
-        K = P * H.transpose() * (H * P * H.transpose() + R).inverse();  //Kg(k)= P(k|k-1) H¡¯ / (H P(k|k-1) H¡¯ + Q)
+        // é¢„æµ‹ä¸‹ä¸€æ—¶åˆ»çš„å€¼
+        Eigen::MatrixXd p_x_k = F * x_k1;   //xçš„å…ˆéªŒä¼°è®¡ç”±ä¸Šä¸€ä¸ªæ—¶é—´ç‚¹çš„åéªŒä¼°è®¡å€¼å’Œè¾“å…¥ä¿¡æ¯ç»™å‡º
 
-        //ĞŞÕı½á¹û£¬¼´¼ÆËãÂË²¨Öµ
-        x_k1 = p_x_k + K * (z_k - H * p_x_k);  //ÀûÓÃ²ĞÓàµÄĞÅÏ¢¸ÄÉÆ¶Ôx(t)µÄ¹À¼Æ£¬¸ø³öºóÑé¹À¼Æ£¬Õâ¸öÖµÒ²¾ÍÊÇÊä³ö  X(k|k)= X(k|k-1)+Kg(k) (Z(k)-H X(k|k-1))
+        //æ±‚åæ–¹å·®
+        P = F * P * F.transpose() + Q;  //è®¡ç®—å…ˆéªŒå‡æ–¹å·® p(n|n-1)=F^2*p(n-1|n-1)+q
 
-        //¸üĞÂºóÑé¹À¼Æ
-        P = (Matrix_xxd::Identity() - K * H) * P;   //¼ÆËãºóÑé¾ù·½²î  P[n|n]=(1-K[n]*H)*P[n|n-1]
+        //è®¡ç®—kalmanå¢ç›Š
+        K = P * H.transpose() * (H * P * H.transpose() + R).inverse();  //Kg(k)= P(k|k-1) Hâ€™ / (H P(k|k-1) Hâ€™ + Q)
+
+        //ä¿®æ­£ç»“æœï¼Œå³è®¡ç®—æ»¤æ³¢å€¼
+        x_k1 = p_x_k + K * (z_k - H * p_x_k);  //åˆ©ç”¨æ®‹ä½™çš„ä¿¡æ¯æ”¹å–„å¯¹x(t)çš„ä¼°è®¡ï¼Œç»™å‡ºåéªŒä¼°è®¡ï¼Œè¿™ä¸ªå€¼ä¹Ÿå°±æ˜¯è¾“å‡º  X(k|k)= X(k|k-1)+Kg(k) (Z(k)-H X(k|k-1))
+
+        //æ›´æ–°åéªŒä¼°è®¡
+        P = (Eigen::MatrixXd::Identity(6, 6) - K * H) * P;   //è®¡ç®—åéªŒå‡æ–¹å·®  P[n|n]=(1-K[n]*H)*P[n|n-1]
 
         return x_k1;
     }
 
 };
-
-#endif /* _KALMAN_H_ */

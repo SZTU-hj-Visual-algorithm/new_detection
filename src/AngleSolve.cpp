@@ -1,7 +1,3 @@
-//
-// Created by 蓬蒿浪人 on 2022/9/16.
-//
-
 #include "AngleSolve.hpp"
 #include <opencv2/core/eigen.hpp>
 
@@ -70,7 +66,7 @@ Eigen::Vector3d AngleSolve::airResistanceSolve(Vector3d &Pos)
     return Vector3d(Pos(0,0),Pos(1,0), y_temp);
 }
 
-Eigen::Vector3d AngleSolve::pnpSolve(vector<Point2f> &p, EnermyType type, int method = SOLVEPNP_IPPE)
+Eigen::Vector3d AngleSolve::pnpSolve(Point2f *p, EnermyType type, int method = SOLVEPNP_IPPE)
 {
     double w = type == SMALL ? small_w : big_w;
     double h = type == SMALL ? small_h : big_h;
@@ -113,6 +109,16 @@ Eigen::Vector3d AngleSolve::pnpSolve(vector<Point2f> &p, EnermyType type, int me
 
 
     cv::cv2eigen(tvec, tv);
+
+    return tv;
+}
+
+float AngleSolve::BulletModel(float x, float v, float angle) { //x:m,v:m/s,angle:rad
+    float y;
+    fly_time = (float)((exp(SMALL_AIR_K * x) - 1) / (SMALL_AIR_K * v * cos(angle)));
+    y = (float)(v * sin(angle) * fly_time - GRAVITY * fly_time * fly_time / 2);
+    printf("t:%f\n",fly_time);
+    return y;
 }
 
 void AngleSolve::yawPitchSolve(Vector3d &Pos)
@@ -123,6 +129,11 @@ void AngleSolve::yawPitchSolve(Vector3d &Pos)
                        sqrt(Pos(0,0)*Pos(0,0) + Pos(2,0)*Pos(2,0))) / CV_PI*180.0 - ab_pitch;
 }
 
+double AngleSolve::getFlyTime()
+{
+    return fly_time * 1000;
+}
+
 void AngleSolve::getAngle(Armor &aimArmor)
 {
     ////sample////
@@ -130,7 +141,7 @@ void AngleSolve::getAngle(Armor &aimArmor)
     po << 1,0,0;
     /////////////
     Vector3d aimPosition,worldPosition,world_dropPosition,camera_dropPosition;
-    aimPosition = pnpSolve(aimArmor.pts_4,aimArmor.type);//use PnP to get aim position
+    aimPosition = pnpSolve(aimArmor.armor_pt4,aimArmor.type);//use PnP to get aim position
 
     worldPosition = transformPos2_World(aimPosition);//transform aim position to world coordinate system
 
@@ -141,11 +152,30 @@ void AngleSolve::getAngle(Armor &aimArmor)
     camera_dropPosition = transformPos2_Camera(world_dropPosition);//transform position to camera coordinate system to get angle
 
     yawPitchSolve(camera_dropPosition);//get need yaw and pitch
-    
+
     ////output result/////
     std::cout<<worldPosition[0]<<std::endl;
     std::cout<<worldPosition[1]<<std::endl;
     std::cout<<worldPosition[2]<<std::endl;
+    /////////////////////
+
+}
+
+//
+void AngleSolve::getAngle(Eigen::Vector3d predicted_position)
+{
+    Vector3d world_dropPosition,camera_dropPosition;
+
+    world_dropPosition = airResistanceSolve(predicted_position);//calculate gravity and air resistance
+
+    camera_dropPosition = transformPos2_Camera(world_dropPosition);//transform position to camera coordinate system to get angle
+
+    yawPitchSolve(camera_dropPosition);//get need yaw and pitch
+
+    ////output result/////
+    std::cout<<predicted_position[0]<<std::endl;
+    std::cout<<predicted_position[1]<<std::endl;
+    std::cout<<predicted_position[2]<<std::endl;
     /////////////////////
 
 }

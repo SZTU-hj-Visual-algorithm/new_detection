@@ -22,7 +22,9 @@ private:
     // 如果需要枚举更多的设备，请更改CameraList数组的大小和CameraNums的值。
     tSdkCameraDevInfo CameraList[1];
 
-    int hCamera = 0; //相机的句柄。
+    int CameraNums = 1;
+
+    CameraHandle hCamera; //相机的句柄。
 
     tSdkCameraCapbility CameraInfo; //相机的特性。
 

@@ -3,21 +3,17 @@
 
 #pragma once
 
+#include <Eigen/Dense>
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc.hpp"
 #include "DNN_detect.h"
 #include <iostream>
-#include "SpinTracker.h"
 
+#include "robot_state.h"
 
 using namespace std;
 
 #define POINT_DIST(p1,p2) std::sqrt((p1.x-p2.x)*(p1.x-p2.x)+(p1.y-p2.y)*(p1.y-p2.y))
-struct SRC{
-public:
-    Mat img;
-    int time_stamp;
-};
 
 //灯条结构体
 struct Light : public cv::RotatedRect     //灯条结构体
@@ -32,17 +28,50 @@ struct Light : public cv::RotatedRect     //灯条结构体
         bottom = (p[2] + p[3]) / 2;
         height = POINT_DIST(top, bottom);
         width = POINT_DIST(p[0], p[1]);
-        angle = top.x <= bottom.x ? box.angle : 90 + box.angle;
-
+        angle = top.x < bottom.x ? box.angle : 90 + box.angle;
+        if(fabs(bottom.x - top.x) < 0.01) angle = 90;
+        //angle = atan2(fabs(centerI.y - centerJ.y),(centerI.x - centerJ.x));
     }
+
+
     int lightColor;
     cv::Point2f top;
     cv::Point2f bottom;
     double angle;
     double height;
     double width;
+
+
 };
 
+//装甲板结构体
+struct Armor : public cv::RotatedRect    //装甲板结构体
+{
+    Armor()
+    {
+        light_height_rate = 0;
+        confidence = 0;
+        id = 0;
+        type = SMALL;
+        grade = 0;
+    }
+    explicit Armor(cv::RotatedRect &box) : cv::RotatedRect(box)
+    {
+        light_height_rate = 0;
+        confidence = 0;
+        id = 0;
+        type = SMALL;
+        grade = 0;
+    }
+    cv::Point2f armor_pt4[4]; //左下角开始逆时针
+    double light_height_rate;  // 左右灯条高度比
+    double confidence;
+    int id;  // 装甲板类别
+    int grade;
+    EnermyType type;  // 装甲板类型
+    Eigen::Vector3d current_position;  // 当前的真实坐标
+//    int area;  // 装甲板面积
+};
 
 //主类
 class ArmorDetector:public robot_state
@@ -50,9 +79,9 @@ class ArmorDetector:public robot_state
 public:
     ArmorDetector(); //构造函数初始化
 
-    Armor autoAim(const Mat &src, int timestamp); //将最终目标的坐标转换到摄像头原大小的
+    vector<Armor> autoAim(const cv::Mat &src); //将最终目标的坐标转换到摄像头原大小的
 
-
+    double cnt;
 
 private:
     int lostCnt;
@@ -67,30 +96,27 @@ private:
 
 
     //armor_judge_condition
-    double armor_max_wh_ratio;
-    double armor_min_wh_ratio;
+    double armor_big_max_wh_ratio;
+    double armor_big_min_wh_ratio;
+    double armor_small_max_wh_ratio;
+    double armor_small_min_wh_ratio;
     double armor_max_angle;
     double armor_height_offset;
     double armor_ij_min_ratio;
     double armor_ij_max_ratio;
+    double armor_max_offset_angle;
 
     //armor_grade_condition
-    double big_wh_standard;
-    double small_wh_standard;
     double near_standard;
     int grade_standard;
 
     //armor_grade_project_ratio
     double id_grade_ratio;
-    double wh_grade_ratio;
     double height_grade_ratio;
     double near_grade_ratio;
-    double angle_grade_ratio;
-
-    bool Lost;
-    bool smallArmor;
 
     cv::Mat _src;  // 裁剪src后的ROI
+    cv::Mat originSrc;
     cv::Mat _binary;
     std::vector<cv::Mat> temps;
 
@@ -100,23 +126,10 @@ private:
 
     std::vector<Light> candidateLights; // 筛选的灯条
     std::vector<Armor> candidateArmors; // 筛选的装甲板
+    vector<Armor> finalArmors;
     Armor finalArmor;  // 最终装甲板
 
-    std::map<int,int> new_armors_cnt_map;          //装甲板计数map，记录新增装甲板数
-    std::multimap<int, SpinTracker> trackers_map;  //预测器Map
-    const int max_delta_t = 50;                //使用同一预测器的最大时间间隔(ms)
-    const double max_delta_dist = 40;              // 最大追踪距离
-    std::map<int,SpinHeading> spin_status_map;     // 记录该车小陀螺状态（未知，顺时针，逆时针）
-    std::map<int,double> spin_score_map;           // 记录各装甲板小陀螺可能性分数，大于0为逆时针旋转，小于0为顺时针旋转
-
-    double anti_spin_max_r_multiple = 4.5;         // 符合陀螺条件，反陀螺分数增加倍数
-    int anti_spin_judge_low_thres = 2e3;           // 小于该阈值认为该车已关闭陀螺
-    int anti_spin_judge_high_thres = 2e4;          // 大于该阈值认为该车已开启陀螺
-
-
-    bool updateSpinScore();
-
-    cv::Point2f dst_p[4] = {cv::Point2f(0,60),cv::Point2f(0,0),cv::Point2f(30,0),cv::Point2f(30,60)};
+    cv::Point2f dst_pt[4] = {cv::Point2f(0,0),cv::Point2f(0,80),cv::Point2f(40,80),cv::Point2f(0,40)};
 
     void setImage(const cv::Mat &src); //对图像进行设置
 
@@ -124,7 +137,7 @@ private:
 
     void matchLights(); //匹配灯条获取候选装甲板
 
-    void chooseTarget(int time_stamp); //找出优先级最高的装甲板
+    void chooseTarget(); //找出优先级最高的装甲板
 
     bool isLight(Light& light, std::vector<cv::Point> &cnt);
 

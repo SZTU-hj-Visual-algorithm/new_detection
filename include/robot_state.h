@@ -12,8 +12,9 @@
 #define BIG_LIGHT_AIR_K 0.00530
 
 //robot basic classes
-enum EnermyColor { RED = 0, BLUE = 1 };
-enum EnermyType  { SMALL = 0, BIG = 1 };
+enum EnermyColor { RED = 1, BLUE = 2 };
+enum EnermyType  { SMALL = 1, BIG = 2 };
+enum EnermyState { RUN = 1, SPIN = 2};
 enum SpinHeading {UNKNOWN, CLOCKWISE, COUNTER_CLOCKWISE};
 
 //robot state information from electronic control group
@@ -21,11 +22,11 @@ class robot_state
 {
 public:
     //电控发来的角度和弹速
-	float ab_pitch = 0.0;
-	float ab_yaw = 0.0;
-	float ab_roll = 0.0;
-	float SPEED = 25.0;
-	int enermy_color = BLUE;
+    float ab_pitch = 0.0;
+    float ab_yaw = 0.0;
+    float ab_roll = 0.0;
+    float SPEED = 25.0;
+    int enermy_color = BLUE;
     int enermy_type;
     int enermy_ID;
 };
