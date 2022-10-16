@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <Eigen/Dense>
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc.hpp"
 #include "DNN_detect.h"
@@ -67,8 +68,8 @@ struct Armor : public cv::RotatedRect    //装甲板结构体
     double confidence;
     int id;  // 装甲板类别
     int grade;
-
     EnermyType type;  // 装甲板类型
+    Eigen::Vector3d current_position;  // 当前的真实坐标
 //    int area;  // 装甲板面积
 };
 
@@ -127,6 +128,8 @@ private:
     std::vector<Armor> candidateArmors; // 筛选的装甲板
     vector<Armor> finalArmors;
     Armor finalArmor;  // 最终装甲板
+
+    cv::Point2f dst_pt[4] = {cv::Point2f(0,0),cv::Point2f(0,80),cv::Point2f(40,80),cv::Point2f(0,40)};
 
     void setImage(const cv::Mat &src); //对图像进行设置
 

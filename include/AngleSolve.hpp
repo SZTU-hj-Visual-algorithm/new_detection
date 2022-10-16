@@ -23,13 +23,16 @@ public:
 
     void getAngle(Armor &aimArmor);
 
+    void getAngle(Eigen::Vector3d predicted_position);
 
-
-private:
+//private:
     double big_w;
     double big_h;
     double small_w;
     double small_h;
+
+    double fly_time;
+
 
     Eigen::Matrix<double,3,3> F_EGN;
     Eigen::Matrix<double,1,5> C_EGN;
@@ -53,13 +56,9 @@ private:
 
     void yawPitchSolve(Eigen::Vector3d &Pos);
 
-    static float BulletModel(float x, float v, float angle) { //x:m,v:m/s,angle:rad
-        float t, y;
-        t = (float)((exp(SMALL_AIR_K * x) - 1) / (SMALL_AIR_K * v * cos(angle)));
-        y = (float)(v * sin(angle) * t - GRAVITY * t * t / 2);
-        printf("t:%f\n",t);
-        return y;
-    }
+    float BulletModel(float x, float v, float angle);
+
+    double getFlyTime();
 };
 
 #endif //SHSIHI_ANGLESOLVE_HPP
