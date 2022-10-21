@@ -5,7 +5,7 @@
 #ifndef SHSIHI_ANGLESOLVE_HPP
 #define SHSIHI_ANGLESOLVE_HPP
 
-#include "robot_state.h"
+#include "RobotState.h"
 #include "opencv2/opencv.hpp"
 #include <Eigen/Dense>
 #include "ArmorDetector.hpp"
@@ -16,15 +16,14 @@ struct headAngle
     double pitch;
 };
 
-class AngleSolve : public robot_state
+class AngleSolve : public RobotState
 {
 public:
-    AngleSolve();
+    explicit AngleSolve(RobotState &robotState);
 
     void getAngle(Armor &aimArmor);
 
-
-
+    headAngle send;
 private:
     double big_w;
     double big_h;
@@ -33,13 +32,11 @@ private:
 
     Eigen::Matrix<double,3,3> F_EGN;
     Eigen::Matrix<double,1,5> C_EGN;
-    Eigen::Matrix<double,3,3> rotated_matrix;
     Eigen::Matrix<double,3,3> coordinate_maxtrix;
+    Eigen::Matrix<double,3,3> rotated_maxtrix;
 
     cv::Mat F_MAT;
     cv::Mat C_MAT;
-
-    headAngle send;
 
     Eigen::Vector3d transformPos2_World(Eigen::Vector3d &Pos);
 

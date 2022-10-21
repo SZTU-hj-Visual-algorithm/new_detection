@@ -3,12 +3,13 @@
 
 #pragma once
 
-#include "opencv2/highgui/highgui.hpp"
-#include "opencv2/imgproc.hpp"
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc.hpp>
 #include "DNN_detect.h"
 #include <iostream>
+#include <opencv2/tracking/tracking.hpp>
 
-#include "robot_state.h"
+#include "RobotState.h"
 
 using namespace std;
 
@@ -73,16 +74,17 @@ struct Armor : public cv::RotatedRect    //装甲板结构体
 };
 
 //主类
-class ArmorDetector:public robot_state
+class ArmorDetector:public RobotState
 {
 public:
-    ArmorDetector(); //构造函数初始化
+    explicit ArmorDetector(RobotState &robotState); //构造函数初始化
 
     vector<Armor> autoAim(const cv::Mat &src); //将最终目标的坐标转换到摄像头原大小的
 
     double cnt;
 
 private:
+
     int lostCnt;
     int binThresh;
 
@@ -107,6 +109,7 @@ private:
 
     //armor_grade_condition
     double near_standard;
+    double height_standard;
     int grade_standard;
 
     //armor_grade_project_ratio

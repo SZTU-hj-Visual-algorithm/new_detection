@@ -11,3 +11,10 @@
 
 #ignore all file in .idea
 /.idea/
+
+#ignore cmake file
+CMakeLists.txt
+
+#ignore huge file such as record and so on
+/material
+

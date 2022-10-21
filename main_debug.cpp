@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <opencv2/opencv.hpp>
 #include "ArmorDetector.hpp"
+#include "AngleSolve.hpp"
 #include "camera.h"
 
 using namespace cv;
@@ -11,8 +12,10 @@ using namespace cv;
 int main()
 {
 //    auto camera_warrper = new Camera;
-    ArmorDetector autoShoot;
-    vector<Armor> autoTarget;
+    RobotState robotState;
+    ArmorDetector autoShoot(robotState);
+    AngleSolve angleSolve(robotState);
+    vector<Armor> autoTargets;
     Mat src;
     VideoCapture v("../material/record.avi");
     int lost_count = 0;
@@ -28,9 +31,14 @@ int main()
                 break;
             }
 //            camera_warrper->read_frame_rgb(src);
-            autoTarget = autoShoot.autoAim(src);
-//            imshow("src",src);
-            if (!autoTarget.empty())
+            autoTargets = autoShoot.autoAim(src);
+//            angleSolve.getAngle(autoTargets[0]);
+//            string yaw = "yaw:" + convertToString(angleSolve.send.yaw);
+//            string pitch = "pitch:" + convertToString(angleSolve.send.pitch);
+//            string angleInformation = yaw + pitch;
+//            putText(src,angleInformation,Point(0,0),FONT_HERSHEY_COMPLEX,1,Scalar(0,255,0),2);
+            imshow("src",src);
+            if (!autoTargets.empty())
             {
                 printf("---------------main get target!!!---------------\n");
             }
@@ -38,7 +46,7 @@ int main()
             {
                 lost_count++;
                 printf("----------------no target\n---------------");
-                waitKey(0);
+//                waitKey(0);
             }
             if (waitKey(10) == 27)
             {

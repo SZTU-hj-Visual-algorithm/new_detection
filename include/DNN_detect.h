@@ -4,11 +4,11 @@
 #include <opencv2/opencv.hpp>
 #include <iostream>
 
-#define NET_PATH "../module/2022_10_13_hj_num.onnx"
+#define NET_PATH "../module/2022_10_21_hj_num_4.onnx"
 #define INPUT_WIDTH 20
 #define INPUT_HEIGHT 30
 #define TO_GRAY 1
-#define THRESH_CONFIDENCE 0.95
+#define THRESH_CONFIDENCE 0.853
 
 class DNN_detect{
 public:

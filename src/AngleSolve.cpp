@@ -12,7 +12,7 @@
 using namespace cv;
 using namespace Eigen;
 
-AngleSolve::AngleSolve()
+AngleSolve::AngleSolve(RobotState &robotState) : RobotState(robotState)
 {
     F_MAT=(Mat_<double>(3, 3) << 1554.52600, 0.000000000000, 630.01725, 0.000000000000, 1554.47451, 519.78242, 0.000000000000, 0.000000000000, 1.000000000000);
     C_MAT=(Mat_<double>(1, 5) << -0.08424, 0.16737, -0.00006, 0.00014, 0.00000);
@@ -20,21 +20,20 @@ AngleSolve::AngleSolve()
 
 Eigen::Vector3d AngleSolve::transformPos2_World(Vector3d &Pos)
 {
-    Mat camera2_tuoluo = (Mat_<double>(3,1) << CV_PI/2,0,0);
-    Mat eular = (Mat_<double>(3,1) << ab_pitch/180*CV_PI,ab_yaw/180*CV_PI,ab_roll/180*CV_PI);
+    Mat eular = (Mat_<double>(3,1) << -ab_pitch/180*CV_PI,-ab_yaw/180*CV_PI,-ab_roll/180*CV_PI);
+    Mat camera_2world = (Mat_<double>(3,1) << CV_PI,0,0);
     Mat rotated_mat,coordinate_mat;
-    Rodrigues(camera2_tuoluo,coordinate_mat);
     Rodrigues(eular,rotated_mat);
+    Rodrigues(camera_2world,coordinate_mat);
 
-    cv2eigen(rotated_mat,rotated_matrix);
+    cv2eigen(rotated_mat,rotated_maxtrix);
     cv2eigen(coordinate_mat,coordinate_maxtrix);
-
-    return rotated_matrix*(coordinate_maxtrix*Pos);
+    return rotated_maxtrix*(coordinate_maxtrix*Pos);
 }
 
 Eigen::Vector3d AngleSolve::transformPos2_Camera(Eigen::Vector3d &Pos)
 {
-    return coordinate_maxtrix.inverse()*(rotated_matrix.inverse()*Pos);
+    return coordinate_maxtrix.inverse()*(rotated_maxtrix.inverse()*Pos);
 }
 
 Eigen::Vector3d AngleSolve::gravitySolve(Vector3d &Pos)
@@ -68,7 +67,7 @@ Eigen::Vector3d AngleSolve::airResistanceSolve(Vector3d &Pos)
         if (fabsf(dy) < 0.001) {
             break;
         }
-        printf("iteration num %d: angle %f,temp target y:%f,err of y:%f\n",i+1,a*180/3.1415926535,y_temp,dy);
+        printf("iteration num %d: angle %f,temp target y:%f,err of y:%f\n",i+1,a*180/CV_PI,y_temp,dy);
     }
 
     return Vector3d(Pos(0,0),Pos(1,0), y_temp);
@@ -78,35 +77,18 @@ Eigen::Vector3d AngleSolve::pnpSolve(Point2f *p, EnermyType type, int method = S
 {
     double w = type == SMALL ? small_w : big_w;
     double h = type == SMALL ? small_h : big_h;
-    cv::Point2f lu, ld, ru, rd;
     std::vector<cv::Point3d> ps = {
             {-w / 2 , -h / 2, 0.},
             {w / 2 , -h / 2, 0.},
             {w / 2 , h / 2, 0.},
             {-w / 2 , h / 2, 0.}
     };
-    if (p[0].y < p[1].y) {
-        lu = p[0];
-        ld = p[1];
-    }
-    else {
-        lu = p[1];
-        ld = p[0];
-    }
-    if (p[2].y < p[3].y) {
-        ru = p[2];
-        rd = p[3];
-    }
-    else {
-        ru = p[3];
-        rd = p[2];
-    }
 
     vector<cv::Point2f> pu;
-    pu.push_back(lu);
-    pu.push_back(ru);
-    pu.push_back(rd);
-    pu.push_back(ld);
+    pu.push_back(p[3]);
+    pu.push_back(p[2]);
+    pu.push_back(p[1]);
+    pu.push_back(p[0]);
 
     cv::Mat rvec;
     cv::Mat tvec;
@@ -131,10 +113,6 @@ void AngleSolve::yawPitchSolve(Vector3d &Pos)
 
 void AngleSolve::getAngle(Armor &aimArmor)
 {
-    ////sample////
-    Vector3d po;
-    po << 1,0,0;
-    /////////////
     Vector3d aimPosition,worldPosition,world_dropPosition,camera_dropPosition;
     aimPosition = pnpSolve(aimArmor.armor_pt4,aimArmor.type);//use PnP to get aim position
 
@@ -148,10 +126,5 @@ void AngleSolve::getAngle(Armor &aimArmor)
 
     yawPitchSolve(camera_dropPosition);//get need yaw and pitch
 
-    ////output result/////
-    std::cout<<worldPosition[0]<<std::endl;
-    std::cout<<worldPosition[1]<<std::endl;
-    std::cout<<worldPosition[2]<<std::endl;
-    /////////////////////
 
 }
