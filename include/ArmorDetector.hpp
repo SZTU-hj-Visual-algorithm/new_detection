@@ -49,7 +49,6 @@ struct Armor : public cv::RotatedRect    //装甲板结构体
 {
     Armor()
     {
-        light_height_rate = 0;
         confidence = 0;
         id = 0;
         type = SMALL;
@@ -57,14 +56,12 @@ struct Armor : public cv::RotatedRect    //装甲板结构体
     }
     explicit Armor(cv::RotatedRect &box) : cv::RotatedRect(box)
     {
-        light_height_rate = 0;
         confidence = 0;
         id = 0;
         type = SMALL;
         grade = 0;
     }
     cv::Point2f armor_pt4[4]; //左下角开始逆时针
-    double light_height_rate;  // 左右灯条高度比
     double confidence;
     int id;  // 装甲板类别
     int grade;
@@ -84,7 +81,6 @@ public:
     double cnt;
 
 private:
-    int lostCnt;
     int binThresh;
 
     //light_judge_condition
@@ -93,6 +89,7 @@ private:
     double light_max_hw_ratio;   // different distance and focus
     double light_min_area_ratio;   // RotatedRect / Rect
     double light_max_area_ratio;
+    double light_area_max;
 
 
     //armor_judge_condition
@@ -109,6 +106,7 @@ private:
     //armor_grade_condition
     double near_standard;
     int grade_standard;
+    int height_standard;
 
     //armor_grade_project_ratio
     double id_grade_ratio;
@@ -120,16 +118,12 @@ private:
     cv::Mat _binary;
     std::vector<cv::Mat> temps;
 
-    cv::Rect detectRoi;  //为了把src通过roi变成_src
-
     Armor lastArmor;
 
     std::vector<Light> candidateLights; // 筛选的灯条
     std::vector<Armor> candidateArmors; // 筛选的装甲板
     vector<Armor> finalArmors;
     Armor finalArmor;  // 最终装甲板
-
-    cv::Point2f dst_pt[4] = {cv::Point2f(0,0),cv::Point2f(0,80),cv::Point2f(40,80),cv::Point2f(0,40)};
 
     void setImage(const cv::Mat &src); //对图像进行设置
 

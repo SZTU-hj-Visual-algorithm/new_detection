@@ -3,7 +3,6 @@
 #include "ArmorDetector.hpp"
 #include "ArmorTracker.h"
 #include "camera.h"
-#include <stdlib.h>
 #include <time.h>
 using namespace cv;
 
@@ -21,17 +20,19 @@ int main()
     {
         while(true)
         {
-            camera_warrper->read_frame_rgb(src);
+            camera_warrper->read_frame_rgb();
             clock_t start;
             start = clock();
             autoTarget = autoShoot.autoAim(src);
             imshow("src",src);
             if (!autoTarget.empty())
             {
-                printf("main get target!!!\n");
+                //printf("main get target!!!\n");
             }
 
-            sendAngle = autoTrack.finalResult(autoTarget, start);
+
+
+            //sendAngle = autoTrack.finalResult(autoTarget, start);
 
             if (waitKey(10) == 27)
             {

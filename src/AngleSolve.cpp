@@ -1,32 +1,48 @@
 #include "AngleSolve.hpp"
 #include <opencv2/core/eigen.hpp>
 
+
 using namespace cv;
 using namespace Eigen;
 
 AngleSolve::AngleSolve()
 {
-    F_MAT=(Mat_<double>(3, 3) << 1554.52600, 0.000000000000, 630.01725, 0.000000000000, 1554.47451, 519.78242, 0.000000000000, 0.000000000000, 1.000000000000);
-    C_MAT=(Mat_<double>(1, 5) << -0.08424, 0.16737, -0.00006, 0.00014, 0.00000);
+    F_MAT=(Mat_<float>(3, 3) <<   1579.60532, 0.000000000000, 627.56545,
+                                            0.000000000000, 1579.86788, 508.65311,
+                                            0.000000000000, 0.000000000000, 1.000000000000);
+    C_MAT=(Mat_<float>(1, 5) << -0.09082  , 0.22923  , -0.00020  , 0.00013 , 0.00000);
+
+    big_w = 0;
+    big_h = 0;
+    small_w = 0.135;
+    small_h = 0.057;
+
 }
 
 Eigen::Vector3d AngleSolve::transformPos2_World(Vector3d &Pos)
 {
+    //for debug
+    ab_pitch=ab_yaw=ab_roll=0;
+
     Mat camera2_tuoluo = (Mat_<double>(3,1) << CV_PI/2,0,0);
-    Mat eular = (Mat_<double>(3,1) << ab_pitch/180*CV_PI,ab_yaw/180*CV_PI,ab_roll/180*CV_PI);
+    Mat eular = (Mat_<double>(3,1) << -ab_pitch/180*CV_PI, -ab_yaw/180*CV_PI, -ab_roll/180*CV_PI);
     Mat rotated_mat,coordinate_mat;
     Rodrigues(camera2_tuoluo,coordinate_mat);
     Rodrigues(eular,rotated_mat);
 
     cv2eigen(rotated_mat,rotated_matrix);
-    cv2eigen(coordinate_mat,coordinate_maxtrix);
+    cv2eigen(coordinate_mat,coordinate_matrix);
 
-    return rotated_matrix*(coordinate_maxtrix*Pos);
+
+
+
+
+    return coordinate_matrix*(rotated_matrix*Pos);
 }
 
 Eigen::Vector3d AngleSolve::transformPos2_Camera(Eigen::Vector3d &Pos)
 {
-    return coordinate_maxtrix.inverse()*(rotated_matrix.inverse()*Pos);
+    return rotated_matrix.inverse()*(coordinate_matrix.inverse()*Pos);
 }
 
 Eigen::Vector3d AngleSolve::gravitySolve(Vector3d &Pos)
@@ -45,8 +61,8 @@ Eigen::Vector3d AngleSolve::gravitySolve(Vector3d &Pos)
 Eigen::Vector3d AngleSolve::airResistanceSolve(Vector3d &Pos)
 {
     //at world coordinate system
-    auto y = (float)Pos(2,0);
-    auto x = (float)sqrt(Pos(0,0)*Pos(0,0)+Pos(1,0)*Pos(1,0));
+    auto y = (float)Pos(1,0);
+    auto x = (float)sqrt(Pos(0,0)*Pos(0,0)+Pos(2,0)*Pos(2,0));
     float y_temp, y_actual, dy;
     float a;
     y_temp = y;
@@ -63,7 +79,7 @@ Eigen::Vector3d AngleSolve::airResistanceSolve(Vector3d &Pos)
         printf("iteration num %d: angle %f,temp target y:%f,err of y:%f\n",i+1,a*180/3.1415926535,y_temp,dy);
     }
 
-    return Vector3d(Pos(0,0),Pos(1,0), y_temp);
+    return Vector3d(Pos(0,0),y_temp,Pos(2,0));
 }
 
 Eigen::Vector3d AngleSolve::pnpSolve(Point2f *p, EnermyType type, int method = SOLVEPNP_IPPE)
@@ -77,38 +93,26 @@ Eigen::Vector3d AngleSolve::pnpSolve(Point2f *p, EnermyType type, int method = S
             {w / 2 , h / 2, 0.},
             {-w / 2 , h / 2, 0.}
     };
-    if (p[0].y < p[1].y) {
-        lu = p[0];
-        ld = p[1];
-    }
-    else {
-        lu = p[1];
-        ld = p[0];
-    }
-    if (p[2].y < p[3].y) {
-        ru = p[2];
-        rd = p[3];
-    }
-    else {
-        ru = p[3];
-        rd = p[2];
-    }
+
 
     vector<cv::Point2f> pu;
-    pu.push_back(lu);
-    pu.push_back(ru);
-    pu.push_back(rd);
-    pu.push_back(ld);
+    pu.push_back(p[3]);
+    pu.push_back(p[2]);
+    pu.push_back(p[1]);
+    pu.push_back(p[0]);
 
     cv::Mat rvec;
     cv::Mat tvec;
     Eigen::Vector3d tv;
 
-
     cv::solvePnP(ps, pu, F_MAT, C_MAT, rvec, tvec,false,method);
-
-
     cv::cv2eigen(tvec, tv);
+
+
+
+    // offset++
+
+
 
     return tv;
 }
@@ -117,16 +121,16 @@ float AngleSolve::BulletModel(float x, float v, float angle) { //x:m,v:m/s,angle
     float y;
     fly_time = (float)((exp(SMALL_AIR_K * x) - 1) / (SMALL_AIR_K * v * cos(angle)));
     y = (float)(v * sin(angle) * fly_time - GRAVITY * fly_time * fly_time / 2);
-    printf("t:%f\n",fly_time);
+    printf("fly_time:%f\n",fly_time);
     return y;
 }
 
 void AngleSolve::yawPitchSolve(Vector3d &Pos)
 {
     send.yaw = atan2(Pos(0,0) ,
-                     Pos(2,0)) / CV_PI*180.0 - ab_yaw;
-    send.pitch = atan2(Pos(1,0) ,
-                       sqrt(Pos(0,0)*Pos(0,0) + Pos(2,0)*Pos(2,0))) / CV_PI*180.0 - ab_pitch;
+                     -1 * Pos(1,0)) / CV_PI*180.0 - ab_yaw;
+    send.pitch = atan2(Pos(2,0) ,
+                       sqrt(Pos(0,0)*Pos(0,0) + Pos(1,0)*Pos(1,0))) / CV_PI*180.0 - ab_pitch;
 }
 
 double AngleSolve::getFlyTime()
@@ -136,6 +140,7 @@ double AngleSolve::getFlyTime()
 
 void AngleSolve::getAngle(Armor &aimArmor)
 {
+
     ////sample////
     Vector3d po;
     po << 1,0,0;
@@ -165,6 +170,8 @@ void AngleSolve::getAngle(Armor &aimArmor)
 void AngleSolve::getAngle(Eigen::Vector3d predicted_position)
 {
     Vector3d world_dropPosition,camera_dropPosition;
+
+
 
     world_dropPosition = airResistanceSolve(predicted_position);//calculate gravity and air resistance
 

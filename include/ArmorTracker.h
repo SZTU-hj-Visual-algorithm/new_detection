@@ -1,4 +1,5 @@
 #include "opencv2/opencv.hpp"
+#include <opencv2/highgui/highgui.hpp>
 #include <Eigen/Dense>
 #include "ArmorDetector.hpp"
 #include "AngleSolve.hpp"
@@ -17,6 +18,8 @@ class ArmorTracker
 public:
     ArmorTracker();
 
+    void setMyAngle(cv::Mat src, float pitch, float yaw, float roll, float SPEED);
+
     // 返回是否找到（初始化卡尔曼）和enemy_armor
     void selectEnemy(vector<Armor> find_armors);
 
@@ -27,17 +30,18 @@ public:
     void getPredictedPositionAndSpeed(clock_t start_time);
 
     // 计算抬枪角度
-    headAngle finalResult(vector<Armor> find_armors,clock_t start_time);
+    headAngle finalResult(cv::Mat src, vector<Armor> find_armors,clock_t start_time);
 
 
 
 private:
+    cv::Mat _src;
 
     Armor enemy_armors;
 
     AngleSolve AS;
 
-    KalmanFilter KF;
+    //KalmanFilter KF;
 
     TrackerState tracker_state;  // 此时跟踪器的状态
 

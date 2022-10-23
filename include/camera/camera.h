@@ -8,14 +8,12 @@ class Camera
 public:
     Camera() = default;
 
-    void re();
     bool init();
-    bool read_frame_rgb(cv::Mat& src);
-
+    bool read_frame_rgb();
+    bool release_data();
     ~Camera();
 
 
-private:
     CameraSdkStatus status; //函数返回的错误类型。
 
     // 调用CameraEnumerateDevice前，先设置CameraNums = 16，表示最多只读取16个设备。

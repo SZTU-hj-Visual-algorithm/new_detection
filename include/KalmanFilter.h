@@ -11,7 +11,9 @@ public:
     Eigen::MatrixXd R;    // 测量噪声偏差，(系统搭建好以后，通过测量统计实验获得)
     Eigen::MatrixXd P;    // 估计误差协方差
 
-    KalmanFilter()
+    KalmanFilter() = default;
+
+    void initial(Eigen::Vector3d position)
     {
         H << 1, 0, 0, 0, 0, 0,
                 0, 1, 0, 0, 0, 0,
@@ -34,15 +36,34 @@ public:
                 0,  0,  0,  1,  0,  0,
                 0,  0,  0,  0,  1,  0,
                 0,  0,  0,  0,  0,  1;
-    }
 
-    void initial(Eigen::Vector3d position)
-    {
         x_k1 << position[0], position[1], position[2], 0, 0, 0;
     }
 
     void initial(Eigen::Vector3d position, Eigen::Vector3d speed)
     {
+        H << 1, 0, 0, 0, 0, 0,
+                0, 1, 0, 0, 0, 0,
+                0, 0, 1, 0, 0, 0;
+
+        R << 0.01,    0,    0,
+                0, 0.01,    0,
+                0,    0, 0.01;
+
+        Q << 10,  0,  0,  0,  0,  0,
+                0, 10,  0,  0,  0,  0,
+                0,  0, 10,  0,  0,  0,
+                0,  0,  0,  2,  0,  0,
+                0,  0,  0,  0,  2,  0,
+                0,  0,  0,  0,  0,  2;
+
+        P << 1,  0,  0,  0,  0,  0,
+                0, 1,  0,  0,  0,  0,
+                0,  0, 1,  0,  0,  0,
+                0,  0,  0,  1,  0,  0,
+                0,  0,  0,  0,  1,  0,
+                0,  0,  0,  0,  0,  1;
+
         x_k1 << position[0], position[1], position[2], speed[0], speed[1], speed[2];
     }
 

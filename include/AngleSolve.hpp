@@ -1,7 +1,3 @@
-//
-// Created by 蓬蒿浪人 on 2022/9/16.
-//
-
 #ifndef SHSIHI_ANGLESOLVE_HPP
 #define SHSIHI_ANGLESOLVE_HPP
 
@@ -37,7 +33,7 @@ public:
     Eigen::Matrix<double,3,3> F_EGN;
     Eigen::Matrix<double,1,5> C_EGN;
     Eigen::Matrix<double,3,3> rotated_matrix;
-    Eigen::Matrix<double,3,3> coordinate_maxtrix;
+    Eigen::Matrix<double,3,3> coordinate_matrix;
 
     cv::Mat F_MAT;
     cv::Mat C_MAT;
