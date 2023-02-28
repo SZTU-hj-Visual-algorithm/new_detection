@@ -1,50 +1,40 @@
-#include <stdio.h>
-#include <opencv2/opencv.hpp>
-#include "ArmorDetector.hpp"
-#include "ArmorTracker.h"
-#include "camera.h"
-#include <time.h>
+#include "armor_detection.hpp"
+#include "gimbal_control.h"
+#include <opencv2/core/cvstd.hpp>
+#include "CRC_Check.h"
+#include"serialport.h"
+#include<X11/Xlib.h>
+#include"Thread.h"
+
+//#define DETECT
+#define PREDICT
+
 using namespace cv;
 
-int main()
+pthread_t thread1;
+pthread_t thread2;
+pthread_t thread3;
+
+pthread_mutex_t mutex_new;
+pthread_cond_t cond_new;
+pthread_mutex_t mutex_ka;
+pthread_cond_t cond_ka;
+
+bool is_ka = false;
+bool is_start = false;
+bool is_continue = true;
+
+int main(void)
 {
-    auto camera_warrper = new Camera;
-    ArmorDetector autoShoot;
-    vector<Armor> autoTarget;
-
-    ArmorTracker autoTrack;
-    headAngle sendAngle;
-    
-    Mat src;
-    if (camera_warrper->init())
-    {
-        while(true)
-        {
-            camera_warrper->read_frame_rgb();
-            clock_t start;
-            start = clock();
-            autoTarget = autoShoot.autoAim(src);
-            imshow("src",src);
-            if (!autoTarget.empty())
-            {
-                //printf("main get target!!!\n");
-            }
-
-
-
-            //sendAngle = autoTrack.finalResult(autoTarget, start);
-
-            if (waitKey(10) == 27)
-            {
-                camera_warrper->~Camera();
-                break;
-            }
-        }
-    }
-
-
-
-
-
+    XInitThreads();
+    pthread_mutex_init(&mutex_new, NULL);
+    pthread_cond_init(&cond_new, NULL);
+    pthread_create(&thread1, NULL, Build_Src, NULL);
+    pthread_create(&thread2, NULL, Armor_Kal, NULL);
+    pthread_create(&thread3, NULL, Kal_predict, NULL);
+    pthread_join(thread1, NULL);
+    pthread_join(thread2, NULL);
+    pthread_join(thread3, NULL);
+    pthread_mutex_destroy(&mutex_new);
     return 0;
 }

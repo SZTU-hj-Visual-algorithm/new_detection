@@ -16,11 +16,6 @@
 #include <sys/ioctl.h>
 #include <iostream>
 #include "CRC_Check.h"
-//#include <opencv2/opencv.hpp>
-//#include <opencv2/core.hpp>
-//#include <opencv2/highgui.hpp>
-//#include <opencv2/imgproc.hpp>
-//using namespace cv;
 using namespace std;
 
 
@@ -37,9 +32,6 @@ using namespace std;
 //串口的相关参数
 #define BAUDRATE 115200//波特率
 #define UART_DEVICE "/dev/ttyUSB0"//默认的串口名称
-
-//C_lflag
-#define ECHOFLAGS (ECHO | ECHOE | ECHOK | ECHONL)
 
 //字节数为4的结构体
 typedef union
@@ -58,10 +50,17 @@ typedef union
 //用于保存目标相关角度和距离信息及瞄准情况
 typedef struct
 {
-	float2uchar pitch_angle;//俯仰角
-        float2uchar yaw_angle;//偏航角
-	unsigned char cmd;
+    float2uchar pitch_angle;//俯仰角
+    float2uchar yaw_angle;//偏航角
+    unsigned char cmd;
 } VisionData;
+
+typedef struct
+{
+    float2uchar CacheData;
+}ReceiveData;
+
+
 
 
 class SerialPort
@@ -72,20 +71,18 @@ private:
     unsigned char rdata[255]; //raw_data
     unsigned char Tdata[30];  //transfrom data
 
-	void set_Brate();
-	int set_Bit();
+    void set_Brate();
+    int set_Bit();
 public:
     SerialPort();
     SerialPort(char const *portpath);
-    void reload(char const *portpath);
     bool initSerialPort();
     bool get_Mode1(int &mode, float &pitch, float &yaw, float &roll, float &ball_speed, int &color);
-	void TransformData(const VisionData &data); //主要方案
-	void send();
-	void closePort();
-	void TransformDataFirst(int Xpos, int Ypos, int dis);//方案1
-//  int set_disp_mode(int);
-//  void TransformTarPos(const VisionData &data);
+    bool get_Mode1_new(int &mode, float &pitch, float &yaw, float &ball_speed, float* quaternion);
+    void TransformData(const VisionData &data); //主要方案
+    void send();
+    void closePort();
+    void TransformDataFirst(int Xpos, int Ypos, int dis);//方案1
 };
 
 #endif //SERIALPORT_H

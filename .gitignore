@@ -8,7 +8,19 @@
 
 #ignore all file in cmake-build-debug
 /cmake-build-debug/
+/cmake-build-release/
 
 #ignore all file in .idea
 /.idea/
-CMakeList.txt
+
+#ignore cmake file
+#CMakeLists.txt
+
+#ignore huge file such as record and so on
+/sample
+
+#ignore record file
+*.avi
+
+#ignore build file
+/build

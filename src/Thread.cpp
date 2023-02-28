@@ -1,207 +1,202 @@
 #include "Thread.h"
 #include <cstdio>
 #include <opencv2/opencv.hpp>
+#include <chrono>
 
 using namespace cv;
+//using namespace robot_detection;
+using namespace std;
 
-bool is_continue = true;
+SerialPort port("/dev/vision");
 
-typedef struct form
-{
-    vector<Armor> Enemy_s;
-    float a[4];
-    int is_get;
-    int mode;
-    int da_is_get;
-}form;
 
+//one2two
+form _send_data;
+Mat src;
+
+//two2three
 form send_data;
+Mat ka_src;
 
-Mat ka_src_get;
 
-SerialPort port("/dev/ttyUSB");
+
 
 void* Build_Src(void* PARAM)
 {
-    Mat get_src;
+    int lin_is_get/* = true*/;
+    int mode_temp;
+	float lin[3];
+	float quat[4];
+	chrono_time time_temp;
+	Mat get_src;
     auto camera_warper = new Camera;
-    printf("camera_open\n");
-    if (camera_warper->init())
-    {
-        printf("1\n");
-        while (is_continue && !(waitKey(10) == 27))
-        {
-            if (camera_warper->read_frame_rgb())
-            {
-                get_src = cv::cvarrToMat(camera_warper->iplImage).clone();
+	port.initSerialPort();
+	printf("camera_open-\n");
+    // chrono
+//    auto start = chrono::high_resolution_clock::now();
+	if (camera_warper->init())
+	{
+		//printf("1-real\n");
+		while (is_continue && (waitKey(1) != 27))
+		{
+            // chrono
+//            auto end = chrono::high_resolution_clock::now();    //结束时间
+			if (camera_warper->read_frame_rgb())
+			{
+				get_src = camera_warper->src.clone();
+
+				lin_is_get = port.get_Mode1_new(mode_temp, lin[0], lin[1], lin[2],quat);
+				time_temp = chrono::high_resolution_clock::now();
                 pthread_mutex_lock(&mutex_new);
                 {
                     get_src.copyTo(src);
+					_send_data = {mode_temp,
+								 lin_is_get,
+								 {lin[0],lin[1],lin[2]},
+								 {quat[0],quat[1],quat[2],quat[3]},
+								 vector<Armor>(),
+								 time_temp};
                     is_start = true;
                     pthread_cond_signal(&cond_new);
                     pthread_mutex_unlock(&mutex_new);
-
+                    imshow("src",src);
                     camera_warper->release_data();
                 }
-            }
-            else
-            {
-                src = cv::Mat();
-            }
 
-        }
-        camera_warper->~Camera();
-        pthread_mutex_unlock(&mutex_new);
-        is_continue = false;
-    }
-    else
-    {
-        printf("No camera!!\n");
-        is_continue = false;
-    }
+			}
+			else
+			{
+				src = cv::Mat();
+			}
+//			start = end;
+		}
+		camera_warper->~Camera();
+		pthread_mutex_unlock(&mutex_new);
+		is_continue = false;
+	}
+	else
+	{
+		printf("No camera!!\n");
+		is_continue = false;
+	}
 }
 
 void* Armor_Kal(void* PARAM)
 {
-    ArmorDetector autoShoot;
-    vector<Armor> autoTarget;
+    ArmorDetector Detect;
+    std::vector<Armor> Targets;
+	Mat src_copy;
+	chrono_time time_temp;
+	int mode_temp;
+	int color_get;
 
-    Mat src_copy;
+	sleep(2);
+	printf("Armor_open\n");
+	while (is_continue)
+	{
+		pthread_mutex_lock(&mutex_new);
 
-    port.initSerialPort();
+		while (!is_start) {
 
-    sleep(2);    // 会影响程序运行时间吗
-    printf("Armor_open\n");
-    while (is_continue)
-    {
-        pthread_mutex_lock(&mutex_new);
+			pthread_cond_wait(&cond_new, &mutex_new);
 
-        while (!is_start) {
-            pthread_cond_wait(&cond_new, &mutex_new);
-        }
+		}
+		is_start = false;
 
-        is_start = false;
+		src.copyTo(src_copy);
+        Detect.updateData(_send_data.data,_send_data.quat);
+        mode_temp = _send_data.mode;
+        color_get = _send_data.dat_is_get;
+        time_temp = _send_data.tim;
+		//imshow("src_copy",src_copy);
 
-        src.copyTo(src_copy);
-
-        pthread_mutex_unlock(&mutex_new);
-        float lin[4];
-        int mode_temp/* = 0x22*/;
-        //lin[0] = 0.0;
-        //lin[1] = 5.0;
-        //lin[2] = 5.0;
-        //lin[3] = 25.0;
-        bool small_energy = false;
-        int lin_is_get;
-        //lin_is_get = true;
-        lin_is_get = port.get_Mode1(mode_temp, lin[0], lin[1], lin[2], lin[3],autoShoot.enermy_color);
-        //mode_temp = 0x22;
-        autoShoot.enermy_color = RED;
-        //printf("mode:%x\n",shibie.enermy_color);
-        //printf("mode_temp:%x\n",mode_temp);
-        //printf("speed:%lf\n",lin[3]);
-        if (mode_temp == 0x21)
+		pthread_mutex_unlock(&mutex_new);
+        if(color_get)
         {
-            vector<Armor> aim_get = autoShoot.autoAim(src);
-
-            pthread_mutex_lock(&mutex_ka);
-            send_data.Enemy_s = aim_get;
-            send_data.a[0] = lin[0];
-            send_data.a[1] = lin[1];
-            send_data.a[2] = lin[2];
-            send_data.a[3] = lin[3];
-            src_copy.copyTo(ka_src_get);
-            send_data.mode = mode_temp;
-            send_data.is_get = lin_is_get;
-            is_ka = true;
-            pthread_cond_signal(&cond_ka);
-            pthread_mutex_unlock(&mutex_ka);
+            if (mode_temp == 0x21)
+            {
+                Targets = Detect.autoAim(src_copy);
+//                if(!Targets.empty())std::cout<<"------------Get Targets--------------"<<std::endl;
+//                else std::cout<<"------------No Targets--------------"<<std::endl;
+                pthread_mutex_lock(&mutex_ka);
+                send_data = {mode_temp,
+							 color_get,
+							 {Detect.ab_pitch,Detect.ab_yaw,Detect.bullet_speed},
+							 {Detect.quaternion[0],Detect.quaternion[1],Detect.quaternion[2],Detect.quaternion[3]},
+							 Targets,
+							 time_temp};
+//                send_data.armors = Targets;
+//                send_data.data[0] = Detect.ab_pitch;
+//                send_data.data[1] = Detect.ab_yaw;
+//                send_data.data[2] = Detect.bullet_speed;
+//                send_data.mode = mode_temp;
+//                send_data.dat_is_get = color_get;
+//                send_data.tim = time_temp;
+                src_copy.copyTo(ka_src);
+				is_ka = true;
+				pthread_cond_signal(&cond_ka);
+                pthread_mutex_unlock(&mutex_ka);
+            }
         }
 
 
-    }
+	}
 }
-
-/*
 
 void* Kal_predict(void* PARAM)
 {
-    ArmorTracker autoTrack;
-    headAngle sendAngle;
+	VisionData vdata;
+	vector<Armor> armors;
+    ArmorTracker Track;
+	int mode_temp;
+	int angle_get;
+    chrono_time time_temp;
+    Mat src_copy;
 
-    int mode_temp;
-
-    form get_data;
     sleep(3);
     printf("kal_open\n");
-    int is_get;
-    int mode;
-    int is_send;
-    float ji_pitch,ji_yaw;
-    int pan_wu = 0;
-    vector<Armor> Aims;
+	while (is_continue)
+	{
+		pthread_mutex_lock(&mutex_ka);
 
-    while (is_continue)
-    {
-        pthread_mutex_lock(&mutex_ka);
+		while (!is_ka) {
 
-        while (!is_ka) {
+			pthread_cond_wait(&cond_ka, &mutex_ka);
+		}
 
-            pthread_cond_wait(&cond_ka, &mutex_ka);
-        }
+		is_ka = false;
 
-        is_ka = false;
-
-
-        is_get=send_data.is_get;
-        mode = send_data.mode;
-        is_send = send_data.da_is_get;
-
+		ka_src.copyTo(src_copy);//Tracker _src has gotten data in thread
+        Track.AS.updateData(send_data.data,send_data.quat);
+		angle_get = send_data.dat_is_get;
+		mode_temp = send_data.mode;
+        armors = send_data.armors;
+        time_temp = send_data.tim;
         pthread_mutex_unlock(&mutex_ka);
-        Aims = send_data.Enemy_s;
-        if(is_get)
-        {
-            if (mode == 0x21)
-            {
-                sendAngle = autoTrack.finalResult(Aims, start);
-
-                if (ka.predict(mubiao, kf, time_count))
+		if(angle_get)
+		{
+			if (mode_temp == 0x21)
+			{
+                Track.AS.bullet_speed = 28.0;
+				if (Track.locateEnemy(src_copy,armors,time_temp))
+				{
+                    vdata = { Track.pitch, Track.yaw, 0x31 };
+//					printf("--------------Thread End----------\n");
+                    Track.show();
+                }
+				else
                 {
-                    time_count = (double)getTickCount();
-                    ji_pitch=ka.send.pitch;
-                    ji_yaw = ka.send.yaw;
-                    vdata = { -ji_pitch, -ji_yaw, 0x31 };
-                    printf("yaw:%f\npitch:%f\n", -ka.send.yaw, -ka.send.pitch);
+                    //    原数据，无自瞄
+                    vdata = {Track.AS.ab_pitch, Track.AS.ab_yaw, 0x32};
                     port.TransformData(vdata);
                     port.send();
-                    pan_wu = 0;
+//					printf("--------------Thread End----------\n");
                 }
-                else
-                {
-                    if(pan_wu<=12)
-                    {
-
-                        vdata = { -ji_pitch, -ji_yaw, 0x31 };
-                        printf("yaw:%f\npitch:%f\npan_wu:%d\n",-ji_yaw, -ji_pitch,pan_wu);
-                        port.TransformData(vdata);
-                        port.send();
-                        pan_wu++;
-                    }else
-                    {
-                        ji_yaw = 0.0 - ka.ab_yaw;
-                        ji_pitch = 0.0 - ka.ab_pitch;
-                        ka.sp_reset(kf);
-                        vdata = { -ji_pitch, -ji_yaw, 0x32 };
-                        //printf("real none!!");
-                        //printf("chong\n");
-                        port.TransformData(vdata);
-                        port.send();
-                    }
-                }
-            }
-        }
-    }
+                port.TransformData(vdata);
+				port.send();
+			}
+		}
+	}
 }
 
 
-*/

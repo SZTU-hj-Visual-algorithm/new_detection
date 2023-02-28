@@ -1,131 +1,175 @@
 #include "camera.h"
 #include <iostream>
 
+
+
 bool Camera::init()
 {
+	//初始化sdk相机
+	CameraSdkInit(1);
+	//获取连接到当前pc端的相机设备
+	int camera_status = CameraEnumerateDevice(camera_list, &pid);
+	if (camera_status != CAMERA_STATUS_SUCCESS)
+	{
+		std::cout << "CameraEnumerateDevice fail with" << camera_status << "!" << std::endl;
+		return false;
+	}
 
-    // 一个进程调用一次，初始化 SDK 为中文接口
-    CameraSdkInit(1);
+	//初始化相机设备并创建相机句柄
+	if (CameraInit(camera_list, -1, -1, &h_camera) != CAMERA_STATUS_SUCCESS)
+	{
+		CameraUnInit(h_camera);
+		return false;
+	}
 
-    // 枚举设备，获得设备列表
-    status = CameraEnumerateDevice(CameraList, &CameraNums);
-    if (status != CAMERA_STATUS_SUCCESS)
-    {
-        printf("No camera was found!");
-        return -1;
-    }
+	//获取相机设备的特性结构体
+	auto status = CameraGetCapability(h_camera, &capbility);
 
-    // 只初始化第一个相机。
-    // (-1,-1)表示加载上次退出前保存的参数，如果是第一次使用该相机，则加载默认参数。
-    status = CameraInit(&CameraList[0], -1, -1, &hCamera);
-    if (status != CAMERA_STATUS_SUCCESS)
-    {
-        printf("Failed to init the camera! Error code is %d", status);
-        CameraUnInit(hCamera);
-        return -1;
-    }
-
-
-    //设置为 BGR24 格式的图像数据。
-    CameraSetIspOutFormat(hCamera, CAMERA_MEDIA_TYPE_BGR8);
-
-    // 获得该相机的特性描述
-    status = CameraGetCapability(hCamera, &CameraInfo);
-    if (status != CAMERA_STATUS_SUCCESS)
-    {
-        std:: cout << "get capbility failed" << std::endl;
-    }
-
-    // 计算RGB buffer所需的大小，这里直接按照相机的最大分辨率来分配
-    UINT FrameBufferSize = CameraInfo.sResolutionRange.iWidthMax * CameraInfo.sResolutionRange.iHeightMax * 3;
-
-    // 分配 RGB buffer，用来存放ISP输出的图像
-    // 备注：从相机传输到PC端的是RAW数据，在PC端通过软件ISP转为RGB数据（如果是黑白相机就不需要转换格式，但是ISP还有其它处理，所以也需要分配这个buffer）
-    pFrameBuffer = (unsigned char*)malloc(FrameBufferSize);
+	//获取当前相机的帧率模式数量
+	//std::cout << capbility.iFrameSpeedDesc << std::endl;
 
 
-    // 设置相机为软触发模式，并且把一次触发的帧数固定为1
-//    status = CameraSetTriggerMode(hCamera, 1);
-//    if (status != CAMERA_STATUS_SUCCESS)
-//    {
-//        printf("Failed to 1! Error code is %d", status);
-//        CameraUnInit(hCamera);
-//    }
-//    status = CameraSetTriggerCount(hCamera, 1);
-//    if (status != CAMERA_STATUS_SUCCESS)
-//    {
-//        printf("Failed to 2! Error code is %d", status);
-//        CameraUnInit(hCamera);
-//    }
+	if (status != CAMERA_STATUS_SUCCESS)
+	{
+		std:: cout << "get capbility failed" << std::endl;
+		return false;
+	}
 
-    // 手动曝光，曝光时间 2ms
-    CameraSetAeState(hCamera, FALSE);
-    CameraSetExposureTime(hCamera, 2 * 1000);
-    // 按 RGB 顺序提供颜色增益
-//    CameraSetGain(hCamera, 120, 110, 135);
-    CameraSetAnalogGain(hCamera, 150);  //该值增大后会提升图像背景噪声
-    //    CameraSetContrast(h_camera, 200);
-    //    CameraSetSaturation(h_camera, 1200);
-    //    CameraSetSharpness(h_camera, 10);
+	//创建rgb图像数据缓冲区
+	rgb_buffer = (unsigned char*)malloc(capbility.sResolutionRange.iHeightMax *
+										capbility.sResolutionRange.iWidthMax * 3
+	);
 
-    // 让SDK内部取图线程开始工作
-    CameraPlay(hCamera);
+	//设置为手动设置曝光时间，用来防止拍摄图片拖影，防止拖影需要曝光时间保持在2毫秒以下
+	CameraSetAeState(h_camera, false);
 
-    return true;
+	//降低曝光时间，一般为了防止图像拖影将曝光时间调为2毫秒以下，该函数以微秒为单位
+	CameraSetExposureTime(h_camera, 1200.);
+	//CameraSetExposureTime(h_camera, 15000.0);
+
+	//调高图像模拟增益值，使得图像亮度提高
+	CameraSetAnalogGain(h_camera, 152);  //152
+	
+	CameraSetWbMode(h_camera,true);
+
+	//CameraSetFrameSpeed(h_camera, 3);
+
+	//int g;
+	//double t;
+	//获取相机当前的曝光时间
+	//CameraGetExposureTime(h_camera, &t);
+	//获取相机的模拟增益值大，亮度越大，最大192，超过自动截断）
+	//CameraGetAnalogGain(h_camera, &g);
+	//相机开始图像采集
+	CameraPlay(h_camera);
+
+	//std::cout << t / 1000.0 << std::endl;
+	//std::cout << g << std::endl;
+
+	//设置getimagebuffer的输出格式
+	if (capbility.sIspCapacity.bMonoSensor)
+	{
+		channel = 1;
+		CameraSetIspOutFormat(h_camera, CAMERA_MEDIA_TYPE_MONO8);
+
+	}
+	else
+	{
+		channel = 3;
+		CameraSetIspOutFormat(h_camera, CAMERA_MEDIA_TYPE_BGR8);
+
+	}
+	return true;
 }
 
 bool Camera::read_frame_rgb()
 {
 
-    // 由于相机目前处于软触发模式，需要软件发送指令通知相机拍照（为了避免意外取到相机缓存中的旧图片，在给触发指令前先清空了缓存）
-//    status = CameraClearBuffer(hCamera);
-//    if (status != CAMERA_STATUS_SUCCESS)
-//    {
-//        printf("Failed to 2! Error code is %d", status);
-//        CameraUnInit(hCamera);
-//    }
-//    status = CameraSoftTrigger(hCamera);
-//    if (status != CAMERA_STATUS_SUCCESS)
-//    {
-//        printf("Failed to 2! Error code is %d", status);
-//        CameraUnInit(hCamera);
-//    }
+	if (CameraGetImageBuffer(h_camera, &frame_h, &pbybuffer, 10000000) == CAMERA_STATUS_SUCCESS)
+	{
+		//将原始图像数据转为bgr图像数据储存到rgb_buffer中
+		CameraImageProcess(h_camera, pbybuffer, rgb_buffer, &frame_h);
+//		if (ipiimage)
+//		{
+//			//释放掉图像数据的头指针，相当于释放全部数据
+//			cvReleaseImageHeader(&ipiimage);
+//		}
+//
+//		//新建一个图像数据头指针
+//		ipiimage = cvCreateImageHeader(cvSize(frame_h.iWidth, frame_h.iHeight), IPL_DEPTH_8U, channel);
+//
+//		//将图像数据垂直翻转
+//		CameraFlipFrameBuffer(rgb_buffer, &frame_h, 1);
+//
+//		//将rgb图像数据缓冲区里的图像数据给头指针指向
+//		cvSetData(ipiimage, rgb_buffer, frame_h.iWidth * channel);
 
-    // 获得一帧图像数据。
-    status = CameraGetImageBuffer(hCamera, &FrameHead, &pRawData, 2000);
-    if (status == CAMERA_STATUS_SUCCESS)
-    {
-        //将获得的相机原始输出图像数据进行处理，迭加饱和度、颜色增益和校正、降噪等处理效果，最后得到 RGB24 格式的图像数据。
-        CameraImageProcess(hCamera, pRawData, pFrameBuffer, &FrameHead);
+        src = cv::Mat(cvSize(frame_h.iWidth,frame_h.iHeight),CV_8UC3,rgb_buffer);
 
-        //创建图像头，不分配图像数据。
-        if (iplImage)
-        {
-            cvReleaseImageHeader(&iplImage);
-        }
-        iplImage = cvCreateImageHeader(cvSize(FrameHead.iWidth, FrameHead.iHeight), IPL_DEPTH_8U, 3);
 
-        //设置图像数据。
-        cvSetData(iplImage, pFrameBuffer, FrameHead.iWidth * 3);
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+
+
+		//delete rgb_buffer;
+		return true;
+	}
+	else
+	{
+
+		return false;
+	}
 
 }
 
 bool Camera::release_data()
 {
-    //释放 CameraGetImageBuffer 的到的 RAW 数据缓冲区的使用权。
-    CameraReleaseImageBuffer(hCamera, pRawData);
+	//将图像缓冲区中的图像数据释放掉
+	CameraReleaseImageBuffer(h_camera, pbybuffer);
 
-    cvReleaseImageHeader(&iplImage);
-    return true;
+//	cvReleaseImageHeader(&ipiimage);
+	return true;
+}
+
+
+bool Camera::record_start()
+{
+	if (record_state != RECORD_START)
+	{
+		int FormatList[] = {1,2,3,4,0};
+		for (int i = 0; i < 5; i++)
+		{
+			//printf("a\n");
+			int iret = CameraInitRecord(h_camera, FormatList[i],path, FALSE, 100,30);
+			if (iret == CAMERA_STATUS_SUCCESS)
+			{
+				record_state = RECORD_START;
+				printf("record start successfully!!!\n");
+				return true;
+
+			}
+		}
+	}
+	return false;
+}
+
+bool Camera::camera_record()
+{
+	if (record_state == RECORD_START)
+	{
+		//图像头指针复制，第一个参数是复制到的地址，第二个参数是提供复制数据的指针
+		memcpy(&record_hframe, &frame_h, sizeof(tSdkFrameHead));
+		CameraFlipFrameBuffer(rgb_buffer, &record_hframe, 1);
+		CameraPushFrame(h_camera, rgb_buffer, &record_hframe);
+		return true;
+	}
+
+    return false;
+
 }
 
 Camera::~Camera()
 {
-    CameraUnInit(hCamera);
+	CameraUnInit(h_camera);
+	if (rgb_buffer != nullptr)
+		free(rgb_buffer);
 }
+

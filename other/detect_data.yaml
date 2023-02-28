@@ -1,0 +1,27 @@
+%YAML:1.0
+---
+light_max_angle: 45.0
+light_min_hw_ratio: 1
+light_max_hw_ratio: 100
+light_min_area_ratio: 0.6
+light_max_area_ratio: 1.0
+light_area_max: 50000
+armor_big_max_wh_ratio: 5
+armor_big_min_wh_ratio: 3
+armor_small_max_wh_ratio: 3
+armor_small_min_wh_ratio: 0.8
+armor_max_offset_angle: 35.0
+armor_height_offset: 1
+armor_ij_min_ratio: 0.4
+armor_ij_max_ratio: 2.5
+armor_max_angle: 35.0
+near_standard: 500
+height_standard: 25
+id_grade_ratio: 0.6
+near_grade_ratio: 0.2
+height_grade_ratio: 0.2
+grade_standard: 60
+
+thresh_confidence: 0
+
+enemy_color: RED

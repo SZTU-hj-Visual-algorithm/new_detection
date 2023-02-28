@@ -8,8 +8,8 @@
  #endif
 
 
-#include "CameraDefine.h"
-#include "CameraStatus.h"
+#include "camera/CameraDefine.h"
+#include "camera/CameraStatus.h"
 
 
 

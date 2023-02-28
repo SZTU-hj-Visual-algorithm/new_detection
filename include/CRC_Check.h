@@ -1,6 +1,5 @@
 #ifndef _CRC_CHECK_H_
 #define _CRC_CHECK_H_
-
 #include <iostream>
 #include <stdint.h>
 unsigned char Get_CRC8_Check_Sum(unsigned char *pchMessage, unsigned int dwLength, unsigned char ucCRC8);
