@@ -1,43 +1,40 @@
-#include "camera.h"
-#include <opencv2/core/core_c.h>
-#include "include/ArmorDetector.hpp"
+#include "armor_detection.h"
+#include "gimbal_control.h"
+#include <opencv2/core/cvstd.hpp>
+#include "CRC_Check.h"
+#include"serialport.h"
+#include<X11/Xlib.h>
+#include"Thread.h"
+
+//#define DETECT
+#define PREDICT
 
 using namespace cv;
 
-int main()
+pthread_t thread1;
+pthread_t thread2;
+pthread_t thread3;
+
+pthread_mutex_t mutex_new;
+pthread_cond_t cond_new;
+pthread_mutex_t mutex_ka;
+pthread_cond_t cond_ka;
+
+bool is_ka = false;
+bool is_start = false;
+bool is_continue = true;
+
+int main(void)
 {
-
-    auto camera_warper = new Camera;
-    ArmorDetector autoShoot;
-    Armor autoTarget;
-    Mat src;
-    auto time_start = std::chrono::steady_clock::now();
-
-    if (camera_warper->init())
-    {
-        camera_warper->record_start();
-        while (waitKey(10)!=27)
-        {
-            camera_warper->read_frame_rgb();
-            src = cv::cvarrToMat(camera_warper->ipiimage).clone();
-
-            auto time_cap = std::chrono::steady_clock::now();
-
-            int time_stamp = (int)(std::chrono::duration<double,std::milli>(time_cap - time_start).count()); // 获取时间戳
-            autoTarget = autoShoot.autoAim(src, time_stamp, time_cap);
-
-//        waitKey(0);
-
-
-            camera_warper->release_data();
-        }
-        camera_warper->~Camera();
-        return 0;
-    }
-    else
-    {
-        printf("No camera!!");
-        return 0;
-    }
-
+    XInitThreads();
+    pthread_mutex_init(&mutex_new, NULL);
+    pthread_cond_init(&cond_new, NULL);
+    pthread_create(&thread1, NULL, Build_Src, NULL);
+    pthread_create(&thread2, NULL, Armor_Kal, NULL);
+    pthread_create(&thread3, NULL, Kal_predict, NULL);
+    pthread_join(thread1, NULL);
+    pthread_join(thread2, NULL);
+    pthread_join(thread3, NULL);
+    pthread_mutex_destroy(&mutex_new);
+    return 0;
 }

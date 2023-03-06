@@ -1,0 +1,28 @@
+%YAML:1.0
+---
+big_w: 0.230
+big_h: 0.057
+small_w: 0.135
+small_h: 0.057
+buff_w: 0
+buff_h: 0
+F_MAT: !!opencv-matrix
+  rows: 3
+  cols: 3
+  dt: d
+  data: [ 1579.60532    , 0.000000000000, 627.56545     ,
+          0.000000000000, 1579.86788    , 508.65311     ,
+          0.000000000000, 0.000000000000, 1.000000000000 ]
+C_MAT: !!opencv-matrix
+  rows: 1
+  cols: 5
+  dt: d
+  data: [ -0.09082 , 0.22923 , -0.00020 , 0.00013 , 0.00000 ]
+RotationMatrix_cam2imu: !!opencv-matrix
+  rows: 3
+  cols: 3
+  dt: d
+  data: [ 0, 0, 1,
+          1, 0, 0,
+          0, 1, 0 ]
+#595 6mm

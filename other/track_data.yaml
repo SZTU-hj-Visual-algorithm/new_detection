@@ -1,0 +1,10 @@
+%YAML:1.0
+---
+find_threshold: 10
+lost_threshold: 10
+new_old_threshold: 100
+anti_spin_max_r_multiple: 4.5
+anti_spin_judge_low_thres: 2000
+anti_spin_judge_high_thres: 20000
+max_delta_t: 50
+max_delta_dist: 40
