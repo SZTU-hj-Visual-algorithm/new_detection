@@ -1,5 +1,5 @@
 %YAML:1.0
 ---
-find_threshold: 10
-lost_threshold: 10
-new_old_threshold: 100
+find_threshold: 3
+lost_threshold: 15
+new_old_threshold: 0.2

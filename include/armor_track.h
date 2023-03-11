@@ -1,7 +1,7 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/highgui/highgui.hpp>
-#include "armor_detection.hpp"
-#include "Singer.h"
+#include "armor_detection.h"
+#include "singer_prediction.h"
 #include "gimbal_control.h"
 #include "armor_prediction.h"
 

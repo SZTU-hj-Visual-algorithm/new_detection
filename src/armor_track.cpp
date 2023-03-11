@@ -3,7 +3,6 @@
 #include <opencv2/calib3d.hpp>
 #include <opencv2/core/eigen.hpp>
 
-//#define DRAW_MATCH_ARMOR
 #define SHOW_TRACK_PREDICT
 #define SHOW_SINGER_PREDICT
 
@@ -67,9 +66,9 @@ bool ArmorTracker::initial(std::vector<Armor> &find_armors)
     tracking_id = enemy_armor.id;
 
     KF.initial_KF();
-    enemy_armor.world_position = AS.pixel2imu(enemy_armor,1);
+    enemy_armor.world_position = AS.pixel2imu(enemy_armor);
     KF.setXPost(enemy_armor.world_position);
-    Singer.setXpos(enemy_armor.world_position.head(2));
+    Singer.setXpos({enemy_armor.world_position(0,0),enemy_armor.world_position(2,0)});
 //    std::cout<<"track_initial"<<std::endl;
     return true;
 }
@@ -84,7 +83,7 @@ bool ArmorTracker::selectEnemy2(std::vector<Armor> &find_armors, double dt)
 //    cv::Mat PointTrack = AS._src.clone();
     Eigen::Vector3d predictedE =  Eigen::Vector3d(predicted_enemy.head(3));
     cv::Point2f preTrack = AS.imu2pixel(predictedE);
-    cv::circle(_src,preTrack,5,cv::Scalar(0,0,255),-1);
+    cv::circle(AS._src,preTrack,5,cv::Scalar(0,0,255),-1);
 //    cv::imshow("_src",AS._src);
 #endif
 
@@ -96,7 +95,7 @@ bool ArmorTracker::selectEnemy2(std::vector<Armor> &find_armors, double dt)
         double min_position_diff = DBL_MAX;
         for(auto & armor : find_armors)
         {
-            armor.world_position= AS.pixel2imu(armor,1);
+            armor.world_position= AS.pixel2imu(armor);
             Eigen::Vector3d pre = predicted_enemy.head(3);
             double position_diff = (pre - armor.world_position).norm();
             if (position_diff < min_position_diff) {
@@ -128,15 +127,6 @@ bool ArmorTracker::selectEnemy2(std::vector<Armor> &find_armors, double dt)
     }
     if (matched)
     {
-#ifdef DRAW_MATCH_ARMOR
-        cv::Mat m_a = AS._src.clone();
-        cv::circle(m_a,matched_armor.center,matched_armor.size.width/10,cv::Scalar(255,255,0),-1);
-        Eigen::Vector3d predicted_track;
-        predicted_track << predicted_enemy.head(3);
-        cv::Point2f p = AS.imu2pixel(predicted_track);
-        cv::circle(m_a,p,matched_armor.size.width/15,cv::Scalar(0,0,255),-1);
-        cv::imshow("DRAW_MATCH_ARMOR",m_a);
-#endif
         enemy_armor = matched_armor;
     }
 
@@ -192,11 +182,11 @@ bool ArmorTracker::selectEnemy2(std::vector<Armor> &find_armors, double dt)
 // 对处于跟踪和正在丢失状态时做 预测，引入各种时间
 bool ArmorTracker::estimateEnemy(double dt)
 {
-    cv::putText(_src, std::to_string(tracker_state),cv::Point(50,100),1,5,cv::Scalar(0,0,255),3);
+    cv::putText(AS._src, std::to_string(tracker_state),cv::Point(50,100),1,5,cv::Scalar(0,0,255),3);
     if(tracker_state == TRACKING || tracker_state == LOSING)
     {
         // enemy_armor get real information to predicted by singer
-        enemy_armor.world_position = AS.pixel2imu(enemy_armor,1);
+        enemy_armor.world_position = AS.pixel2imu(enemy_armor);
         std::cout << "[target_distance]:  " << enemy_armor.world_position(0, 0) << std::endl;
 
         double fly_time = AS.getFlyTime(enemy_armor.world_position);
@@ -205,22 +195,24 @@ bool ArmorTracker::estimateEnemy(double dt)
                                     enemy_armor.world_position,
                                     predicted_position))
         {
-            return false;
+            std::cerr<<"[predict value illegal!!! Fix in origin value]"<<std::endl;
         }
 		////////////////Singer predictor//////////////////////////////
         bullet_point = AS.airResistanceSolve(predicted_position);
 #ifdef SHOW_SINGER_PREDICT
         cv::Point2f pixelPos = AS.imu2pixel(bullet_point);
-//        std::cout<<"pixelPos"<<pixelPos<<std::endl;
-		circle(_src,enemy_armor.center,5,cv::Scalar(255,0,0),-1);
-		circle(_src,pixelPos,5,cv::Scalar(0,255,255),-1);
-//        cv::imshow("_src",AS._src);
+		circle(AS._src,enemy_armor.center,5,cv::Scalar(255,0,0),-1);
+		circle(AS._src,pixelPos,5,cv::Scalar(0,255,255),-1);
+//		for (int i=0;i<4;i++)
+//		{
+//			line(_src, vertice_lights[i], vertice_lights[(i + 1) % 4], CV_RGB(0, 255, 255),2,cv::LINE_8);
+//		}
 #endif
 		return true;
     }
     else if (tracker_state == DETECTING)
     {
-        enemy_armor.world_position = AS.pixel2imu(enemy_armor,1);
+        enemy_armor.world_position = AS.pixel2imu(enemy_armor);
         std::cout << "[target_distance]:  " << enemy_armor.world_position(0, 0) << std::endl;
         double fly_time = AS.getFlyTime(enemy_armor.world_position);
         ////////////////Singer predictor//////////////////////////////
@@ -228,31 +220,34 @@ bool ArmorTracker::estimateEnemy(double dt)
                                     enemy_armor.world_position,
                                     predicted_position))
         {
-            return false;
-        }
+			std::cerr<<"[predict value illegal!!! Fix in origin value]"<<std::endl;
+		}
         ////////////////Singer predictor//////////////////////////////
 #ifdef SHOW_SINGER_PREDICT
         cv::Point2f pixelPos = AS.imu2pixel(bullet_point);
-//        std::cout<<"pixelPos"<<pixelPos<<std::endl;
-		circle(_src,enemy_armor.center,5,cv::Scalar(255,0,0),-1);
-        circle(_src,pixelPos,5,cv::Scalar(0,0,255),-1);
-//        cv::imshow("_src",AS._src);
+		circle(AS._src,enemy_armor.center,5,cv::Scalar(255,0,0),-1);
+        circle(AS._src,pixelPos,5,cv::Scalar(0,0,255),-1);
 #endif
-        locate_target = false;
         return false;
     }
     else
     {
-        locate_target = false;
         return false;
     }
 }
 
 bool ArmorTracker::locateEnemy(const cv::Mat& src, std::vector<Armor> &armors, const chrono_time &time)
 {
-	src.copyTo(_src);
-	AS.RotationMatrix_imu = AS.quaternionToRotationMatrix(AS.quaternion);
-
+    //!< 先搞清楚电控那边的坐标系是怎么样的(准确的陀螺仪本身定义的xyz在哪个方向，不能是人为定义的)，
+    //!< 特别是现在他们统一了c板的安装（佛山的时候理清过，现在忘了）
+    //!< 理清电控那边imu的坐标系后，拿到的陀螺仪的四元数才是可用的，
+    //!< 确定imu坐标系xyz（！！！！一定是陀螺仪自身定义的，不是人为定义的），
+    //!< imu坐标系中心平移到云台旋转轴中心！！！（佛山的时候缺失的一步，大概率也是导致当时测试失败的一步，而且一定是在四元数作用前平移
+    //!< ，准确来说应该是相机坐标系的中心，因为上面说的imu和相机只是三轴方向不同，中心是一样的）
+    //!< 拿到四元数用来转旋转矩阵作用到云台转轴中心的坐标系，得到我们diaski的世界坐标系的点
+	AS._src = src;
+	_src=src;
+	AS.RotationMatrix_imu = AS.quaternionToRotationMatrix();
     if(!locate_target)
     {
         if(initial(armors))
@@ -263,11 +258,6 @@ bool ArmorTracker::locateEnemy(const cv::Mat& src, std::vector<Armor> &armors, c
         {
             locate_target = false;
         }
-	
-//		bullet_point = AS.airResistanceSolve(enemy_armor.world_position);
-
-//        pitch = -atan2(bullet_point[1],bullet_point[2])/CV_PI*180 + AS.ab_pitch;
-//        yaw   = -atan2(bullet_point[0],bullet_point[2])/CV_PI*180 + AS.ab_yaw;
 		pitch = AS.ab_pitch;
         yaw = AS.ab_yaw;
         return false;
@@ -281,76 +271,55 @@ bool ArmorTracker::locateEnemy(const cv::Mat& src, std::vector<Armor> &armors, c
             return false;
         }
         double dt = seconds_duration (time - t).count();
-//        std::cout<<"[dt:]"<<dt<<std::endl;
         t = time;
         if(!selectEnemy2(armors,dt))
         {
             return false;
         }
-
+        
         if(!estimateEnemy(dt))
         {
             return false;
         }
-
-//        Eigen::Vector3d gun_offset = {0,0,0};   // m
-//        gun_offset +=enemy_armor.camera_position;
-//        bullet_point = AS.airResistanceSolve(gun_offset);
-	
-//		bullet_point = AS.airResistanceSolve(enemy_armor.world_position);
-		
-		bullet_point = AS.imu2cam(bullet_point);
-		pitch = -atan2(bullet_point[1],bullet_point[2])/CV_PI*180 + AS.ab_pitch;
-		yaw   = -atan2(bullet_point[0],bullet_point[2])/CV_PI*180 + AS.ab_yaw;
-
+        
+//		pitch = static_cast<int>(atan2(bullet_point[2],bullet_point[1])/CV_PI*180);
+		pitch = round(atan2(bullet_point[2],bullet_point[1])/CV_PI*180 * 100)/100;
+		yaw = -atan2(bullet_point[0],bullet_point[1])/CV_PI*180;
         return true;
     }
 }
 
 void ArmorTracker::show()
 {
-    switch (tracker_state)
-    {
-        case 0: // MISSING
-            cv::putText(_src,"MISSING   ",cv::Point2f(1280 - 200,60),cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(255, 255, 0),1,3);
-            break;
-        case 1: // DETECTING
-            cv::putText(_src,"DETECTING " + std::to_string(tracking_id),cv::Point2f(1280 - 200,60),cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(255, 255, 0),1,3);
-            break;
-        case 2: // LOSING
-            cv::putText(_src,"LOSING    " + std::to_string(tracking_id),cv::Point2f(1280 - 200,60),cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(255, 255, 0),1,3);
-            break;
-        case 3: // TRACKING
-            cv::putText(_src,"TRACKING  " + std::to_string(tracking_id),cv::Point2f(1280 - 200,60),cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(255, 255, 0),1,3);
-            break;
-    }
-    cv::putText(_src,std::to_string(1) +" ARMOR",cv::Point2f(1280 - 200,30),cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(255, 255, 0),1,3);
     cv::putText(_src,"PITCH    : "+std::to_string(pitch),cv::Point2f(0,60),cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(255, 255, 0),1,3);
     cv::putText(_src,"YAW      : "+std::to_string(yaw),cv::Point2f(0,90),cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(255, 255, 0),1,3);
-    cv::putText(_src,"DISTANCE : "+std::to_string(enemy_armor.camera_position.norm())+"m",cv::Point2f(0,30),cv::FONT_HERSHEY_SIMPLEX,1,cv::Scalar(255,255,0),1,3);
-    std::string info_grade = "grade: "+std::to_string(enemy_armor.grade);
-    putText(_src,info_grade,enemy_armor.armor_pt4[0],cv::FONT_HERSHEY_SIMPLEX,2,cv::Scalar(0,255,255),1,8);
-
-    // 用预测位置为中心点，选择的装甲板画框
-    cv::Point2f pre_armor_center = AS.imu2pixel(predicted_position);
-    cv::RotatedRect armor_rrect = cv::RotatedRect(pre_armor_center,
-                                                  cv::Size2f(enemy_armor.size.width,enemy_armor.size.height),
-                                                  enemy_armor.angle);
-    cv::Point2f vertice_armors[4]; // 预测装甲板绿色
-    armor_rrect.points(vertice_armors);
-    cv::Point2f vertice_lights[4]; // 目标装甲板紫色
+    cv::putText(_src,"DISTANCE : "+std::to_string(enemy_armor.camera_position.norm())+"m",cv::Point2f(0,30),cv::FONT_HERSHEY_COMPLEX,1,cv::Scalar(255,255,0),1,3);
+    cv::putText(_src,"PREDICT_X:"+std::to_string(predicted_position(0,0)),cv::Point2f(0,_src.rows-90),cv::FONT_HERSHEY_SIMPLEX,1,cv::Scalar(255,255,0),1,3);
+	cv::putText(_src,"PREDICT_Y:"+std::to_string(predicted_position(1,0)),cv::Point2f(0,_src.rows-60),cv::FONT_HERSHEY_SIMPLEX,1,cv::Scalar(255,255,0),1,3);
+	cv::putText(_src,"PREDICT_Z:"+std::to_string(predicted_position(2,0)),cv::Point2f(0,_src.rows-30),cv::FONT_HERSHEY_SIMPLEX,1,cv::Scalar(255,255,0),1,3);
+	cv::Point2f vertice_lights[4];
     enemy_armor.points(vertice_lights);
-    for (int m = 0; m < 4; ++m)
-    {
-        line(_src, vertice_lights[m], vertice_lights[(m + 1) % 4], CV_RGB(0, 255, 255),2,cv::LINE_8);
-        line(_src, vertice_armors[m], vertice_armors[(m + 1) % 4], CV_RGB(0, 255, 0),2,cv::LINE_8);
+    for (int i = 0; i < 4; i++) {
+        line(_src, vertice_lights[i], vertice_lights[(i + 1) % 4], CV_RGB(0, 255, 255),2,cv::LINE_8);
     }
-
     std::string information = std::to_string(enemy_armor.id) + ":" + std::to_string(enemy_armor.confidence*100) + "%";
-//            putText(final_armors_src,ff,finalArmors[i].center,FONT_HERSHEY_SIMPLEX, 1.0, Scalar(12, 23, 200), 1, 8);
+    //        putText(final_armors_src,ff,finalArmors[i].center,FONT_HERSHEY_COMPLEX, 1.0, Scalar(12, 23, 200), 1, 8);
     putText(_src, information,enemy_armor.armor_pt4[3],cv::FONT_HERSHEY_SIMPLEX,2,cv::Scalar(255,0,255),1,3);
-
-    imshow("final_result",_src);
+	
+	// 用预测位置为中心点，选择的装甲板画框
+	cv::Point2f armor_singer_center = AS.imu2pixel(predicted_position);
+	cv::RotatedRect armor_singer = cv::RotatedRect(armor_singer_center,
+												   cv::Size2f(enemy_armor.size.width,enemy_armor.size.height),
+												   enemy_armor.angle);
+	
+	cv::Point2f vertice_armor_singer[4];
+	armor_singer.points(vertice_armor_singer);
+	for (int m = 0; m < 4; ++m)
+	{
+		line(_src, vertice_armor_singer[m], vertice_armor_singer[(m + 1) % 4], CV_RGB(255, 255, 0),2,cv::LINE_8);
+	}
+	
+	imshow("final_result",_src);
 
 }
 

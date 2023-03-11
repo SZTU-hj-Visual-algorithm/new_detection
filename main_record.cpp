@@ -3,7 +3,7 @@
 //
 #include <stdio.h>
 #include <opencv2/opencv.hpp>
-#include "armor_detection.hpp"
+#include "armor_detection.h"
 #include "gimbal_control.h"
 #include "armor_track.h"
 #include "camera.h"
