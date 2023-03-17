@@ -4,14 +4,17 @@
 #include <iostream>
 #include <opencv2/opencv.hpp>
 #include "robot_status.h"
-#define PI CV_PI
+#include <cmath>
+
+#define TANH2(x) (exp(2.5*x)-exp(-2.5*x))/(exp(2.5*x)+exp(-2.5*x))
+#define TANH_HALF(x) (exp(1.1*x)-exp(-1.1*x))/(exp(1.1*x)+exp(-1.1*x))
 
 //二维Singer模型
 class Skalman
 {
-    double alefa = 1.0/20.0;//目标机动频率
-    double Sigmaq = 0.1;//目标加速度标准差，Singer模型假设目标加速度符合均值为零的高斯分布
-    double initT = 0.03;//用来初始化初始协方差矩阵的采样时间间隔（估算出来的）
+    double alefa = 1.0/30.0;//目标机动频率
+    double Sigmaq = 0.01;//目标加速度标准差，Singer模型假设目标加速度符合均值为零的高斯分布
+    double initT = 0.01;//用来初始化初始协方差矩阵的采样时间间隔（估算出来的）
     double axHold = 30;//x方向的加速度调整阈值
     double ayHold = 30;//y方向的加速度调整阈值
     double lamda;//渐消因子，减小滤波发散问题
@@ -31,19 +34,25 @@ class Skalman
     Eigen::Matrix<double, 2, 2> Sk;//根据观测方程算出来的新息协方差
 public:
     double T = 0;//采样周期T，即前后两次预测帧相隔的时间
+    double last_x1 = 0;
+    double last_x2 = 0;
+    double last_x[2] = {0,0};
+    Eigen::Vector3d predicted_xyz = {0,0,0};
+    
 
     Skalman();
     void Reset();
-    void Reset(Eigen::Vector2d Xpos);
+    void Reset(const Eigen::Vector2d &Xpos);
     void PredictInit(const double &deleta_t);
-    void setXpos(Eigen::Vector2d Xpos);
+    void setXpos(const Eigen::Vector2d &Xpos);
     Eigen::Matrix<double,6,1> predict(bool predict);
     bool SingerPrediction(const double &dt,
                           const double &fly_time,
                           const Eigen::Matrix<double,3,1> &imu_position,
                           Eigen::Vector3d &predicted_position);
 
-    Eigen::Matrix<double,6,1> correct(Eigen::Matrix<double,2,1> &measure);
+    Eigen::Matrix<double,6,1> correct(const Eigen::Matrix<double,2,1> &measure);
+    double filter(const double &last, const double &current, const double &origin);
 };
 
 

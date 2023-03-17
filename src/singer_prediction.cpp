@@ -1,4 +1,4 @@
-#include "Singer.h"
+#include "singer_prediction.h"
 
 Skalman::Skalman()
 {
@@ -8,8 +8,8 @@ Skalman::Skalman()
          0,0,0,1,0,0;
 
     //init R
-    R << 0.00005, 0,
-         0, 0.00005;
+    R << 5e-4, 0,
+         0, 5e-4;
 
     //init Xk_1
     Xk_1 << 0,0.1,0,
@@ -41,7 +41,7 @@ Skalman::Skalman()
     _Sk = 0.5*Vk*Vk.transpose();
     Sk = H*P*H.transpose() + R;
     lamda = std::max(1.,_Sk.trace()/Sk.trace());
-    std::cout<<"lamda:"<<lamda<<std::endl;
+//    std::cout<<"lamda:"<<lamda<<std::endl;
 }
 
 void Skalman::Reset()
@@ -73,11 +73,10 @@ void Skalman::Reset()
 }
 
 
-void Skalman::Reset(Eigen::Vector2d Xpos)
+void Skalman::Reset(const Eigen::Vector2d &Xpos)
 {
     //init Xk_1
-    Xk_1 << Xpos(0,0),0.1,0,
-            Xpos(1,0),0.1,0;
+	setXpos(Xpos);
 
     //init Xk
 //    Xk = Xk_1;
@@ -101,10 +100,12 @@ void Skalman::Reset(Eigen::Vector2d Xpos)
     Zk << 0.1,0.1;
 }
 
-void Skalman::setXpos(Eigen::Vector2d Xpos)
+void Skalman::setXpos(const Eigen::Vector2d &Xpos)
 {
     Xk_1 << Xpos(0,0),0.1,0,
             Xpos(1,0),0.1,0;
+    last_x1 = Xpos(0,0);
+    last_x2 = Xpos(1,0);
 }
 
 void Skalman::PredictInit(const double &deleta_t)
@@ -194,24 +195,18 @@ Eigen::Matrix<double,6,1> Skalman::predict(bool predict)
     return Xk_1;
 }
 
-Eigen::Matrix<double,6,1> Skalman::correct(Eigen::Matrix<double,2,1> &measure)
+Eigen::Matrix<double,6,1> Skalman::correct(const Eigen::Matrix<double,2,1> &measure)
 {
     Zk = measure;
     Vk = Zk - H*Xk_1;
     _Sk = (lamda*Vk*Vk.transpose())/(1+lamda);
     Sk = H*P*H.transpose() + R;
     lamda = std::max(1.,_Sk.trace()/Sk.trace());
-    std::cout<<"lamda:"<<lamda<<std::endl;
+//    std::cout<<"lamda:"<<lamda<<std::endl;
     P = lamda*((F * P * F.transpose()) + W);
     K = P * H.transpose() * (H * P * H.transpose() + R).inverse();
     Xk = Xk_1 + K * (Zk - H * Xk_1);
     P = (Eigen::Matrix<double, 6, 6>::Identity() - K * H) * P;
-    //        if((fabs(Xk(2,0) - Xk_1(2,0)) > axHold) ||
-    //            (fabs(Xk(5,0) - Xk_1(5,0)) > ayHold))
-    //        {
-    //            Reset(measure);
-    //        }
-    //        std::cout<<"correct_Data:"<<Xk_1<<"-----------------------------"<<std::endl;
     return Xk_1;
 }
 
@@ -220,24 +215,53 @@ bool Skalman::SingerPrediction(const double &dt,
                       const Eigen::Matrix<double,3,1> &imu_position,
                       Eigen::Vector3d &predicted_position)
 {
-    Eigen::Matrix<double,2,1> measure(round(imu_position(0,0)*1000)/1000,
-                                      round(imu_position(1,0)*1000)/1000);
-    //std::cout<<"measureDepth:"<<measure[0]<<std::endl;
-    //std::cout<<"measureY:"<<measure[1]<<std::endl;
+	//mean of predicting 0 index and 1 index value, the value of index 2 is constant
+	int predict_x1=0,predict_x2=1,constant_x=2;
+	
+	double x1 = imu_position(predict_x1,0);
+	double x2 = imu_position(predict_x2,0);
+	
+	Eigen::Matrix<double,2,1> measure(round(x1*1000)/1000,
+                                      round(x2*1000)/1000);
     double all_time = SHOOT_DELAY + fly_time;
+    //! state transition
     PredictInit(dt);
-    /*std::cout<<"predict_front:"<<*/predict(false)/*<<std::endl*/;
-    /*std::cout<<"correct:"<<*/correct(measure)/*<<std::endl*/;
+    predict(false);
+    correct(measure);
+    //! predictor work
     PredictInit(all_time);
     Eigen::Matrix<double,6,1> predicted_result = predict(true);
     //std::cout<<"result:"<<predicted_result<<std::endl;
-    predicted_position << predicted_result(0,0),
-                        predicted_result(3,0),
-                        imu_position(2,0);
-    if (!predicted_position.norm()){
+    //! filter for result, inhibit infinite change
+//    double predicted_x = predicted_result(0,0);
+//    double predicted_y = predicted_result(3,0);//no need to calculate with filter
+//    double predicted_z = imu_position(2,0);
+    predicted_xyz[predict_x1] = filter(last_x[0],predicted_result(0,0),x1);
+    predicted_xyz[predict_x2] = filter(last_x[1],predicted_result(3,0),x2);
+    predicted_xyz[constant_x] = imu_position(constant_x,0);
+//    predicted_x = filter(last_x1,predicted_x,x1);
+//    predicted_y = filter(last_x2,predicted_y,x2);
+//    last_x1 = predicted_xyz[predict_x1];
+//    last_x2 = predicted_xyz[predict_x2];
+	last_x[0] = predicted_xyz[predict_x1];
+	last_x[1] = predicted_xyz[predict_x2];
+    
+//    predicted_position << predicted_x,predicted_y,predicted_z;
+    predicted_position = predicted_xyz;
+	
+	if (!finite(predicted_position.norm()) || predicted_position.norm() - imu_position.norm() > 2){
+		predicted_position = imu_position;
         return false;
     }
-    return true;
+//	predicted_position = imu_position;
+	return true;
 }
 
+double Skalman::filter(const double &last, const double &current, const double &origin)
+{
+	double predicted_offset = last - origin;
+	double predicted_diff = current - last;
+	return (1-pow(TANH2(predicted_diff),2))*current+(pow(TANH2(predicted_diff),2))*
+	((1-pow(TANH_HALF(predicted_offset),2))*last+(pow(TANH_HALF(predicted_offset),2))*origin);
+}
 

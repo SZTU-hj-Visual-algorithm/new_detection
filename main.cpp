@@ -1,10 +1,8 @@
 #include "armor_detection.h"
 #include "gimbal_control.h"
 #include <opencv2/core/cvstd.hpp>
-#include "CRC_Check.h"
-#include"serialport.h"
 #include<X11/Xlib.h>
-#include"Thread.h"
+#include"thread.h"
 
 //#define DETECT
 #define PREDICT

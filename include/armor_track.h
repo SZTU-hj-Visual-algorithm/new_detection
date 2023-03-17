@@ -2,7 +2,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include "Spin_Tracker.h"
 #include "armor_detection.h"
-#include "Singer.h"
+#include "singer_prediction.h"
 #include "gimbal_control.h"
 #include "armor_prediction.h"
 
@@ -16,7 +16,6 @@ enum TrackerState {
     LOSING,      // 处于丢失状态，还会保留预测
     TRACKING,    // 处于跟踪状态
 };
-
 struct Circle
 {
     double x; // 圆心x坐标
@@ -34,21 +33,20 @@ struct Disappear_tracker{
     Armor disappear_armor;
 };
 
+
 class ArmorTracker
 {
 public:
-
-
     int tracker_state;  // 此时跟踪器的状态
     int tracking_id;  // 跟踪的敌方ID
-
+	
 	float pitch;
 	float yaw;
-
-    Skalman Singer;
-
+	
+	Skalman Singer;
+	
     AngleSolve AS;
-
+	
     ArmorTracker();
 
     void reset();
@@ -59,25 +57,25 @@ public:
     bool estimateEnemy(double dt);
     bool locateEnemy(const cv::Mat& src, std::vector<Armor> &armors, const chrono_time &time);
 
+
     Circle fitCircle(const cv::Point2f& x1, const cv::Point2f& x2, const cv::Point2f& x3);
     bool updateSpinScore();
     void spin_detect();
 private:
-
-    Armor enemy_armor;//最终选择的装甲板
-
+	Armor enemy_armor;//最终选择的装甲板
+    Armor real_armor; // virtual armor state, real armor
     KalmanFilter KF;
 
-    bool locate_target;
 
-    bool isChangeSameID;
 
-    bool first_vir_armor = true;
+    bool is_vir_armor = false;
+    bool is_anti = false;
+    int last_final_armors_size;
     double anti_spin_max_r_multiple;         // 符合陀螺条件，反陀螺分数增加倍数
     int anti_spin_judge_low_thres;           // 小于该阈值认为该车已关闭陀螺
     int anti_spin_judge_high_thres;          // 大于该阈值认为该车已开启陀螺
     int max_delta_t;                    //使用同一预测器的最大时间间隔(ms)
-    double max_delta_dist;              // 最大追踪距离
+//    double max_delta_dist;               // 最大追踪距离
     double spin_T;
     Jump_tracker jump_tracker;
     Disappear_tracker disappear_tracker;
@@ -88,6 +86,12 @@ private:
     std::map<int,SpinHeading> spin_status_map;     // 记录该车小陀螺状态（未知，顺时针，逆时针）
     std::map<int,double> spin_score_map;           // 记录各装甲板小陀螺可能性分数，大于0为逆时针旋转，小于0为顺时针旋转
 
+
+
+
+    bool locate_target;
+
+    bool isChangeSameID;
 
     int find_aim_cnt;
     int find_threshold;

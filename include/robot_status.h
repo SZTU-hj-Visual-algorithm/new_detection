@@ -31,17 +31,16 @@ public:
     //电控发来的角度和弹速
     float ab_pitch;
     float ab_yaw;
-    float ab_roll;
+//    float ab_roll;
     float bullet_speed;
     float quaternion[4];
-//    int enemy_color;
+    int enemy_color;
 
     robot_state() = default;
 
     void clone(robot_state &robot);
 
     void updateData(const float *data, const float *quat);
-//    void updateData(float *data, int color);
 };
 
 //}

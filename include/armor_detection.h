@@ -5,7 +5,7 @@
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc.hpp"
 #include "robot_status.h"
-#include "number_DNN.h"
+#include "number_dnn.h"
 #include <iostream>
 
 #define POINT_DIST(p1,p2) std::sqrt((p1.x-p2.x)*(p1.x-p2.x)+(p1.y-p2.y)*(p1.y-p2.y))
@@ -113,9 +113,11 @@ private:
     std::vector<Light> candidateLights; // 筛选的灯条
     std::vector<Armor> candidateArmors; // 筛选的装甲板
     std::vector<Armor> finalArmors;
-    Armor finalArmor;  // 最终装甲板
+    Armor finalArmor;  // 最终装甲板,已弃用
 
     DNN_detect dnnDetect;
+
+    void test();
 
     void setImage(const cv::Mat &src); //对图像进行设置
 

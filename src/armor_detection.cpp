@@ -1,21 +1,63 @@
 #include "armor_detection.h"
 
-#define BINARY_SHOW
+//#define BINARY_SHOW
 //#define DRAW_LIGHTS_CONTOURS
 //#define DRAW_LIGHTS_RRT
-//#define SHOW_NUMROI
-#define DEBUG_DNN_PRINT
+#define SHOW_NUMROI
+//#define DEBUG_DNN_PRINT
 //#define DRAW_ARMORS_RRT
-#define DRAW_FINAL_ARMOR_S_CLASS
-//#define DRAW_FINAL_ARMOR_MAIN
+//#define DRAW_FINAL_ARMOR_S_CLASS
+//#define SHOW_TIME
 
 using namespace cv;
 using namespace std;
 
 //namespace robot_detection {
-/**
- * @brief 初始化各种标准参数
- */
+
+void ArmorDetector::test()
+{
+    Mat dd;
+    _src.copyTo(dd);
+
+    int thres_max_color_red = 46;
+    int thres_max_color_blue = 146;
+
+    Mat _max_color = cv::Mat(_src.size(), CV_8UC1, cv::Scalar(0));
+
+
+    Mat element = getStructuringElement(MORPH_CROSS, Size(3, 3));
+
+    int srcdata = _src.rows * _src.cols;
+
+    uchar* Imgdata = (uchar*)_src.data;
+    uchar* Imgdata_binary = (uchar*)_max_color.data;
+    for (size_t i = 0; i < srcdata; i++)
+    {
+        if (*Imgdata - *(Imgdata + 2) > thres_max_color_blue)
+            *Imgdata_binary = 255;
+        Imgdata += 3;
+        Imgdata_binary++;
+    }
+
+    /*subtract(splited[0], splited[2], _max_color);
+    threshold(_max_color, _max_color, thres_max_color_blue, 255, THRESH_BINARY);// blue*/
+
+    imshow("binary_before", _max_color);
+    //_max_color = _max_color & thres_whole;  // _max_color获得了清晰的二值图
+    dilate(_max_color, _max_color, element);
+
+    vector<vector<cv::Point>> contours;
+    vector<cv::Vec4i> hierarchy;
+    cv::findContours(_max_color, contours, hierarchy, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+
+#ifdef DRAW_LIGHTS_CONTOURS
+    for(int i=0;i< contours.size();i++)
+        cv::drawContours(dd,contours,i,Scalar(255,0,0),2,LINE_8);
+    imshow("after_dilate",dd);
+#endif
+    imshow("binary_after", _max_color);
+}
+
 ArmorDetector::ArmorDetector()
 {
     cnt_count=1179;
@@ -58,11 +100,7 @@ ArmorDetector::ArmorDetector()
 
     fs.release();
 }
-/**
- * @brief 图像预处理
- * @param src  从相机读取的图像
- * @return 返回处理后的图像
- */
+
 void ArmorDetector::setImage(const Mat &src)
 {
 //    _src = src.clone();
@@ -83,12 +121,7 @@ void ArmorDetector::setImage(const Mat &src)
     imshow("_binary",_binary);
 #endif //BINARY_SHOW
 }
-/**
- * @brief 判断矩形是否符合灯条形状
- * @param light  具有灯条属性的结构体
- * @param cnt    矩形点集
- * @return 是否符合灯条形状条件
- */
+
 bool ArmorDetector::isLight(Light& light, vector<Point> &cnt)
 {
     double height = light.height;
@@ -112,7 +145,6 @@ bool ArmorDetector::isLight(Light& light, vector<Point> &cnt)
     //灯条角度条件
     bool angle_ok = fabs(90.0 - light.angle) < light_max_angle;
     // cout<<"angle: "<<light.angle<<endl;
-    // angle_ok = true;
 
     //限制面积条件
     bool area_limit_ok = contourArea(cnt) < light_max_area;
@@ -122,10 +154,7 @@ bool ArmorDetector::isLight(Light& light, vector<Point> &cnt)
 
     return is_light;
 }
-/**
- * @brief 查找灯条：找轮廓 -> 灯条筛选 -> 判断灯条颜色
- * @return 返回符合条件的灯条矩形
- */
+
 void ArmorDetector::findLights()
 {
     vector<vector<cv::Point>> contours;
@@ -175,10 +204,6 @@ void ArmorDetector::findLights()
                 // Sum of red pixels > sum of blue pixels ?
                 light.lightColor = sum_r > sum_b ? RED : BLUE;
 
-                //enermy_color ==  BLUE;
-                //cout<<"enermy_color  ==  "<<enermy_color<<endl;
-                //cout<<"light.lightColor  ==  "<<light.lightColor<<endl;
-
                 // 颜色不符合电控发的就不放入
 
                 if(light.lightColor == enemy_color)
@@ -199,10 +224,7 @@ void ArmorDetector::findLights()
     }
 //cout<<"dengtiao  geshu:  "<<candidateLights.size()<<endl;
 }
-/**
- * @brief 根据限制条件匹配灯条对
- * @return 返回预选装甲板及其位置数据等
- */
+
 void ArmorDetector::matchLights()
 {
     if(candidateLights.size() < 2)
@@ -296,10 +318,7 @@ void ArmorDetector::matchLights()
         }
     }
 }
-/**
- * @brief 数字识别+打分选择最高优先级目标装甲板
- * @return 返回预选装甲板及其位置数据等
- */
+
 void ArmorDetector::chooseTarget()
 {
 
@@ -396,11 +415,7 @@ void ArmorDetector::chooseTarget()
         imshow("showSrc", showSrc);
 #endif //DRAW_FINAL_ARMOR_S_CLASS
 }
-/**
- * @brief 自瞄总函数
- * @param src 摄像头获取的原图像
- * @return 返回最终装甲板结构体
- */
+
 vector<Armor> ArmorDetector::autoAim(const cv::Mat &src)
 {
     //binary_thresh
@@ -414,6 +429,7 @@ vector<Armor> ArmorDetector::autoAim(const cv::Mat &src)
     if(!candidateLights.empty())candidateLights.clear();
 
     //do autoaim task
+#ifdef SHOW_TIME
     auto start = std::chrono::high_resolution_clock::now();
     setImage(src);
     auto end = std::chrono::high_resolution_clock::now();
@@ -434,24 +450,18 @@ vector<Armor> ArmorDetector::autoAim(const cv::Mat &src)
     end = std::chrono::high_resolution_clock::now();
     duration = seconds_duration(end-start).count();
     printf("choose_time:%lf\n",duration);
+#else
 
-#ifdef DRAW_FINAL_ARMOR_MAIN
-    Point2f vertice_armor[4];
-    finalArmor.points(vertice_armor);
-    for (int i = 0; i < 4; i++) {
-        line(showSrc, vertice_armor[i], vertice_armor[(i + 1) % 4], CV_RGB(0, 255, 0));
-    }
-    imshow("showSrc", showSrc);
-#endif //DRAW_FINAL_ARMOR_MAIN
-
+	setImage(src);
+	findLights();
+	matchLights();
+	chooseTarget();
+//    test();
+#endif
 
     return finalArmors;
 }
-/**
- * @brief 数字截取+预处理+识别
- * @param armor 候选装甲板结构体
- * @return 返回装甲板ID和置信度
- */
+
 void ArmorDetector::detectNum(Armor& armor)
 {
     Mat numDst;
@@ -482,13 +492,16 @@ void ArmorDetector::detectNum(Armor& armor)
 
     // Get ROI
     numDst = numDst(cv::Rect(cv::Point((warp_width - roi_size.width) / 2, 0), roi_size));
-
+#ifdef SHOW_TIME
     auto start = std::chrono::high_resolution_clock::now();
     dnn_detect(numDst, armor);
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = seconds_duration(end-start).count();
     printf("dnn_time:%lf\n",duration);
-    putText(showSrc, to_string(duration),Point(10,100),2,3,Scalar(0,0,255));
+	putText(showSrc, to_string(duration),Point(10,100),2,3,Scalar(0,0,255));
+#else
+	dnn_detect(numDst, armor);
+#endif
 #ifdef SHOW_NUMROI
     if ((armor.id!=0)&&(armor.confidence > thresh_confidence))
     {
@@ -506,13 +519,6 @@ void ArmorDetector::detectNum(Armor& armor)
 #endif
 }
 
-/**
- * @brief 排除包含灯条的预选装甲板
- * @param match_rect 已匹配的装甲板旋转矩形
- * @param Lights 候选灯条
- * @param i 左灯条
- * @return 返回装甲板是否包含灯条
- */
 bool ArmorDetector::conTain(RotatedRect &match_rect,vector<Light> &Lights, size_t &i, size_t &j)
 {
     Rect matchRoi = match_rect.boundingRect();
@@ -534,10 +540,7 @@ bool ArmorDetector::conTain(RotatedRect &match_rect,vector<Light> &Lights, size_
     }
     return false;
 }
-/**
- * @brief 判断装甲板优先级具体的打分函数
- * @return 返回装甲板分数
- */
+
 int ArmorDetector::armorGrade(const Armor& checkArmor)
 {
     // 看看裁判系统的通信机制，雷达的制作规范
@@ -576,10 +579,7 @@ int ArmorDetector::armorGrade(const Armor& checkArmor)
 
     return final_grade;
 }
-/**
- * @brief 数字识别接口函数
- * @return 返回装甲板ID和置信度
- */
+
 void ArmorDetector::dnn_detect(cv::Mat frame, Armor& armor)// 调用该函数即可返回数字ID
 {
     return dnnDetect.net_forward(dnnDetect.img_processing(std::move(frame)), armor.id, armor.confidence);
