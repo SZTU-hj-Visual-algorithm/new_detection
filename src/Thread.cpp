@@ -118,12 +118,14 @@ void* Armor_Kal(void* PARAM)
         pthread_mutex_unlock(&mutex_new);
         if(second_get)
         {
-            printf("[mode_temp]:    |%x\n",mode_temp);
+//            printf("[mode_temp]:    |%x\n",mode_temp);
             if (mode_temp == 0x21)
             {
                 Targets = Detect.autoAim(src_copy);
-                if(!Targets.empty())std::cout<<"------------[Get Targets]--------------"<<std::endl;
-                else 				std::cout<<"------------[No Targets]---------------"<<std::endl;
+                if(!Targets.empty())
+                    std::cout<<"------------[Get Target]--------------"<<std::endl;
+                else
+                    std::cout<<"------------[No Target]---------------"<<std::endl;
                 pthread_mutex_lock(&mutex_ka);
                 send_data = {mode_temp,
                              second_get,
@@ -153,7 +155,7 @@ void* Kal_predict(void* PARAM)
     Mat src_copy;
 
     long int time_count = 0;
-    energy_pre E_predicter;
+    //energy_pre E_predicter;
 
     sleep(3);
     printf("kal_open\n");
@@ -179,97 +181,29 @@ void* Kal_predict(void* PARAM)
         {
             if (mode_temp == 0x21)
             {
+
                 Track.AS.bullet_speed = 28.0;
+
                 if (Track.locateEnemy(src_copy,armors,time_temp))
                 {
                     vdata = { Track.pitch, Track.yaw, 0x31 };
+                    cout<<"-----------fire-------"<<endl;
                 }
                 else
                 {
                     //    原数据，无自瞄
                     vdata = { Track.AS.ab_pitch, Track.AS.ab_yaw, 0x32 };
                 }
+
                 Track.show();
+
                 // uart
 //                port.TransformData(vdata);
 //                port.send();
                 // usb
                 serial.SenderMain(vdata);
-            } // else if (mode_temp == 0x21)
-//            else if (mode_temp == 0x22)
-//            {
-//                bool small_energy = false;
-//                //printf("big energy!!\n");
-//                ka_src.copyTo(src_copy);
-////                quan_ab_pitch = lin[0];
-////                quan_ab_yaw = lin[1];
-////                E_predicter.ab_roll = lin[2];
-////                E_predicter.SPEED = lin[3];
-////                send_data.is_get = lin_is_get;
-//                time_count = getTickCount();
-//
-//                if (E_predicter.energy_detect(src, BLUE))
-//                {
-//                    if (E_predicter.energy_predict_aim(time_count,small_energy))
-//                    {
-//                        float p = E_predicter.E_pitch - E_predicter.AS.ab_pitch;
-//                        float y = E_predicter.E_yaw - E_predicter.AS.ab_yaw;
-//                        printf("de_yaw:%f     de_pitch:%f\n",-p,-y);
-//
-//                        vdata = { -p, -y, 0x31 };
-//                    }
-//                    else
-//                    {
-//                        vdata = { Track.AS.ab_pitch, Track.AS.ab_yaw, 0x32 };
-//                    }
-//                }
-//                else
-//                {
-//                    vdata = { Track.AS.ab_pitch, Track.AS.ab_yaw, 0x32 };//---------
-//                }
-//            }  // else if (mode_temp == 0x22)
-//            else if (mode_temp == 0x23)
-//            {
-//                bool small_energy = true;
-//                //printf("samll energy!!\n");
-//                ka_src.copyTo(src_copy);
-////                quan_ab_pitch = lin[0];
-////                quan_ab_yaw = lin[1];
-////                E_predicter.ab_roll = lin[2];
-////                E_predicter.SPEED = lin[3];
-////                send_data.is_get = lin_is_get;
-//                time_count = getTickCount();
-//                //printf("quan_pitch:%f",quan_ab_pitch);
-//                //printf("quan_yaw:%f",quan_ab_yaw);
-//                if (E_predicter.energy_detect(src, BLUE)) //
-//                {
-//                    if (E_predicter.energy_predict_aim(time_count,small_energy))
-//                    {
-//                        float p = E_predicter.E_pitch - E_predicter.AS.ab_pitch;
-//                        float y = E_predicter.E_yaw - E_predicter.AS.ab_yaw;
-//                        printf("de_yaw:%f     de_pitch:%f\n",-p,-y);
-//
-//                        vdata = { -p, -y, 0x31 };//---------
-//                    }
-//                    else
-//                    {
-//                        vdata = { Track.AS.ab_pitch, Track.AS.ab_yaw, 0x32 };//--------
-//                    }
-//                }
-//                else
-//                {
-//                    vdata = { Track.AS.ab_pitch, Track.AS.ab_yaw, 0x32 };//---------
-//                }
-//            } // else if (mode_temp == 0x23)
-
-            // uart
-//                port.TransformData(vdata);
-//                port.send();
-            // usb
-            serial.SenderMain(vdata);
-
+            }
         }
-
     }
 }
 

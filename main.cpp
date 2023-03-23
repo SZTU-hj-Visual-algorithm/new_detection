@@ -1,5 +1,6 @@
-#include "armor_detection.h"
-#include "gimbal_control.h"
+//#include "gimbal_control.h"
+#include "opencv2/opencv.hpp"
+#include <Eigen/Dense>
 #include <opencv2/core/cvstd.hpp>
 #include<X11/Xlib.h>
 #include"thread.h"

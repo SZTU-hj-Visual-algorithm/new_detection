@@ -4,7 +4,17 @@ big_w: 0.230
 big_h: 0.057
 small_w: 0.135
 small_h: 0.057
-self_type: balance_infantry
+buff_r_w: 0.0730
+buff_r_h: 0.0725
+buff_in_w: 0.36426
+buff_in_h: 0.043
+buff_out_w: 0.337836
+buff_out_h: 0.047
+buff_radius: 0.700
+buff_convex: 0.146
+
+
+self_type: omni_infantry
 
 omni_infantry:
   F_MAT: !!opencv-matrix
@@ -24,6 +34,11 @@ omni_infantry:
     cols: 1
     dt: d
     data: [ 0 , 0.125 , -0.02 ]
+  gimbal_offset_angle: !!opencv-matrix
+    rows: 3
+    cols: 1
+    dt: d
+    data: [ 0 , 0 , 0 ]
 
 balance_infantry:
   F_MAT: !!opencv-matrix
@@ -39,6 +54,11 @@ balance_infantry:
     dt: d
     data: [ -0.09082 , 0.22923 , -0.00020 , 0.00013 , 0.00000 ]
   center_offset_position: !!opencv-matrix
+    rows: 3
+    cols: 1
+    dt: d
+    data: [ 0 , 0 , 0 ]
+  gimbal_offset_angle: !!opencv-matrix
     rows: 3
     cols: 1
     dt: d
@@ -62,4 +82,9 @@ hero:
     cols: 1
     dt: d
     data: [ -0.078 , 0.26 , 0.0205 ]
+  gimbal_offset_angle: !!opencv-matrix
+    rows: 3
+    cols: 1
+    dt: d
+    data: [ 0 , 0 , 0 ]
 #595 6mm

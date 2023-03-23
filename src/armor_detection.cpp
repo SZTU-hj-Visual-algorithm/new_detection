@@ -6,7 +6,7 @@
 //#define SHOW_NUMROI
 //#define DEBUG_DNN_PRINT
 //#define DRAW_ARMORS_RRT
-#define DRAW_FINAL_ARMOR_S_CLASS
+//#define DRAW_FINAL_ARMOR_S_CLASS
 //#define SHOW_TIME
 
 using namespace cv;
@@ -16,7 +16,6 @@ using namespace std;
 
 ArmorDetector::ArmorDetector()
 {
-    cnt_count=1179;
 
     FileStorage fs("../other/detect_data.yaml", FileStorage::READ);
 
@@ -26,7 +25,7 @@ ArmorDetector::ArmorDetector()
     light_max_hw_ratio = (double)fs["light_max_hw_ratio"];   // different distance and focus
     light_min_area_ratio = (double)fs["light_min_area_ratio"];   // contourArea / RotatedRect
     light_max_area_ratio = (double)fs["light_max_area_ratio"];
-    light_max_area = (double)fs["light_area_max"];
+    light_area_max = (double)fs["light_max_area"];
 
     //armor_judge_condition
     armor_big_max_wh_ratio = (double)fs["armor_big_max_wh_ratio"];
@@ -51,7 +50,7 @@ ArmorDetector::ArmorDetector()
 
     //thresh_confidence
     thresh_confidence = (double)fs["thresh_confidence"];
-	//enemy_color
+    //enemy_color
     enemy_color = COLOR(((string)fs["enemy_color"]));
 
     fs.release();
@@ -62,7 +61,6 @@ void ArmorDetector::setImage(const Mat &src)
 //    _src = src.clone();
 //    showSrc = src.clone();
     src.copyTo(_src);
-    src.copyTo(showSrc);
 //    size_t size = src.rows*src.cols*src.channels();
 //    _src = Mat(src.size(),src.type());
 //    showSrc = Mat(src.size(),src.type());
@@ -103,7 +101,7 @@ bool ArmorDetector::isLight(Light& light, vector<Point> &cnt)
     // cout<<"angle: "<<light.angle<<endl;
 
     //限制面积条件
-    bool area_limit_ok = contourArea(cnt) < light_max_area;
+    bool area_limit_ok = contourArea(cnt) < light_area_max;
 
     //灯条判断的条件总集
     bool is_light = hw_ratio_ok && area_ratio_ok && angle_ok && standing_ok && area_limit_ok;
@@ -207,7 +205,7 @@ void ArmorDetector::matchLights()
             double armorHeight = (lightI.height + lightJ.height) / 2.0;
             double armor_ij_ratio = lightI.height / lightJ.height;
             double armorAngle = atan2((centerI.y - centerJ.y),fabs(centerI.x - centerJ.x))/CV_PI*180.0;
-            
+
             //宽高比筛选条件
             bool small_wh_ratio_ok = armor_small_min_wh_ratio < armorWidth/armorHeight && armorWidth/armorHeight < armor_small_max_wh_ratio;
             bool big_wh_ratio_ok = armor_big_min_wh_ratio < armorWidth/armorHeight && armorWidth/armorHeight < armor_big_max_wh_ratio;
@@ -218,7 +216,7 @@ void ArmorDetector::matchLights()
 
             //左右亮灯条中心点高度差筛选条件
             bool height_offset_ok = fabs(lightI.center.y - lightJ.center.y) / armorHeight < armor_height_offset;
-            
+
             //左右灯条的高度比
             bool ij_ratio_ok = armor_ij_min_ratio < armor_ij_ratio && armor_ij_ratio < armor_ij_max_ratio;
 
@@ -289,13 +287,13 @@ void ArmorDetector::chooseTarget()
         //cout<<"get 1 target!!"<<endl;
         detectNum(candidateArmors[0]);
         if(candidateArmors[0].confidence < thresh_confidence)
-		{
+        {
 #ifdef DEBUG_DNN_PRINT
-			std::cout<<"confidence"<<candidateArmors[0].confidence<<std::endl;
+            std::cout<<"confidence"<<candidateArmors[0].confidence<<std::endl;
 			std::cout<<"Num_ID:"<<candidateArmors[0].id<<std::endl;
 #endif
-			return;
-		}
+            return;
+        }
         if(candidateArmors[0].id == 2 || candidateArmors[0].id == 0)
         {
             return;
@@ -308,20 +306,20 @@ void ArmorDetector::chooseTarget()
 
         sort(candidateArmors.begin(),candidateArmors.end(),
              [](Armor &candidate1,Armor &candidate2){
-            return candidate1.size.height > candidate2.size.height;});
+                 return candidate1.size.height > candidate2.size.height;});
 
         // 获取每个候选装甲板的id和type
 
         for(int i = 0; i < candidateArmors.size(); ++i) {
             detectNum(candidateArmors[i]);
             if(candidateArmors[i].confidence < thresh_confidence)
-			{
+            {
 #ifdef DEBUG_DNN_PRINT
-				std::cout<<"confidence:"<<candidateArmors[0].confidence<<std::endl;
+                std::cout<<"confidence:"<<candidateArmors[0].confidence<<std::endl;
 				std::cout<<"Num_ID:"<<candidateArmors[0].id<<std::endl;
 #endif
-				continue;
-			}
+                continue;
+            }
             if (candidateArmors[i].id == 2 || candidateArmors[i].id == 0)
                 continue;
 
@@ -408,10 +406,10 @@ vector<Armor> ArmorDetector::autoAim(const cv::Mat &src)
     printf("choose_time:%lf\n",duration);
 #else
 
-	setImage(src);
-	findLights();
-	matchLights();
-	chooseTarget();
+    setImage(src);
+    findLights();
+    matchLights();
+    chooseTarget();
 //    test();
 #endif
 
@@ -456,7 +454,7 @@ void ArmorDetector::detectNum(Armor& armor)
     printf("dnn_time:%lf\n",duration);
 	putText(showSrc, to_string(duration),Point(10,100),2,3,Scalar(0,0,255));
 #else
-	dnn_detect(numDst, armor);
+    dnn_detect(numDst, armor);
 #endif
 #ifdef SHOW_NUMROI
     if ((armor.id!=0)&&(armor.confidence > thresh_confidence))
