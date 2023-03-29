@@ -16,20 +16,20 @@ DNN_detect::DNN_detect()
     fs.release();
 }
 
-Mat DNN_detect::img_processing(Mat ori_img) {
+void DNN_detect::img_processing(Mat ori_img, std::vector<cv::Mat>& numROIs) {
     Mat out_blob;
     cvtColor(ori_img, ori_img, cv::COLOR_RGB2GRAY);
     threshold(ori_img, ori_img, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
-    dnn::blobFromImage(ori_img, out_blob, 1.0f/255.0f, Size(input_width, input_height));
-    return out_blob;
+    numROIs.push_back(ori_img);
 }
 
-void DNN_detect::net_forward(const Mat& blob, int& id, double& confidence) {
+Mat DNN_detect::net_forward(const std::vector<cv::Mat>& numROIs) {
+    //!< opencv dnn supports dynamic batch_size, later modify
+    cv::Mat blob;
+    dnn::blobFromImages(numROIs, blob, 1.0f/255.0f, Size(input_width, input_height));
     net.setInput(blob);
     Mat outputs = net.forward();
-    cv::Point class_id;
-    minMaxLoc(outputs, nullptr, &confidence, nullptr, &class_id);
-    if(class_id.x)id = class_id.x;
+    return outputs;
 }
 
 //}

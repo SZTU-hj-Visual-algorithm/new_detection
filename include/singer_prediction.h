@@ -1,10 +1,11 @@
-#ifndef SHSIHI_SINGER_HPP
-#define SHSIHI_SINGER_HPP
 #include <Eigen/Dense>
 #include <iostream>
 #include <opencv2/opencv.hpp>
 #include "robot_status.h"
 #include <cmath>
+#define PI CV_PI
+
+//namespace robot_detection {
 
 #define TANH2(x) (exp(2.5*x)-exp(-2.5*x))/(exp(2.5*x)+exp(-2.5*x))
 #define TANH_HALF(x) (exp(1.1*x)-exp(-1.1*x))/(exp(1.1*x)+exp(-1.1*x))
@@ -33,12 +34,12 @@ class Skalman
     Eigen::Matrix<double, 2, 2> _Sk;//根据测量值算出来的新息协方差
     Eigen::Matrix<double, 2, 2> Sk;//根据观测方程算出来的新息协方差
 public:
+    double shoot_delay;
+    double error_distance;
+
     double T = 0;//采样周期T，即前后两次预测帧相隔的时间
-    double last_x1 = 0;
-    double last_x2 = 0;
     double last_x[2] = {0,0};
     Eigen::Vector3d predicted_xyz = {0,0,0};
-    
 
     Skalman();
     void Reset();
@@ -54,7 +55,4 @@ public:
     Eigen::Matrix<double,6,1> correct(const Eigen::Matrix<double,2,1> &measure);
     double filter(const double &last, const double &current, const double &origin);
 };
-
-
-
-#endif //SHSIHI_SINGER_HPP
+//}

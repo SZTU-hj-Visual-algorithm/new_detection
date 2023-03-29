@@ -14,10 +14,10 @@ using namespace cv;
 
 energy::energy()
 {
-    l_hit = imread("/home/lmx/HJ_VISION/other/l_h.jpg");
-    r_hit = imread("/home/lmx/HJ_VISION/other/r_h.jpg");
-    l_uhit = imread("/home/lmx/HJ_VISION/other/l_uh.jpg");
-    r_uhit = imread("/home/lmx/HJ_VISION/other/r_uh.jpg");
+    l_hit = imread("../other/l_h.jpg");
+    r_hit = imread("../other/r_h.jpg");
+    l_uhit = imread("../other/l_uh.jpg");
+    r_uhit = imread("../other/r_uh.jpg");
     cvtColor(l_hit,l_hit,COLOR_BGR2GRAY);
     cvtColor(r_hit,r_hit,COLOR_BGR2GRAY);
     cvtColor(l_uhit,l_uhit,COLOR_BGR2GRAY);

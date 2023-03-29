@@ -11,8 +11,8 @@ class DNN_detect{
     cv::dnn::Net net;
 public:
     DNN_detect();
-    cv::Mat img_processing(cv::Mat ori_img);
-    void net_forward(const cv::Mat& blob, int& id, double & confidence);
+    void img_processing(cv::Mat ori_img, std::vector<cv::Mat>& numROIs);
+    cv::Mat net_forward(const std::vector<cv::Mat>& numROIs);
 };
 
 //}
