@@ -6,7 +6,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 #include "robot_status.h"
-#include "number_DNN.h"
+#include "number_dnn.h"
 #include <iostream>
 
 //namespace robot_detection {
@@ -23,11 +23,11 @@
             bottom = (p[2] + p[3]) / 2;
             height = POINT_DIST(top, bottom);
             width = POINT_DIST(p[0], p[1]);
+            // sentry
 //            angle = atan2(bottom.y-top.y, bottom.x-top.x) * 180 / CV_PI;
-            angle = box.angle;
-            angle = top.x < bottom.x ? box.angle : 90 + box.angle;
-             if(fabs(bottom.x - top.x) <= 0.01) angle = 0;
-            //angle = atan2(fabs(centerI.y - centerJ.y),(centerI.x - centerJ.x));
+            // infantry
+             angle = top.x < bottom.x ? box.angle : 90 + box.angle;
+             if(fabs(bottom.x - top.x) <= 0.01) angle = 90;
         }
 
         int lightColor;
@@ -53,7 +53,7 @@
 
          cv::Point2f armor_pt4[4]; //左下角开始逆时针
 //        std::vector<cv::Point2f> armor_pt4; //左下角开始逆时针
-        double confidence;
+        float confidence;
         int id;  // 装甲板类别
         int grade;
         int type;  // 装甲板类型
@@ -72,7 +72,8 @@
 
     private:
         int binThresh;
-        int enemy_color = 0;
+        int enemy_color;
+        int categories;
 
         //light_judge_condition
         double light_max_angle;
@@ -80,8 +81,7 @@
         double light_max_hw_ratio;   // different distance and focus
         double light_min_area_ratio;   // RotatedRect / Rect
         double light_max_area_ratio;
-        double light_area_max;
-
+        double light_max_area;
 
         //armor_judge_condition
         double armor_big_max_wh_ratio;
@@ -104,7 +104,7 @@
         double height_grade_ratio;
         double near_grade_ratio;
 
-        double thresh_confidence;
+        float thresh_confidence;
 
         cv::Mat _src;  // 裁剪src后的ROI
         cv::Mat _binary;
@@ -115,6 +115,7 @@
         std::vector<Light> candidateLights; // 筛选的灯条
         std::vector<Armor> candidateArmors; // 筛选的装甲板
         std::vector<Armor> finalArmors;
+        std::vector<cv::Mat> numROIs;
         Armor finalArmor;  // 最终装甲板
 
         DNN_detect dnnDetect;
@@ -133,11 +134,9 @@
 
         int armorGrade(const Armor& checkArmor);
 
-        void detectNum(Armor& armor);
+        void preImplement(Armor& armor);
 
-        void dnn_detect(cv::Mat frame, Armor& armor);// 调用该函数即可返回数字ID
-
-
+        bool get_max(const float *data, float &confidence, int &id);
     };
 
 //}

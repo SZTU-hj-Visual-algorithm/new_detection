@@ -56,6 +56,7 @@
             return false;
         }
 
+
         sort(find_armors.begin(),find_armors.end(),
             [](Armor &armor1,Armor &armor2){return armor1.grade > armor2.grade;});
 
@@ -66,10 +67,10 @@
 
         // initial KF --- x_post
         KF.initial_KF();
-        enemy_armor.world_position = AS.pixel2imu(enemy_armor,1);
+        enemy_armor.world_position = AS.pixel2imu(enemy_armor);
         KF.setXPost(enemy_armor.world_position);
         // TODO: 这里用的是x和y是水平面的,顺序和数据是否正确
-        Singer.setXpos({enemy_armor.world_position(0,0),enemy_armor.world_position(2,0)});
+        Singer.setXpos({enemy_armor.world_position(0,0),enemy_armor.world_position(1,0)});
         // std::cout<<enemy_armor.camera_position.norm()<<"     "<<enemy_armor.world_position.norm()<<std::endl;
         // std::cout<<"enemy_armor.camera_position:  "<<enemy_armor.camera_position.transpose()<<std::endl;
         // std::cout<<AS.ab_roll<<"     "<<AS.ab_pitch<<"     "<<AS.ab_yaw<<std::endl;
@@ -108,7 +109,7 @@
             double min_position_diff = DBL_MAX;
             for(auto & armor : find_armors)
             {
-                armor.world_position = AS.pixel2imu(armor,1);
+                armor.world_position = AS.pixel2imu(armor);
                 Eigen::Vector3d pre = predicted_enemy.head(3);
                 double position_diff = (pre - armor.world_position).norm();
 

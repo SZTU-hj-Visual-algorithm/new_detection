@@ -110,8 +110,6 @@
     {
         Xk_1 << Xpos(0,0),0.1,0,
                 Xpos(1,0),0.1,0;
-        last_x1 = Xpos(0,0);
-        last_x2 = Xpos(1,0);
     }
 
     void Skalman::PredictInit(const double &deleta_t)

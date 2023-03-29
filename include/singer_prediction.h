@@ -8,7 +8,7 @@
 //namespace robot_detection {
 
     #define TANH2(x) (exp(2.5*x)-exp(-2.5*x))/(exp(2.5*x)+exp(-2.5*x))
-    #define TANH_HALF(x) (exp(0.8*x)-exp(-0.8*x))/(exp(0.8*x)+exp(-0.8*x))
+    #define TANH_HALF(x) (exp(1.1*x)-exp(-1.1*x))/(exp(1.1*x)+exp(-1.1*x))
 
     //二维Singer模型
     class Skalman
@@ -38,11 +38,8 @@
         double error_distance;
 
         double T = 0;//采样周期T，即前后两次预测帧相隔的时间
-        double last_x1 = 0;
-        double last_x2 = 0;
         double last_x[2] = {0,0};
         Eigen::Vector3d predicted_xyz = {0,0,0};
-        
 
         Skalman();
         void Reset();
