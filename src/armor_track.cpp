@@ -177,8 +177,9 @@ bool ArmorTracker::selectEnemy2(std::vector<Armor> &find_armors, double dt)
                     >new_old_threshold)
                 {
                     std::cout << "---1->1(跳变)---"<< std::endl;
-
-                    spin_T = milliseconds_duration (t - jump_trackers.at(0).jump_time).count();
+                    if (milliseconds_duration (t - jump_trackers.at(0).jump_time).count()*2 > spin_T){
+                        spin_T = milliseconds_duration (t - jump_trackers.at(0).jump_time).count();
+                    }
 
                     jump_tracker.jump_armor = matched_armor;
                     jump_tracker.jump_time = t;
@@ -199,7 +200,9 @@ bool ArmorTracker::selectEnemy2(std::vector<Armor> &find_armors, double dt)
                     {
                         std::cout << "---2->1(无跳变)---"<< std::endl;
 
-                        spin_T = milliseconds_duration(t - jump_trackers.at(0).jump_time).count();
+                        if (milliseconds_duration (t - jump_trackers.at(0).jump_time).count()*2 > spin_T){
+                            spin_T = milliseconds_duration (t - jump_trackers.at(0).jump_time).count();
+                        }
                         double min_delta_dist = 0;
                         double min_delta_t = 1e9;
 
@@ -224,12 +227,12 @@ bool ArmorTracker::selectEnemy2(std::vector<Armor> &find_armors, double dt)
                 // 如果超过限制时间，构造虚拟装甲板。
 
                 double delay_time = AS.getFlyTime(matched_armor.world_position) * 10000; // TODO：改为子弹飞行时间+系统时延+the time of move to disappear
-                std::cout << "delay_time: " << delay_time << std::endl;
+//                std::cout << "delay_time: " << delay_time << std::endl;
 //                auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(t.time_since_epoch());
 //                auto ms2 = std::chrono::duration_cast<std::chrono::milliseconds>(jump_trackers.front().jump_time.time_since_epoch());
 //                std::cout << "t: " << ms.count() << std::endl;
 //                std::cout << "jump_time: " << ms2.count() << std::endl;
-                std::cout << "jump_tracker_size: " << jump_trackers.size() << std::endl;
+//                std::cout << "jump_tracker_size: " << jump_trackers.size() << std::endl;
                 std::cout << "duration: " << milliseconds_duration (t - jump_trackers.back().jump_time).count() << std::endl;
                 std::cout << "T: " << spin_T << std::endl;
 
@@ -259,44 +262,48 @@ bool ArmorTracker::selectEnemy2(std::vector<Armor> &find_armors, double dt)
                     p2.y = jump_trackers.back().jump_armor.world_position[1];
                     p3.x = disappear_tracker.disappear_armor.world_position[0];
                     p3.y = disappear_tracker.disappear_armor.world_position[1];
-                    std::cout << "[p1]: " << p1 << "   [p2]: " << p2 << "    [p3]: " << p3 << std::endl;
+//                    std::cout << "[p1]: " << p1 << "   [p2]: " << p2 << "    [p3]: " << p3 << std::endl;
                     cv::Mat image = cv::Mat::ones(300, 300, CV_8UC3);
                     cv::Scalar color1(255, 0, 0); // 蓝色
                     cv::Scalar color2(0, 0, 255); // red
+                    cv::Scalar color3(0, 255, 0); // green
 
-                    cv::circle(image, cv::Point2f(p1.x*100+100, p1.y*100+100), 1, color2);
-                    cv::circle(image, cv::Point2f(p2.x*100+100, p2.y*100+100), 1, color1);
-                    cv::circle(image, cv::Point2f(p3.x*100+100, p3.y*100+100), 1, color1);
+                    cv::circle(image, cv::Point2f(p1.x*100+100, p1.y*100+100), 2, color2, -1);
+                    cv::circle(image, cv::Point2f(p2.x*100+100, p2.y*100+100), 2, color1, -1);
+                    cv::circle(image, cv::Point2f(p3.x*100+100, p3.y*100+100), 2, color1, -1);
 
                     Circle circle = fitCircle(p1, p2, p3);
+                    cv::circle(image, cv::Point2f(circle.x*100+100, circle.y*100+100), circle.r*100, color3, 1);
 
                     cv::imshow("Image", image);
-
-                    std::cout << "[r]: " << circle.r << std::endl;
-
-                    /// 转化世界坐标
-                    double new_world_position_x;
-                    double new_world_position_y;
-                    // 该点与圆心连线和水平方向的夹角θ
-                    double theta = atan2(matched_armor.world_position[1] - circle.y,
-                                         matched_armor.world_position[0] - circle.x);
-                    // 逆时针+，顺时针-
-                    if(spin_status == COUNTER_CLOCKWISE)
-                    {
-                        double alpha = theta - M_PI / 2;
-                        new_world_position_x = circle.r * cos(alpha) + circle.x;
-                        new_world_position_y = circle.r * sin(alpha) + circle.y;
+                    circle.r = (circle.r + last_r) / 2;
+//                    std::cout << "[r]: " << circle.r << std::endl;
+                    if (circle.r > 0.35){
+                        circle.r = last_r;
+                        matched_armor.world_position = last_position;
                     }
                     else
-                    {
-                        double beta = theta + M_PI / 2;
-                        new_world_position_x = circle.r * cos(beta) + circle.x;
-                        new_world_position_y = circle.r * sin(beta) + circle.y;
+                    {/// 转化世界坐标
+                        double new_world_position_x;
+                        double new_world_position_y;
+                        // 该点与圆心连线和水平方向的夹角θ
+                        double theta = atan2(matched_armor.world_position[1] - circle.y,
+                                             matched_armor.world_position[0] - circle.x);
+                        // 逆时针-，顺时针+
+                        if (spin_status == COUNTER_CLOCKWISE) {
+                            double alpha = theta - M_PI / 2;
+                            new_world_position_x = circle.r * cos(alpha) + circle.x;
+                            new_world_position_y = circle.r * sin(alpha) + circle.y;
+                        } else {
+                            double beta = theta + M_PI / 2;
+                            new_world_position_x = circle.r * cos(beta) + circle.x;
+                            new_world_position_y = circle.r * sin(beta) + circle.y;
+                        }
+                        matched_armor.world_position.x() = new_world_position_x;
+                        matched_armor.world_position.y() = new_world_position_y;
                     }
-                    matched_armor.world_position.x() = new_world_position_x;
-                    matched_armor.world_position.y() = new_world_position_y;
-
                     kf_state = 3;
+                    Singer.Reset();
                 }
                 /// 初始化/更新KF参数
                 if(kf_state == 2)
@@ -368,6 +375,7 @@ bool ArmorTracker::selectEnemy2(std::vector<Armor> &find_armors, double dt)
                 is_vir_armor = false;
             }
             last_final_armors_size = final_armors.size();
+            last_position = matched_armor.world_position;
         }
     }
         if (matched)

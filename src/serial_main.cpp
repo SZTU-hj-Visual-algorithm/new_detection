@@ -119,13 +119,13 @@ uint16_t SerialMain::ReceiveDataSolve(uint8_t *frame)
 			case VISION_ID:
 			{
 				memcpy(&vision_msg_, frame + index, sizeof(vision_t));
-				std::cout<<"mode:"<<vision_msg_.mode<<std::endl;
-				std::cout<<"yaw:"<<vision_msg_.yaw<<std::endl;
-				std::cout<<"pitch:"<<vision_msg_.pitch<<std::endl;
-				std::cout<<"quat0:"<<vision_msg_.quaternion[0]<<std::endl;
-				std::cout<<"quat1:"<<vision_msg_.quaternion[1]<<std::endl;
-				std::cout<<"quat2:"<<vision_msg_.quaternion[2]<<std::endl;
-				std::cout<<"quat3:"<<vision_msg_.quaternion[3]<<std::endl;
+//				std::cout<<"mode:"<<vision_msg_.mode<<std::endl;
+//				std::cout<<"yaw:"<<vision_msg_.yaw<<std::endl;
+//				std::cout<<"pitch:"<<vision_msg_.pitch<<std::endl;
+//				std::cout<<"quat0:"<<vision_msg_.quaternion[0]<<std::endl;
+//				std::cout<<"quat1:"<<vision_msg_.quaternion[1]<<std::endl;
+//				std::cout<<"quat2:"<<vision_msg_.quaternion[2]<<std::endl;
+//				std::cout<<"quat3:"<<vision_msg_.quaternion[3]<<std::endl;
 			}
 				break;
 			default:

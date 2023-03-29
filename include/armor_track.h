@@ -67,7 +67,8 @@ private:
     KalmanFilter KF;
 
 
-
+    double last_r = 0.35;
+    Eigen::Vector3d last_position;
     bool is_vir_armor = false;
     bool is_anti = false;
     int last_final_armors_size;
