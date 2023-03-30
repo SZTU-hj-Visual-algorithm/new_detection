@@ -71,6 +71,8 @@
         std::vector<Armor> autoAim(const cv::Mat &src); //将最终目标的坐标转换到摄像头原大小的
 
     private:
+        int save_num_cnt;
+
         int binThresh;
         int enemy_color;
         int categories;
@@ -136,7 +138,9 @@
 
         void preImplement(Armor& armor);
 
-        bool get_max(const float *data, float &confidence, int &id);
+        bool get_max(const float *data, float &confidence, int &id);//serve single-task network
+
+        bool get_valid(const float *data, float &confidence, int &id);// serve multi-task network
     };
 
 //}

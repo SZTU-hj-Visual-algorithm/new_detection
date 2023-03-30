@@ -16,7 +16,7 @@ using namespace std;
 
 ArmorDetector::ArmorDetector()
 {
-
+    save_num_cnt = 0;
     FileStorage fs("../other/detect_data.yaml", FileStorage::READ);
 
     binThresh = (int)fs["binThresh"];
@@ -102,10 +102,10 @@ bool ArmorDetector::isLight(Light& light, vector<Point> &cnt)
 
     bool is_light = hw_ratio_ok && area_ratio_ok && angle_ok && standing_ok && area_ok;
 
-//        if(!is_light)
-//    {
-//        cout<<hw_ratio<<"    "<<contourArea(cnt) / light_area_max<<"    "<<light.angle<<endl;
-//    }
+        if(!is_light)
+    {
+//        cout<<hw_ratio<<"    "<<contourArea(cnt) / light_max_area<<"    "<<light.angle<<endl;
+    }
 
     return is_light;
 }
@@ -287,10 +287,10 @@ void ArmorDetector::chooseTarget()
     }
     else if(candidateArmors.size() == 1)
     {
-        //cout<<"get 1 target!!"<<endl;
+        cout<<"get 1 target!!"<<endl;
         Mat out_blobs = dnnDetect.net_forward(numROIs);
         float *outs = (float*)out_blobs.data;
-        if (get_max(outs, candidateArmors[0].confidence, candidateArmors[0].id))
+        if (get_valid(outs, candidateArmors[0].confidence, candidateArmors[0].id))
         {
             candidateArmors[0].grade = 100;
             finalArmors.emplace_back(candidateArmors[0]);
@@ -307,7 +307,7 @@ void ArmorDetector::chooseTarget()
         // 获取每个候选装甲板的id和type
         for(int i=0;i<candidateArmors.size();i++) {
             // numROIs has identical size as candidateArmors
-            if (!get_max(outs, candidateArmors[i].confidence, candidateArmors[i].id))
+            if (!get_valid(outs, candidateArmors[i].confidence, candidateArmors[i].id))
             {
                 outs+=categories;
                 continue;
@@ -450,7 +450,7 @@ void ArmorDetector::preImplement(Armor& armor)
     const int small_armor_width = 32;//为48/3*2
     const int large_armor_width = 44;//约为70/3*2
     // Number ROI size
-    const cv::Size roi_size(22, 30);
+    const cv::Size roi_size(20, 30);
 
     const int top_light_y = (warp_height - light_length) / 2;
     const int bottom_light_y = top_light_y + light_length;
@@ -469,6 +469,25 @@ void ArmorDetector::preImplement(Armor& armor)
     // Get ROI
     numDst = numDst(cv::Rect(cv::Point((warp_width - roi_size.width) / 2, 0), roi_size));
     dnnDetect.img_processing(numDst, numROIs);
+
+    // save number roi
+     int c = waitKey(100);
+     cvtColor(numDst, numDst, cv::COLOR_BGR2GRAY);
+     threshold(numDst, numDst, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
+     string nn= std::to_string(save_num_cnt);
+     string path="/home/lmx/data_list/"+nn+".jpg";
+     if(c==113){
+//
+         imwrite(path,numDst);
+         save_num_cnt++;
+     }
+
+    resize(numDst, numDst,Size(200,300));
+//    cvtColor(numDst, numDst, cv::COLOR_BGR2GRAY);
+//    threshold(numDst, numDst, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
+    string name = to_string(armor.id) + ":" + to_string(armor.confidence*100) + "%";
+    imshow("name", numDst);
+    // std::cout<<"number:   "<<armor.id<<"   type:   "<<armor.type<<std::endl;
 #ifdef SHOW_TIME
     auto start = std::chrono::high_resolution_clock::now();
     dnn_detect(numDst, armor);
@@ -537,6 +556,26 @@ int ArmorDetector::armorGrade(const Armor& checkArmor)
 //	std::cout<<"final_grade"<<std::endl;
 
     return final_grade;
+}
+
+
+bool ArmorDetector::get_valid(const float *data, float &confidence, int &id)
+{
+    id = 1;
+    int i=2;
+    confidence = data[i];
+    for (;i<categories;i++)
+    {
+        if (data[i] > confidence)
+        {
+            confidence = data[i];
+            id = i-1;
+        }
+    }
+    if(data[0] > data[1] || id == 2 || confidence < thresh_confidence)
+        return false;
+    else
+        return true;
 }
 
 //}
