@@ -119,6 +119,8 @@ uint16_t SerialMain::ReceiveDataSolve(uint8_t *frame)
 			case VISION_ID:
 			{
 				memcpy(&vision_msg_, frame + index, sizeof(vision_t));
+                //---------------------serial_main  data------------
+//                std::cout<<"-----serial_main  data------"<<std::endl;
 //				std::cout<<"mode:"<<vision_msg_.mode<<std::endl;
 //				std::cout<<"yaw:"<<vision_msg_.yaw<<std::endl;
 //				std::cout<<"pitch:"<<vision_msg_.pitch<<std::endl;

@@ -1,14 +1,13 @@
-#include "robot_status.h"
 #include "opencv2/opencv.hpp"
 #include <Eigen/Dense>
 #include "armor_detection.h"
-
 
 
 class AngleSolve : public robot_state
 {
 public:
     AngleSolve();
+
 
     double big_w;
     double big_h;
@@ -34,9 +33,10 @@ public:
     cv::Mat C_MAT;
     Eigen::Matrix<double,3,3> F_EGN;
     Eigen::Matrix<double,1,5> C_EGN;
+    Eigen::Vector3d tv;
+    Eigen::Matrix<double,3,3> rv;
     Eigen::Matrix<double,3,3> rotated_matrix;
     Eigen::Matrix<double,3,3> coordinate_matrix;
-
 
     Eigen::Vector3d pnpSolve(cv::Point2f *p, int type);
 
@@ -46,11 +46,14 @@ public:
     cv::Point2f imu2pixel(Eigen::Vector3d imu_pos);
     Eigen::Vector3d pixel2imu(Armor &armor);
     Eigen::Vector3d pixel2cam(Armor &armor);
+    Eigen::Vector3d pnp2imu(Eigen::Vector3d world_position);
+    Eigen::Vector3d pnp2cam(Eigen::Vector3d world_position);
     // for BUFF
     Eigen::Vector3d pixel2cam(cv::Point2f *p, int type);
     Eigen::Vector3d pixel2imu(cv::Point2f *p, int type);
     Eigen::Vector3d imu2buff(Eigen::Vector3d imu_pos);
     Eigen::Vector3d buff2imu(Eigen::Vector3d buff_pos);
+    double buff_scale_ratio;
 
     Eigen::Vector3d getAngle(Eigen::Vector3d predicted_position);
     Eigen::Vector3d airResistanceSolve(Eigen::Vector3d Pos);//consider gravity asn air resistance
@@ -66,5 +69,6 @@ public:
 
     double getFlyTime(Eigen::Vector3d &pos);
 };
+
 
 

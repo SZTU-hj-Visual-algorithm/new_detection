@@ -179,7 +179,7 @@ int SerialDevice::Read(uint8_t *buf, int len) {
 			while (!Init()) {
 				usleep(500000);//check every 500 ms
 			}
-//			std::cout << "Reconnect Success." << std::endl;
+			std::cout << "Reconnect Success." << std::endl;
 			ret = read(serial_fd_, buf, len);
 		}
 		return ret;
@@ -202,7 +202,7 @@ int SerialDevice::ReadUntil2(uint8_t *buf, uint8_t end1, uint8_t end2, uint8_t m
 				while (!Init()) {
 					usleep(500000);//check every 500 ms
 				}
-//				std::cout << "Reconnect Success." << std::endl;
+				std::cout << "Reconnect Success." << std::endl;
 				ret = read(serial_fd_, p, 1);
 			}
 			

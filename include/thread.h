@@ -2,7 +2,7 @@
 #include "armor_track.h"
 #include <opencv2/core/cvstd.hpp>
 #include "serialport.h"
-#include "energy_predict.h"
+// #include "energy_predict.h"
 #include "serial_main.h"
 #include <thread>
 #include <mutex>

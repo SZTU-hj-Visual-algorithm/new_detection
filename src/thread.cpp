@@ -52,7 +52,7 @@ void* Build_Src(void* PARAM)
 //                                  {quat[0],quat[1],quat[2],quat[3]},
 //                                  vector<Armor>(),
 //                                  time_temp};
-                    // usb
+                    // usb  //TODO: 这个值需要变化，用来模式切换serial.vision_msg_.mode
                     _send_data = {0x21,first_get,
                                   {serial.vision_msg_.pitch,
                                    serial.vision_msg_.yaw,
@@ -122,10 +122,13 @@ void* Armor_Kal(void* PARAM)
             if (mode_temp == 0x21)
             {
                 Targets = Detect.autoAim(src_copy);
-//                if(!Targets.empty())
-//                    std::cout<<"------------[Get Target]--------------"<<std::endl;
-//                else
-//                    std::cout<<"------------[No Target]---------------"<<std::endl;
+                if(!Targets.empty())
+                {
+                    std::cout<<"------------[Get Target]--------------"<<std::endl;
+                }
+
+                else
+                    std::cout<<"------------[No Target]---------------"<<std::endl;
                 pthread_mutex_lock(&mutex_ka);
                 send_data = {mode_temp,
                              second_get,
@@ -157,7 +160,7 @@ void* Kal_predict(void* PARAM)
     long int time_count = 0;
     //energy_pre E_predicter;
 
-    sleep(3);
+    sleep(4);
     printf("kal_open\n");
     while (is_continue)
     {
@@ -187,7 +190,7 @@ void* Kal_predict(void* PARAM)
                 if (Track.locateEnemy(src_copy,armors,time_temp))
                 {
                     vdata = { Track.pitch, Track.yaw, 0x31 };
-//                    cout<<"-----------fire-------"<<endl;
+                    cout<<"-----------fire-------"<<endl;
                 }
                 else
                 {

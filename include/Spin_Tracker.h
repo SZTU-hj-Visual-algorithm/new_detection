@@ -1,7 +1,6 @@
-#include "armor_detection.h"
-
 #ifndef RUN_SPIN_TRACKER_H
 #define RUN_SPIN_TRACKER_H
+#include "armor_detection.h"
 
 
 

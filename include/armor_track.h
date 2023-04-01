@@ -39,14 +39,14 @@ class ArmorTracker
 public:
     int tracker_state;  // 此时跟踪器的状态
     int tracking_id;  // 跟踪的敌方ID
-	
-	float pitch;
-	float yaw;
-	
-	Skalman Singer;
-	
+
+    float pitch;
+    float yaw;
+
+    Skalman Singer;
+
     AngleSolve AS;
-	
+
     ArmorTracker();
 
     void reset();
@@ -62,7 +62,7 @@ public:
     bool updateSpinScore();
     void spin_detect();
 private:
-	Armor enemy_armor;//最终选择的装甲板
+    Armor enemy_armor;//最终选择的装甲板
     Armor real_armor; // virtual armor state, real armor
     KalmanFilter KF;
 
