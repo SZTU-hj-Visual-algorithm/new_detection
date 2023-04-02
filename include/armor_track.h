@@ -88,7 +88,7 @@ private:
     std::map<int,double> spin_score_map;           // 记录各装甲板小陀螺可能性分数，大于0为逆时针旋转，小于0为顺时针旋转
 
 
-
+    bool is_aim_virtual_armor;  // 出现虚拟装甲板后转过去
 
     bool locate_target;
 

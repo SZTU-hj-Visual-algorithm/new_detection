@@ -220,8 +220,6 @@ bool ArmorTracker::selectEnemy2(std::vector<Armor> &find_armors, double dt)
 
 
                 // 如果超过限制时间，构造虚拟装甲板。
-
-                // TODO: 这乘一万？
                 double delay_time = AS.getFlyTime(matched_armor.world_position) * 10000; // TODO：改为子弹飞行时间+系统时延+the time of move to disappear
 //                std::cout << "delay_time: " << delay_time << std::endl;
 //                auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(t.time_since_epoch());
@@ -299,8 +297,6 @@ bool ArmorTracker::selectEnemy2(std::vector<Armor> &find_armors, double dt)
                         matched_armor.world_position.y() = new_world_position_y;
                     }
                     kf_state = 3;
-                    Singer.Reset();
-                    Singer.setXpos({matched_armor.world_position[0],matched_armor.world_position[1]});
                 }
                 /// 初始化/更新KF参数
                 if(kf_state == 2)
@@ -319,7 +315,11 @@ bool ArmorTracker::selectEnemy2(std::vector<Armor> &find_armors, double dt)
                     pos_speed << matched_armor.world_position, predicted_enemy.tail(3);
                     KF.setPosAndSpeed(matched_armor.world_position, predicted_enemy.tail(3));
                     predicted_enemy = pos_speed;
-                    if(kf_state == 3 && !is_vir_armor)is_vir_armor = true;
+                    if(kf_state == 3 && !is_vir_armor)
+                    {
+                        is_aim_virtual_armor = true; // 出现虚拟装甲板后转过去
+                        is_vir_armor = true;
+                    }
                     if(kf_state == 1)is_vir_armor = false;
                 }
 
@@ -433,6 +433,12 @@ bool ArmorTracker::selectEnemy2(std::vector<Armor> &find_armors, double dt)
 // 对处于跟踪和正在丢失状态时做 预测，引入各种时间
 bool ArmorTracker::estimateEnemy(double dt)
 {
+    // 如果有虚拟装甲板的那一刻就重置Singer，然后把虚拟点接入Singer重新开始预测
+    if(is_aim_virtual_armor)
+    {
+        Singer.setXpos({enemy_armor.world_position[0],enemy_armor.world_position[1]});
+    }
+
     if(tracker_state == TRACKING || tracker_state == LOSING)
     {
         double fly_time = AS.getFlyTime(enemy_armor.world_position);
@@ -524,10 +530,22 @@ bool ArmorTracker::locateEnemy(const cv::Mat& src, std::vector<Armor> &armors, c
             return false;
         }
 
-        Eigen::Vector3d rpy = AS.getAngle(predicted_position);
-        pitch = rpy[1];
-        yaw   = rpy[2];
-		pitch = round(pitch * 100)/100;
+        //
+        if(is_aim_virtual_armor)
+        {
+            Eigen::Vector3d rpy = AS.getAngle(enemy_armor.world_position);
+            pitch = rpy[1];
+            yaw   = rpy[2];
+            pitch = round(pitch * 100)/100;
+        }
+        else
+        {
+            Eigen::Vector3d rpy = AS.getAngle(predicted_position);
+            pitch = rpy[1];
+            yaw   = rpy[2];
+            pitch = round(pitch * 100)/100;
+        }
+
         return true;
     }
 }
