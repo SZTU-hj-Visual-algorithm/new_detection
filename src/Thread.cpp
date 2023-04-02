@@ -122,10 +122,10 @@ void* Armor_Kal(void* PARAM)
             if (mode_temp == 0x21)
             {
                 Targets = Detect.autoAim(src_copy);
-//                if(!Targets.empty())
-//                    std::cout<<"------------[Get Target]--------------"<<std::endl;
-//                else
-//                    std::cout<<"------------[No Target]---------------"<<std::endl;
+                if(!Targets.empty())
+                    std::cout<<"------------[Get Target]--------------"<<std::endl;
+                else
+                    std::cout<<"------------[No Target]---------------"<<std::endl;
                 pthread_mutex_lock(&mutex_ka);
                 send_data = {mode_temp,
                              second_get,
@@ -157,7 +157,7 @@ void* Kal_predict(void* PARAM)
     long int time_count = 0;
     //energy_pre E_predicter;
 
-    sleep(3);
+    sleep(4);
     printf("kal_open\n");
     while (is_continue)
     {

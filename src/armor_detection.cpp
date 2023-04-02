@@ -471,20 +471,20 @@ void ArmorDetector::preImplement(Armor& armor)
     dnnDetect.img_processing(numDst, numROIs);
 
     // save number roi
-     int c = waitKey(100);
-     cvtColor(numDst, numDst, cv::COLOR_BGR2GRAY);
-     threshold(numDst, numDst, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
-     string nn= std::to_string(save_num_cnt);
-     string path="/home/lmx/data_list/"+nn+".jpg";
-     if(c==113){
-//
-         imwrite(path,numDst);
-         save_num_cnt++;
-     }
+//     int c = waitKey(100);
+//     cvtColor(numDst, numDst, cv::COLOR_BGR2GRAY);
+//     threshold(numDst, numDst, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
+//     string nn= std::to_string(save_num_cnt);
+//     string path="/home/lmx/data_list/"+nn+".jpg";
+//     if(c==113){
+////
+//         imwrite(path,numDst);
+//         save_num_cnt++;
+//     }
 
     resize(numDst, numDst,Size(200,300));
-//    cvtColor(numDst, numDst, cv::COLOR_BGR2GRAY);
-//    threshold(numDst, numDst, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
+    cvtColor(numDst, numDst, cv::COLOR_BGR2GRAY);
+    threshold(numDst, numDst, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
     string name = to_string(armor.id) + ":" + to_string(armor.confidence*100) + "%";
     imshow("name", numDst);
     // std::cout<<"number:   "<<armor.id<<"   type:   "<<armor.type<<std::endl;

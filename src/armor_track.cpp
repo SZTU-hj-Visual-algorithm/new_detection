@@ -326,9 +326,10 @@
                 return false;
             }
 
-            Eigen::Vector3d rpy = AS.getAngle(bullet_point);
+            Eigen::Vector3d rpy = AS.getAngle(predicted_position);
             pitch = rpy[1];
             yaw   = rpy[2];
+//            std::cout<<pitch<<"---------"<<yaw<<std::endl;
             return true;
         }
 
