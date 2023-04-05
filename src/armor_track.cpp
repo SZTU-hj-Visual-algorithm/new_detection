@@ -152,16 +152,21 @@ bool ArmorTracker::selectEnemy2(std::vector<Armor> &find_armors, double dt)
                 {
                     armor.world_position = AS.pixel2imu(armor);
                     final_armors.push_back(armor);
+                    // 储存装甲板
+                    if (history_armors.size() <= max_history_len)
+                    {
+                        history_armors.push_back(armor);
+                    } else
+                    {
+                        history_armors.pop_front();
+                        history_armors.push_back(armor);
+                    }
                     matched = true;
 //                    std::cout << "match" << std::endl;
                 } else {
                     continue;
                 }
             }
-//            std::cout << "jump_trackers size: " << jump_trackers.size() << std::endl;
-//            std::cout << "backward_with_same_ID: " << backward_with_same_ID << std::endl;
-//            std::cout << "final_armors size: " << final_armors.size() << std::endl;
-//            std::cout << "spin T: " << spin_T << std::endl;
 
             //若存在一块装甲板
             if (final_armors.size() == 1)
@@ -237,44 +242,24 @@ bool ArmorTracker::selectEnemy2(std::vector<Armor> &find_armors, double dt)
                     std::cout << "---generate virtual armor--- " << std::endl;
                     real_armor = matched_armor;
 //                    std::cout << "---save tracker--- " << std::endl;
-
-
                     /// 根据当前装甲板、当前装甲板出现的第一帧装甲板、以及上一个消失的装甲板坐标用最小二乘法拟合圆，计算圆心、半径
-                    // 将Eigen::Vector3d转换为cv::Mat
-                    cv::Mat temp_mat1, temp_mat2, temp_mat3;
-                    cv::eigen2cv(matched_armor.world_position, temp_mat1);
-                    cv::eigen2cv(jump_trackers.front().jump_armor.world_position, temp_mat2);
-                    cv::eigen2cv(disappear_tracker.disappear_armor.world_position, temp_mat3);
-                    // 将cv::Mat转换为cv::Point2f
-                    cv::Point2f p1;
-                    cv::Point2f p2;
-                    cv::Point2f p3;
-// 将v的前两个通道赋值给p
-                    p1.x = matched_armor.world_position[0];
-                    p1.y = matched_armor.world_position[1];
-                    p2.x = jump_trackers.back().jump_armor.world_position[0];
-                    p2.y = jump_trackers.back().jump_armor.world_position[1];
-                    p3.x = disappear_tracker.disappear_armor.world_position[0];
-                    p3.y = disappear_tracker.disappear_armor.world_position[1];
-//                    std::cout << "[p1]: " << p1 << "   [p2]: " << p2 << "    [p3]: " << p3 << std::endl;
-                    cv::Mat image = cv::Mat::ones(300, 300, CV_8UC3);
-                    cv::Scalar color1(255, 0, 0); // 蓝色
-                    cv::Scalar color2(0, 0, 255); // red
-                    cv::Scalar color3(0, 255, 0); // green
+                    std::vector<cv::Point2f> pts;
+                    for (const auto& history_armor : history_armors)
+                    {
+                        pts.push_back(AS.Vector3d2point2f(history_armor.world_position));  // 将Eigen::Vector3d 转为 cv::point2f
+                    }
 
-                    cv::circle(image, cv::Point2f(p1.x*100+100, p1.y*100+100), 2, color2, -1);
-                    cv::circle(image, cv::Point2f(p2.x*100+100, p2.y*100+100), 2, color1, -1);
-                    cv::circle(image, cv::Point2f(p3.x*100+100, p3.y*100+100), 2, color1, -1);
-
-                    Circle circle = fitCircle(p1, p2, p3);
-                    cv::circle(image, cv::Point2f(circle.x*100+100, circle.y*100+100), circle.r*100, color3, 1);
-
-                    cv::imshow("Image", image);
+                    pts.push_back(AS.Vector3d2point2f(jump_trackers.back().jump_armor.world_position));
+                    pts.push_back(AS.Vector3d2point2f(disappear_tracker.disappear_armor.world_position));
+//                    cv::Mat image = cv::Mat::ones(300, 300, CV_8UC3);
+//                    cv::Scalar color1(255, 0, 0); // 蓝色
+                    Circle circle;
+                    AS.circleLeastFit(pts, circle.x, circle.y, circle.r);
                     circle.r = (circle.r + last_r) / 2;
 //                    std::cout << "[r]: " << circle.r << std::endl;
                     if (circle.r > 0.35){
                         circle.r = last_r;
-                        matched_armor.world_position = last_position;
+                        matched_armor.world_position = last_position; //TODO:优化
                     }
                     else
                     {/// 转化世界坐标
@@ -407,6 +392,7 @@ bool ArmorTracker::selectEnemy2(std::vector<Armor> &find_armors, double dt)
             if (lost_aim_cnt > lost_threshold) {
                 lost_aim_cnt = 0;
                 tracker_state = MISSING;
+                history_armors.clear(); // 目标丢失后重置历史装甲板
             }
         } else {
             tracker_state = TRACKING;
