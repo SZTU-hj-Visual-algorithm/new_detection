@@ -450,7 +450,7 @@ void ArmorDetector::preImplement(Armor& armor)
     const int small_armor_width = 32;//为48/3*2
     const int large_armor_width = 44;//约为70/3*2
     // Number ROI size
-    const cv::Size roi_size(22, 30);
+    const cv::Size roi_size(20, 30);
 
     const int top_light_y = (warp_height - light_length) / 2;
     const int bottom_light_y = top_light_y + light_length;
