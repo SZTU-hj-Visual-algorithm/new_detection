@@ -1,4 +1,4 @@
-#include "thread.h"
+#include "Thread.h"
 
 using namespace cv;
 using namespace std;
