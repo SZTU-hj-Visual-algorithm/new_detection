@@ -86,7 +86,8 @@ private:
     std::multimap<int, SpinTracker> trackers_map;  //预测器Map
     std::map<int,SpinHeading> spin_status_map;     // 记录该车小陀螺状态（未知，顺时针，逆时针）
     std::map<int,double> spin_score_map;           // 记录各装甲板小陀螺可能性分数，大于0为逆时针旋转，小于0为顺时针旋转
-
+    std::deque<Armor> history_armors;
+    const int max_history_len = 4;
 
     bool is_aim_virtual_armor;  // 出现虚拟装甲板后转过去
 
