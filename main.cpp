@@ -1,4 +1,3 @@
-//#include "gimbal_control.h"
 #include "opencv2/opencv.hpp"
 #include <Eigen/Dense>
 #include <opencv2/core/cvstd.hpp>

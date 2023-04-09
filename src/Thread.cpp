@@ -123,7 +123,10 @@ void* Armor_Kal(void* PARAM)
             {
                 Targets = Detect.autoAim(src_copy);
                 if(!Targets.empty())
+                {
                     std::cout<<"------------[Get Target]--------------"<<std::endl;
+                }
+
                 else
                     std::cout<<"------------[No Target]---------------"<<std::endl;
                 pthread_mutex_lock(&mutex_ka);
