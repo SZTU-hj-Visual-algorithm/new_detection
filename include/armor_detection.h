@@ -6,7 +6,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 #include "robot_status.h"
-#include "number_dnn.h"
+#include "number_DNN.h"
 #include <iostream>
 
 //namespace robot_detection {
@@ -26,8 +26,8 @@
             // sentry
 //            angle = atan2(bottom.y-top.y, bottom.x-top.x) * 180 / CV_PI;
             // infantry
-             angle = top.x < bottom.x ? box.angle : 90 + box.angle;
-             if(fabs(bottom.x - top.x) <= 0.01) angle = 90;
+            angle = top.x < bottom.x ? box.angle : 90 + box.angle;
+            if(fabs(bottom.x - top.x) <= 0.01) angle = 90;
         }
 
         int lightColor;
@@ -36,7 +36,6 @@
         double angle;
         double height;
         double width;
-
     };
 
 //装甲板结构体
@@ -77,7 +76,7 @@
         int enemy_color;
         int categories;
 
-        //light_judge_condition
+        // light_judge_condition
         double light_max_angle;
         double light_min_hw_ratio;
         double light_max_hw_ratio;   // different distance and focus
@@ -85,7 +84,7 @@
         double light_max_area_ratio;
         double light_max_area;
 
-        //armor_judge_condition
+        // armor_judge_condition
         double armor_big_max_wh_ratio;
         double armor_big_min_wh_ratio;
         double armor_small_max_wh_ratio;
@@ -96,12 +95,12 @@
         double armor_ij_max_ratio;
         double armor_max_offset_angle;
 
-        //armor_grade_condition
+        // armor_grade_condition
         double near_standard;
         int grade_standard;
         int height_standard;
 
-        //armor_grade_project_ratio
+        // armor_grade_project_ratio
         double id_grade_ratio;
         double height_grade_ratio;
         double near_grade_ratio;

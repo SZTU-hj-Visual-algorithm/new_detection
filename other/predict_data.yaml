@@ -18,5 +18,5 @@ Q: !!opencv-matrix
           0, 0, 0, 0, 1, 0,
           0, 0, 0, 0, 0, 1 ]
 
-shoot_delay: 0.07
-error_distance: 1
+shoot_delay: 0.1
+error_distance: 0.2

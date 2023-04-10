@@ -1,5 +1,5 @@
 %YAML:1.0
 ---
-net_path: ../model/2023_3_16_hj_num_1.onnx
+net_path: ../model/2023_3_26_hj_num_1_dyn.onnx
 input_width: 20
 input_height: 30

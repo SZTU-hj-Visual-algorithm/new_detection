@@ -1,3 +1,4 @@
+#include "robot_status.h"
 #include "opencv2/opencv.hpp"
 #include <Eigen/Dense>
 #include "armor_detection.h"
@@ -66,8 +67,9 @@ public:
     bool pointsInLine(cv::Point2f p1, cv::Point2f p2, cv::Point2f p3, double error, int type);  // 三点是否在误差允许内为一条直线，type的值为1表示斜率，0表示夹角
     bool circleLeastFit(const std::vector<cv::Point2f> &points, double &center_x, double &center_y, double &radius);  // 对二维平面点集拟合成圆
     double countArmorIoU(Armor armor1, Armor armor2);   // 输出像素坐标系内两旋转矩形的交并比
-    cv::Point2f Vector3d2point2f(Eigen::Vector3d src_vector);
+
     double getFlyTime(Eigen::Vector3d &pos);
 };
+
 
 

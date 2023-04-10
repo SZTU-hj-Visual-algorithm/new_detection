@@ -498,9 +498,3 @@ double AngleSolve::getFlyTime(Eigen::Vector3d &pos)
 {
     return pos.norm() / bullet_speed;
 }
-cv::Point2f AngleSolve::Vector3d2point2f(Eigen::Vector3d src_vector) {
-    cv::Point2f temp;
-    temp.x = src_vector[0];
-    temp.y = src_vector[1];
-    return temp;
-}

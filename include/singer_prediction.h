@@ -16,6 +16,8 @@
         double alefa = 1.0/30.0;//目标机动频率
         double Sigmaq = 0.01;//目标加速度标准差，Singer模型假设目标加速度符合均值为零的高斯分布
         double initT = 0.01;//用来初始化初始协方差矩阵的采样时间间隔（估算出来的）
+        double axHold = 30;//x方向的加速度调整阈值
+        double ayHold = 30;//y方向的加速度调整阈值
         double lamda;//渐消因子，减小滤波发散问题
         Eigen::Matrix<double, 6, 6> F;//状态转移矩阵
         Eigen::Matrix<double, 6, 6> W;//预测方程过程噪声

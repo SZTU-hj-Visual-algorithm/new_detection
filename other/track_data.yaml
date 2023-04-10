@@ -2,10 +2,4 @@
 ---
 find_threshold: 20
 lost_threshold: 50
-new_old_threshold: 0.05
-
-anti_spin_maxa_r_multiple: 5
-anti_spin_judge_low_thres: 2000
-anti_spin_judge_high_thres: 20000
-max_delta_t: 200
-max_delta_dist: 40
+new_old_threshold: 0.1

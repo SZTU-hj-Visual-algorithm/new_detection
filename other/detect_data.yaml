@@ -27,7 +27,7 @@ id_grade_ratio: 0.6
 near_grade_ratio: 0.2
 height_grade_ratio: 0.2
 
-categories: 9
+categories: 10
 # 阈值是0~1之间
-thresh_confidence: 0.90
+thresh_confidence: 0
 enemy_color: BLUE
