@@ -16,10 +16,10 @@ Mat ka_src;
 
 int t = chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch()).count();
 string ss = to_string(t);
-string OutputPath = "/home/cola/hanjiang/code/new_detection-lmx1/video/"  +ss+ string( ".avi");
+string OutputPath = "../video/"  +ss+ string( ".avi");
 VideoWriter OutputVideo(OutputPath, VideoWriter::fourcc('M','P','4','2'), 25, Size(1280, 1024));
 
-string serialPath = "/home/cola/hanjiang/code/new_detection-lmx1/video/" + ss + string(".txt");
+string serialPath = "../video/" + ss + string(".txt");
 ofstream outfile(serialPath);
 
 void* Build_Src(void* PARAM)
