@@ -1,0 +1,5 @@
+%YAML:1.0
+---
+net_path: ../model/2023_4_9_hj_num_1.onnx
+input_width: 22
+input_height: 30

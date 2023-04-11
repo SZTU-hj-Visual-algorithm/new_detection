@@ -1,0 +1,24 @@
+%YAML:1.0
+---
+# image
+binary_threshold: 
+enemy_color: 
+
+# R
+fit_circle_counts: 
+r_max_area: 
+r_min_area: 
+r_full_ratio_min: 
+r_full_ratio_max: 
+
+# Buff_no
+no_buff_area_max: 
+no_buff_area_min: 
+no_full_ratio_min: 
+no_full_ratio_max: 
+
+# Buff_yes
+yes_buff_area_max: 
+yes_buff_area_min: 
+yes_full_ratio_min: 
+yes_full_ratio_max: 

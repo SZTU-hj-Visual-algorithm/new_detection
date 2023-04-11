@@ -1,42 +1,38 @@
-#include <cstdio>
-#include <opencv2/opencv.hpp>
-#include "ArmorDetector.hpp"
-#include "camera.h"
+#include "opencv2/opencv.hpp"
+#include <Eigen/Dense>
+#include <opencv2/core/cvstd.hpp>
+#include<X11/Xlib.h>
+#include"thread.h"
+
+//#define DETECT
+#define PREDICT
 
 using namespace cv;
 
-int main()
+pthread_t thread1;
+pthread_t thread2;
+//pthread_t thread3;
+
+pthread_mutex_t mutex_new;
+pthread_cond_t cond_new;
+//pthread_mutex_t mutex_ka;
+//pthread_cond_t cond_ka;
+
+//bool is_ka = false;
+bool is_start = false;
+bool is_continue = true;
+
+int main(void)
 {
-    auto camera_warrper = new Camera;
-    ArmorDetector autoShoot;
-    Armor autoTarget;
-    Mat src;
-    auto time_start = std::chrono::steady_clock::now();
-    if (camera_warrper->init())
-    {
-        while(true)
-        {
-            camera_warrper->read_frame_rgb(src);
-            auto time_cap = std::chrono::steady_clock::now();
-
-            int time_stamp = (int)(std::chrono::duration<double,std::milli>(time_cap - time_start).count()); // 获取时间戳
-            autoTarget = autoShoot.autoAim(src, time_stamp);
-            imshow("src",src);
-            if (!autoTarget.size.empty())
-            {
-                printf("main get target!!!\n");
-            }
-            if (waitKey(10) == 27)
-            {
-                camera_warrper->~Camera();
-                break;
-            }
-        }
-    }
-
-
-
-
-
+    XInitThreads();
+    pthread_mutex_init(&mutex_new, NULL);
+    pthread_cond_init(&cond_new, NULL);
+    pthread_create(&thread1, NULL, Sample, NULL);
+    pthread_create(&thread2, NULL, Implement, NULL);
+//  pthread_create(&thread3, NULL, Send, NULL);
+    pthread_join(thread1, NULL);
+    pthread_join(thread2, NULL);
+//  pthread_join(thread3, NULL);
+    pthread_mutex_destroy(&mutex_new);
     return 0;
 }
