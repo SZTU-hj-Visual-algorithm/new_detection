@@ -33,7 +33,7 @@ omni_infantry:
     rows: 3
     cols: 1
     dt: d
-    data: [ 0 , 0.125 , -0.02 ]
+    data: [ 0 , 0 , 0 ]
   gimbal_offset_angle: !!opencv-matrix
     rows: 3
     cols: 1

@@ -1,7 +1,5 @@
 #include "singer_prediction.h"
 
-//namespace robot_detection{
-
 Skalman::Skalman()
 {
     cv::FileStorage fs("../other/predict_data.yaml", cv::FileStorage::READ);
@@ -14,14 +12,10 @@ Skalman::Skalman()
             0,0,0,1,0,0;
 
     //init R
-    R << 5e-4, 0,
-            0, 5e-4;
+    R << 5e-5, 0,
+            0, 5e-5;
 
-    //init Xk_1    old
-//    Xk_1 << 0,0.1,0,
-//            0,0.1,0;
-
-    //init Xk       new
+    //init Xk
     Xk << 0,0.1,0,
             0,0.1,0;
 
@@ -44,8 +38,7 @@ Skalman::Skalman()
     Zk << 0.1,0.1;
 
     //init lamda
-//    Vk = Zk - H*Xk_1;       // old
-    Vk = Zk - H*Xk;         // new
+    Vk = Zk - H*Xk;
     _Sk = 0.5*Vk*Vk.transpose();
     Sk = H*P*H.transpose() + R;
     lamda = std::max(1.,_Sk.trace()/Sk.trace());
@@ -54,12 +47,9 @@ Skalman::Skalman()
 
 void Skalman::Reset()
 {
-    //init Xk_1
-    Xk_1 << 0,0.1,0,
-            0,0.1,0;
-
     //init Xk
-    //    Xk = Xk_1;
+    Xk << 0,0.1,0,
+            0,0.1,0;
 
     //init P
     double r11 = R(0,0);
@@ -110,12 +100,8 @@ void Skalman::Reset(const Eigen::Vector2d &Xpos)
 
 void Skalman::setXpos(const Eigen::Vector2d &Xpos)
 {
-    // old
-//    Xk_1 << Xpos(0,0),0.1,0,
-//            Xpos(1,0),0.1,0;
-    // new
-    Xk << Xpos(0,0),1,0,
-            Xpos(1,0),1,0;
+    Xk(0,0) = Xpos(0,0);
+    Xk(3,0) = Xpos(1,0);////0409��ʱ����Xk(1,0) = Xpos(1,0);
     last_x[0] = Xpos(0,0);
     last_x[1] = Xpos(1,0);
 }
@@ -123,7 +109,6 @@ void Skalman::setXpos(const Eigen::Vector2d &Xpos)
 void Skalman::PredictInit(const double &deleta_t)
 {
     T = deleta_t;
-    //    std::cout<<"time_T:"<<(1-exp(-alefa*T))/alefa<<std::endl;
 
     //init F
     Eigen::Matrix<double,3,3> Fx;
@@ -204,7 +189,6 @@ Eigen::Matrix<double,6,1> Skalman::predict(bool predict)
     }
     Xk_1 = F*Xk + G*_a;
     //        std::cout<<"predictData:"<<Xk_1<<std::endl;
-
     return Xk_1;
 }
 
@@ -213,17 +197,17 @@ Eigen::Matrix<double,6,1> Skalman::correct(const Eigen::Matrix<double,2,1> &meas
     Zk = measure;
     Vk = Zk - H*Xk_1;
     _Sk = (lamda*Vk*Vk.transpose())/(1+lamda);
-    Sk = H*P*H.transpose() + R;
+    Sk = H*(F*P*F.transpose() + W)*H.transpose() + R;
+    rk = fabs(Vk.transpose()*Sk.inverse()*Vk);
+    rk = rk > 10 ? 10 : rk;
+        std::cout<<"[rk    ]:"<<rk<<std::endl;
+
     lamda = std::max(1.,_Sk.trace()/Sk.trace());
-    //    std::cout<<"lamda:"<<lamda<<std::endl;
-    P = lamda*((F * P * F.transpose()) + W);
+        std::cout<<"[lamda ]:"<<lamda<<std::endl;
+    P = lamda*(F * P * F.transpose()) + W;
     K = P * H.transpose() * (H * P * H.transpose() + R).inverse();
     Xk = Xk_1 + K * (Zk - H * Xk_1);
     P = (Eigen::Matrix<double, 6, 6>::Identity() - K * H) * P;
-
-    // old
-//    return Xk_1;
-    // new
     return Xk;
 }
 
@@ -258,13 +242,15 @@ bool Skalman::SingerPrediction(const double &dt,
 
     //    predicted_position << predicted_x,predicted_y,predicted_z;
     predicted_position = predicted_xyz;
-
-    if (!finite(predicted_position.norm())
-        || fabs(predicted_position.norm() - imu_position.norm()) > error_distance)
-    {
+//    printf("[predict_pos  ]:%lf\n",predicted_position.norm());
+//    printf("[world_pos    ]:%lf\n",imu_position.norm());
+//    printf("[erro_distance]:%lf\n",error_distance);
+//    printf("[shoot_delay  ]:%lf\n",shoot_delay);
+    if (!finite(predicted_position.norm()) || fabs(predicted_position.norm() - imu_position.norm()) > error_distance){
         predicted_position = imu_position;
         return false;
     }
+    //	predicted_position = imu_position;
     return true;
 }
 
@@ -272,7 +258,9 @@ double Skalman::filter(const double &last, const double &current, const double &
 {
     double predicted_offset = last - origin;
     double predicted_diff = current - last;
-    return (1-pow(TANH2(predicted_diff),2))*current+(pow(TANH2(predicted_diff),2))*
-                                                    ((1-pow(TANH_HALF(predicted_offset),2))*last+(pow(TANH_HALF(predicted_offset),2))*origin);
+    return (1-pow(TANH2(predicted_diff, rk*rk),2))*current+(pow(TANH2(predicted_diff, rk*rk),2))*
+                                                        ((1-pow(TANH_HALF(predicted_offset),2))*last+(pow(TANH_HALF(predicted_offset),2))*origin);
+   // return (1-pow(TANH2(predicted_diff),2))*current+(pow(TANH2(predicted_diff),2))*
+    //((1-pow(TANH_HALF(predicted_offset),2))*last+(pow(TANH_HALF(predicted_offset),2))*origin);
 }
-//}
+

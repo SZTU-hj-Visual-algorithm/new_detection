@@ -102,18 +102,20 @@ void* Implement(void* PARAM)
         is_start = false;
 
         src.copyTo(src_copy);
-        Detect.updateData(_send_data.data,_send_data.quat);
+        Detect.updateData(_send_data.data,_send_data.quat);////
+        Track.AS.updateData(_send_data.data, _send_data.quat);////每次都要重设
         mode_temp = _send_data.mode;
         second_get = _send_data.dat_is_get;
         time_temp = _send_data.tim;
         pthread_mutex_unlock(&mutex_new);
         if(second_get && mode_temp == 0x21)
         {
-            ///  printf("[mode_temp]:    |%x\n",mode_temp);
+            printf("[mode_temp]:    |%x\n",mode_temp);
 
 
-            Targets = Detect.autoAim(src_copy);
-            Track.AS.bullet_speed = 28.0;
+                Targets = Detect.autoAim(src_copy);
+                    Track.AS.bullet_speed = 28.0;
+
             if (Track.locateEnemy(src_copy,Targets,time_temp))
             {
                 vdata = { Track.pitch, Track.yaw, 0x31 };
