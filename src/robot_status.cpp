@@ -14,10 +14,10 @@
 	    quaternion[2] = quat[2];
 	    quaternion[3] = quat[3];
         // printf("//////status//////\n");
-        // printf("pitch :%f\n",ab_pitch);
-        // printf("yaw   :%f\n",ab_yaw);
-        // printf("roll  :%f\n",ab_roll);
-        // printf("speed :%f\n",bullet_speed);
+//         printf("pitch :%f\n",ab_pitch);
+//         printf("yaw   :%f\n",ab_yaw);
+//         printf("roll  :%f\n",ab_roll);
+//         printf("speed :%f\n",bullet_speed);
         // printf("////////////////\n");
 
     }

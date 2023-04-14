@@ -42,6 +42,7 @@ Skalman::Skalman()
     _Sk = 0.5*Vk*Vk.transpose();
     Sk = H*P*H.transpose() + R;
     lamda = std::max(1.,_Sk.trace()/Sk.trace());
+    lamda_temp = lamda > 10 ? 10 : lamda;
     //    std::cout<<"lamda:"<<lamda<<std::endl;
 }
 
@@ -200,10 +201,12 @@ Eigen::Matrix<double,6,1> Skalman::correct(const Eigen::Matrix<double,2,1> &meas
     Sk = H*(F*P*F.transpose() + W)*H.transpose() + R;
     rk = fabs(Vk.transpose()*Sk.inverse()*Vk);
     rk = rk > 10 ? 10 : rk;
-        std::cout<<"[rk    ]:"<<rk<<std::endl;
+
+    fmt::print("[rk    ]: {}", rk);
 
     lamda = std::max(1.,_Sk.trace()/Sk.trace());
-        std::cout<<"[lamda ]:"<<lamda<<std::endl;
+    lamda_temp = lamda > 10 ? 10 : lamda;
+    fmt::print("[lamda ]: {}", lamda);
     P = lamda*(F * P * F.transpose()) + W;
     K = P * H.transpose() * (H * P * H.transpose() + R).inverse();
     Xk = Xk_1 + K * (Zk - H * Xk_1);
@@ -225,22 +228,27 @@ bool Skalman::SingerPrediction(const double &dt,
     Eigen::Matrix<double,2,1> measure(round(x1*1000)/1000,
                                       round(x2*1000)/1000);
     double all_time = shoot_delay + fly_time;
+//    double time_ratio = all_time / dt;
     //! state transition
     PredictInit(dt);
     predict(false);
     correct(measure);
     //! predictor work
-    PredictInit(all_time);
+    PredictInit(all_time);//new predict function, when disable the two new line, dt should change as all_time.
     Eigen::Matrix<double,6,1> predicted_result = predict(true);
     //std::cout<<"result:"<<predicted_result<<std::endl;
     //! filter for result, inhibit infinite change
     predicted_xyz[predict_x1] = filter(last_x[0],predicted_result(0,0),x1);
     predicted_xyz[predict_x2] = filter(last_x[1],predicted_result(3,0),x2);
     predicted_xyz[constant_x] = imu_position(constant_x,0);
+
+    //!new predict function, implement with PredictInit(dt)
+//    predicted_xyz[predict_x1] = (predicted_xyz[predict_x1] - x1)*time_ratio + x1;
+//    predicted_xyz[predict_x2] = (predicted_xyz[predict_x2] - x2)*time_ratio + x2;
+
     last_x[0] = predicted_xyz[predict_x1];
     last_x[1] = predicted_xyz[predict_x2];
 
-    //    predicted_position << predicted_x,predicted_y,predicted_z;
     predicted_position = predicted_xyz;
 //    printf("[predict_pos  ]:%lf\n",predicted_position.norm());
 //    printf("[world_pos    ]:%lf\n",imu_position.norm());
@@ -250,7 +258,7 @@ bool Skalman::SingerPrediction(const double &dt,
         predicted_position = imu_position;
         return false;
     }
-    //	predicted_position = imu_position;
+//    predicted_position = imu_position;
     return true;
 }
 
@@ -258,9 +266,10 @@ double Skalman::filter(const double &last, const double &current, const double &
 {
     double predicted_offset = last - origin;
     double predicted_diff = current - last;
-    return (1-pow(TANH2(predicted_diff, rk*rk),2))*current+(pow(TANH2(predicted_diff, rk*rk),2))*
-                                                        ((1-pow(TANH_HALF(predicted_offset),2))*last+(pow(TANH_HALF(predicted_offset),2))*origin);
+//    return (1-pow(TANH2(predicted_diff, lamda_temp*lamda_temp),2))*current+(pow(TANH2(predicted_diff, lamda_temp*lamda_temp),2))*
+//                                                        ((1-pow(TANH_HALF(predicted_offset),2))*last+(pow(TANH_HALF(predicted_offset),2))*origin);
    // return (1-pow(TANH2(predicted_diff),2))*current+(pow(TANH2(predicted_diff),2))*
     //((1-pow(TANH_HALF(predicted_offset),2))*last+(pow(TANH_HALF(predicted_offset),2))*origin);
+    return (1-pow(TANH2(predicted_diff, lamda_temp*lamda_temp),2))*current+(pow(TANH2(predicted_diff, lamda_temp*lamda_temp),2))*origin;
 }
 

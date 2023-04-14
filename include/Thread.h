@@ -2,6 +2,7 @@
 #include "armor_track.h"
 #include <opencv2/core/cvstd.hpp>
 #include "serialport.h"
+#include "fmt/core.h"
 // #include "energy_predict.h"
 #include "serial_main.h"
 #include <thread>

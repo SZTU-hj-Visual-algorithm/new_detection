@@ -1,5 +1,6 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/highgui/highgui.hpp>
+#include "fmt/core.h"
 #include "Spin_Tracker.h"
 #include "armor_detection.h"
 #include "singer_prediction.h"
@@ -51,23 +52,25 @@ public:
 
     void reset();
     void show();
-    bool initial(std::vector<Armor> &find_armors);
-
-    bool selectEnemy2(std::vector<Armor> &find_armors, double dt);
+    bool initial(std::vector<Armor> find_armors);
+    bool switchEnemy(std::vector<Armor> find_armors);
+    bool selectEnemy(std::vector<Armor> find_armors, double dt);
     bool estimateEnemy(double dt);
-    bool locateEnemy(const cv::Mat& src, std::vector<Armor> &armors, const chrono_time &time);
+    bool locateEnemy(const cv::Mat src, std::vector<Armor> armors, const chrono_time time);
 
 
     Circle fitCircle(const cv::Point2f& x1, const cv::Point2f& x2, const cv::Point2f& x3);
     bool updateSpinScore();
     void spin_detect();
-private:
+
     Armor enemy_armor;//最终选择的装甲板
     Armor real_armor; // virtual armor state, real armor
     KalmanFilter KF;
 
-
+    const int max_history_len = 4;
     double last_r = 0.35;
+    int vir_max = 20;
+    int vir_num = 0;
     Eigen::Vector3d last_position;
     bool is_vir_armor = false;
     bool is_anti = false;
@@ -86,6 +89,7 @@ private:
     std::multimap<int, SpinTracker> trackers_map;  //预测器Map
     std::map<int,SpinHeading> spin_status_map;     // 记录该车小陀螺状态（未知，顺时针，逆时针）
     std::map<int,double> spin_score_map;           // 记录各装甲板小陀螺可能性分数，大于0为逆时针旋转，小于0为顺时针旋转
+    std::deque<Armor> history_armors;
 
 
     bool is_aim_virtual_armor;  // 出现虚拟装甲板后转过去

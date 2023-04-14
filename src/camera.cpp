@@ -11,8 +11,9 @@ bool Camera::init()
 	int camera_status = CameraEnumerateDevice(camera_list, &pid);
 	if (camera_status != CAMERA_STATUS_SUCCESS)
 	{
-		std::cout << "CameraEnumerateDevice fail with" << camera_status << "!" << std::endl;
-		return false;
+        fmt::print("CameraEnumerateDevice fail with {} !\n", camera_status);
+
+        return false;
 	}
 
 	//初始化相机设备并创建相机句柄
@@ -31,7 +32,7 @@ bool Camera::init()
 
 	if (status != CAMERA_STATUS_SUCCESS)
 	{
-		std:: cout << "get capbility failed" << std::endl;
+        fmt::print("get capbility failed");
 		return false;
 	}
 

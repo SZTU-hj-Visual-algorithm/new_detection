@@ -1,6 +1,6 @@
 #include <opencv2/opencv.hpp>
 #include <iostream>
-
+#include "fmt/core.h"
 
 //namespace robot_detection {
 

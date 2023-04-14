@@ -33,7 +33,7 @@ public:
     float ab_yaw;
     float ab_roll;
     float quaternion[4];
-    float bullet_speed;
+    float bullet_speed=28.0;
     int enemy_color;//TODO:可以删了
 
     robot_state() = default;

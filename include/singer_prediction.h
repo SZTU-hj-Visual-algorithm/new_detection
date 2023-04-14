@@ -2,6 +2,7 @@
 #include <iostream>
 #include <opencv2/opencv.hpp>
 #include "robot_status.h"
+#include "fmt/core.h"
 #include <cmath>
 #define PI CV_PI
 
@@ -15,11 +16,12 @@
 //二维Singer模型
     class Skalman
     {
-        double shoot_delay=0.01;
+        double shoot_delay;
         double alefa = 1.0/30.0;//目标机动频率
-        double Sigmaq = 0.01;//目标加速度标准差，Singer模型假设目标加速度符合均值为零的高斯分布
+        double Sigmaq = 1;//目标加速度标准差，Singer模型假设目标加速度符合均值为零的高斯分布
         double initT = 0.01;//用来初始化初始协方差矩阵的采样时间间隔（估算出来的）
         double lamda;//渐消因子，减小滤波发散问题
+        double lamda_temp;
         double rk;//卡方检验
         Eigen::Matrix<double, 6, 6> F;//状态转移矩阵
         Eigen::Matrix<double, 6, 6> W;//预测方程过程噪声

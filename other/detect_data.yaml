@@ -1,6 +1,6 @@
 %YAML:1.0
 ---
-binThresh: 70
+binThresh: 120
 
 light_max_angle: 45.0
 light_min_hw_ratio: 1
@@ -27,7 +27,7 @@ id_grade_ratio: 0.6
 near_grade_ratio: 0.2
 height_grade_ratio: 0.2
 
-categories: 9
+categories: 9  #todo: 2_16_hj_num:6, 3_16_hj_num and 4_9_hj_num:9
 # 阈值是0~1之间
 thresh_confidence: 0.90
-enemy_color: BLUE
+enemy_color: BLUE  #todo:when change side, remember this value

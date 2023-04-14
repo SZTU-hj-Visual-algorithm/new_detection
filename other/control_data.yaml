@@ -13,7 +13,6 @@ buff_out_h: 0.047
 buff_radius: 0.700
 buff_convex: 0.146
 
-
 self_type: omni_infantry
 
 omni_infantry:
@@ -38,7 +37,9 @@ omni_infantry:
     rows: 3
     cols: 1
     dt: d
-    data: [ 0 , 0 , 0 ]
+    data: [ 0 , -0.75 , 1.5 ] # r p y
+#    data: [ 0 , 0 , 0 ] # r p y
+
 
 balance_infantry:
   F_MAT: !!opencv-matrix
