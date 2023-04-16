@@ -1,4 +1,4 @@
-#include "number_DNN.h"
+#include "number_dnn.h"
 
 using namespace cv;
 using namespace std;
@@ -18,6 +18,9 @@ DNN_detect::DNN_detect()
 
 void DNN_detect::img_processing(Mat ori_img, std::vector<cv::Mat>& numROIs) {
     Mat out_blob;
+//    Mat ggg;
+//    resize(ori_img,ggg,Size (330,450));
+//    imshow("ori_img",ggg);
     cvtColor(ori_img, ori_img, cv::COLOR_RGB2GRAY);
     threshold(ori_img, ori_img, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
     numROIs.push_back(ori_img);

@@ -133,8 +133,7 @@ Eigen::Vector3d AngleSolve::pnpSolve(Point2f *p, int type)
 
 #ifdef SHOW_MEASURE_RRECT
     Mat pnp_check = _src.clone();
-        std::cout<<"rv"<<rv<<std::endl;
-
+        fmt::print("rv: {}", rv);
         Eigen::Vector3d imuPoint = {-w / 2 , -h / 2, 0.};
         Eigen::Vector3d armorPoint = rv*imuPoint + tv;//in camera coordinate
         cv::Point2f m_lu,m_ld,m_ru,m_rd;
@@ -497,4 +496,11 @@ double AngleSolve::countArmorIoU(Armor armor1, Armor armor2)
 double AngleSolve::getFlyTime(Eigen::Vector3d &pos)
 {
     return pos.norm() / bullet_speed;
+}
+
+cv::Point2f AngleSolve::Vector3d2point2f(Eigen::Vector3d src_vector) {
+    cv::Point2f temp;
+    temp.x = src_vector[0];
+    temp.y = src_vector[1];
+    return temp;
 }

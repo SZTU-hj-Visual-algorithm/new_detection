@@ -37,7 +37,7 @@ bool SerialPort::get_Mode1(int &mode, float &pitch, float &yaw, float &roll, flo
 	cout<<bytes<<endl;
 	if (bytes == 0)
 	{
-		cout << "缓冲区为空" << endl;
+        fmt::print("缓冲区为空");
 		return true;
 	}
 	
@@ -129,7 +129,7 @@ bool SerialPort::get_Mode1_new(int &mode, float &pitch, float &yaw, float &ball_
 	
 	if (bytes == 0)
 	{
-		cout << "缓冲区为空" << endl;
+        fmt::print("缓冲区为空");
 		return true;
 	}
 	read(fd, rdata, RECEIVE_LENGTH*2);
@@ -227,8 +227,7 @@ bool SerialPort::initSerialPort()
 		perror(UART_DEVICE);
 		return false;
 	}
-	
-	std::cout << "Opening..." << std::endl;
+    fmt::print("Opening...");
 	set_Brate();
 	
 	if (set_Bit() == FALSE)
