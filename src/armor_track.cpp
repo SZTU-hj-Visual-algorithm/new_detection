@@ -2,7 +2,7 @@
 // #include <opencv2/calib3d.hpp>
 // #include <opencv2/core/eigen.hpp>
 
- #define ANTI_SPIN
+//  #define ANTI_SPIN
 
 
     ArmorTracker::ArmorTracker() {
@@ -37,6 +37,13 @@
         anti_spin_judge_high_thres = (int)fs["anti_spin_judge_high_thres"];
         max_delta_t = (int)fs["max_delta_t"];
 
+///-----------------------------switchEnemy-----------------
+        memset(switch_enemy_cnt, 0, sizeof switch_enemy_cnt);
+        memset(flag, false, sizeof flag);
+        memset(temp, 0, sizeof temp);
+        delta_distance = (double)fs["delta_distance"];
+        hero_distance= (double)fs["hero_distance"];
+//-----------------------------------------------------------
         fs.release();
     }
 
@@ -69,6 +76,25 @@
         double distance = DBL_MAX;
         for (auto & armor : find_armors)
         {
+            if(tracking_id == armor.id)
+            {
+                tracker_state = DETECTING;
+                tracking_id = enemy_armor.id;
+
+                // initial KF --- x_post
+                KF.initial_KF();
+                enemy_armor.world_position = AS.pixel2imu(enemy_armor);
+                KF.setXPost(enemy_armor.world_position);
+                Singer.setXpos({enemy_armor.world_position(0,0),enemy_armor.world_position(1,0)});
+        //        fmt::print("{}      {}",enemy_armor.camera_position.norm(), enemy_armor.world_position.norm());
+        //        fmt::print("enemy_armor.camera_position:  {}, {}, {}",
+        //                   enemy_armor.camera_position.transpose()[0], enemy_armor.camera_position.transpose()[1],
+        //                   enemy_armor.camera_position.transpose()[2]);
+        //        fmt::print("{}       {}       {}",AS.ab_roll, AS.ab_pitch, AS.ab_yaw);
+        //        fmt::print("enemy_armor.world_position:  {}, {}, {}",enemy_armor.world_position.transpose()[0], enemy_armor.world_position.transpose()[1],
+        //                   enemy_armor.world_position.transpose()[2]);
+                return true;
+            }
             if(armor.id == 1)
             {
                 enemy_armor = armor;
@@ -102,52 +128,100 @@
 
     bool ArmorTracker::switchEnemy(std::vector<Armor> find_armors)
     {
-//        Armor tmp;
-//        // genju juli shezhi fadanmoshi
-//        if(enemy_armor.camera_position.norm() > max_effective_distance)
-//        {
-//            reset();
-//            return false;
-//        }
-//        else
-//        {
-//            // TODO: 如果另一台车比跟踪的进应该怎么选？
-//            if(!find_armors.empty())
-//            {
-//                for(auto armor : find_armors)
-//                {
-//                    if(armor.id == 1 && tracking_id != 1)
-//                    {
-//                        tmp = armor;
-//                        switch_enemy_cnt++;
-//                    }
-//                    else
-//                    {
-//                        switch_enemy_cnt = 0;
-//                    }
-//                }
-//            }
-//            else
-//            {
-//                switch_enemy_cnt = 0;
-//            }
-//
-//            return false;
-//        }
-//
-//        if(switch_enemy_cnt >= switch_enemy_threshold)
-//        {
-//            enemy_armor = tmp;
-//
-//            tracker_state = DETECTING;
-//            tracking_id = enemy_armor.id;
-//            // initial KF --- x_post
-//            KF.initial_KF();
-//            enemy_armor.world_position = AS.pixel2imu(enemy_armor);
-//            KF.setXPost(enemy_armor.world_position);
-//            Singer.setXpos({enemy_armor.world_position(0,0),enemy_armor.world_position(1,0)});
-//            return true;
-//        }
+       Armor tmp;
+       // genju juli shezhi fadanmoshi
+       enemy_armor.camera_position = AS.pixel2cam(enemy_armor);
+       if(enemy_armor.camera_position.norm() > max_effective_distance)
+       {
+           reset();
+           return false;
+       }
+       else
+       {
+           // TODO: 如果另一台车比跟踪的进应该怎么选？
+           if(find_armors.empty())
+           {
+                memset(switch_enemy_cnt, 0, sizeof switch_enemy_cnt);
+                memset(flag, false, sizeof flag);
+                memset(temp, 0, sizeof temp);
+                return true;
+           }
+           else
+           {
+                memset(flag, false, sizeof flag);
+                for(auto armor : find_armors)
+                {
+                    if(armor.id == 1)
+                    {
+                        flag[0] = true;
+                        switch_enemy_cnt[0]++;
+                        temp[0] = armor;
+                    }
+                    else if(armor.id != 2 && AS.pixel2cam(armor).norm() - enemy_armor.camera_position.norm() >= delta_distance) 
+                    {
+                        switch(armor.id)
+                        {
+                            case 3:
+                                flag[1] = true;
+                                switch_enemy_cnt[1]++;
+                                temp[1] = armor;
+                                break;
+                            case 4:
+                                flag[2] = true;
+                                switch_enemy_cnt[2]++;
+                                temp[2] = armor;
+                                break;
+                            case 5:
+                                flag[3] = true;
+                                switch_enemy_cnt[3]++;
+                                temp[3] = armor;
+                                break;
+                            case 6:
+                                flag[4] = true;
+                                switch_enemy_cnt[4]++;
+                                temp[4] = armor;
+                                break;
+                        }
+                    }
+                }
+
+                bool change = false;
+                for(int i = 0; i < 5; i++)
+                {
+                    if(!flag[i])
+                    {
+                        switch_enemy_cnt[i] = 0;
+                    }
+
+                    if(switch_enemy_cnt[i] >= switch_enemy_threshold)
+                    {
+                        if(i == 0 && AS.pixel2cam(temp[i]).norm() <= hero_distance)
+                        {//英雄
+                            enemy_armor = temp[i];
+                            change = true;
+                            break;
+                            
+                        }
+                        else if(AS.pixel2cam(temp[i]) < enemy_armor.camera_position.norm())
+                        {
+                            enemy_armor = temp[i];
+                            change = true;
+                        }
+                    }
+                }
+
+                if(change)
+                {
+                    reset();
+                    tracking_id = enemy_armor.id;
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
+           }
+       }
     }
 
     // dt是两帧之间时间间隔, 跟得住目标  用预测来做匹配，确定跟踪器状态
@@ -159,7 +233,7 @@
         Armor matched_armor;
         bool matched = false;
 
-#ifdef ANTI_SPIN
+    #ifdef ANTI_SPIN
         SpinHeading spin_status;
         if (!find_armors.empty()) {
             spin_status = spin_status_map[tracking_id];
@@ -517,7 +591,7 @@
         }
         // predicted_position = predicted_enemy.head(3);
         // predicted_speed = predicted_enemy.tail(3);
-
+ 
         if (tracker_state == DETECTING)
         {
             // DETECTING
@@ -667,13 +741,17 @@
             double dt = seconds_duration (time - t).count();
             t = time;
 
-            // if(switchEnemy(armors)) { return false; }
 
             if(!selectEnemy(armors,dt))  { std::cout<<"1"<<std::endl; return false; }
 
 #ifdef ANTI_SPIN
             if (tracker_state == TRACKING) { spin_detect(); std::cout<<"2"<<std::endl;}
 #endif
+
+            if (tracker_state == TRACKING)
+            {
+                if(!switchEnemy(armors)) { return false; }
+            }
 
             if(!estimateEnemy(dt)) { fmt::print("3"); return false; }
 

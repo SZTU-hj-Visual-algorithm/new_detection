@@ -3,3 +3,5 @@
 find_threshold: 20
 lost_threshold: 10
 new_old_threshold: 0.1
+theta_disteance: 
+hero_distance:

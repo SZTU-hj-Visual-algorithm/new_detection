@@ -113,6 +113,16 @@ public:
     Eigen::Vector3d predicted_speed;  // 预测得到的速度???
     Eigen::Matrix<double,6,1> predicted_enemy;
     Eigen::Vector3d bullet_point;
+
+///---------------------switchEnemy---------------------
+    int switch_enemy_cnt[5];
+    bool flag[5];
+    armor temp[5];
+    double delta_distance;
+    double hero_distance;
+//----------------------------------------------------------
+    int switch_enemy_threshold;
+    double max_effective_distance;
 };
 
 //}
