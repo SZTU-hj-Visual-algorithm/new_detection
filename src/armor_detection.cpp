@@ -8,7 +8,7 @@
 //#define DRAW_ARMORS_RRT
 //#define DRAW_FINAL_ARMOR_S_CLASS
 //#define SHOW_TIME
-#define DNN_DETECT
+//#define DNN_DETECT
 using namespace cv;
 using namespace std;
 
@@ -162,15 +162,16 @@ void ArmorDetector::findLights()
 
                 cv::Mat roi = _src(rect);
                 cv::Mat mask = _binary(rect);
-                cv::Mat channels[3];
-                cv::split(roi, channels); // 分离多通道图像的通道
-                Scalar sum_r = cv::mean(channels[2], mask);
-                Scalar sum_b = cv::mean(channels[0], mask);
-                Scalar sum_g = cv::mean(channels[1], mask);
+                // cv::Mat channels[3];
+                // cv::split(roi, channels); // 分离多通道图像的通道
+                // Scalar sum_r = cv::mean(channels[2], mask);
+                // Scalar sum_b = cv::mean(channels[0], mask);
+                // Scalar sum_g = cv::mean(channels[1], mask);
+                Scalar sum = cv::mean(roi,mask);
                 // cout << "color: red-" << sum_r[0] << " | blue-" << sum_b[0] << " | green-" << sum_g[0] << endl;
 
-                light.lightColor = sum_r[0] > sum_b[0] ? RED : BLUE;
-
+                //light.lightColor = sum_r[0] > sum_b[0] ? RED : BLUE;
+                light.lightColor = sum[2] > sum[0] ? RED : BLUE;
                 // if(sum_r[0]>sum_b[0])
                 // {
                 //     light.lightColor = RED;
