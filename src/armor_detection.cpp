@@ -3,10 +3,10 @@
 //#define BINARY_SHOW
 //#define DRAW_LIGHTS_CONTOURS
 //#define DRAW_LIGHTS_RRT
-//#define SHOW_NUMROI
+#define SHOW_NUMROI
 //#define DEBUG_DNN_PRINT
 //#define DRAW_ARMORS_RRT
-//#define DRAW_FINAL_ARMOR_S_CLASS
+#define DRAW_FINAL_ARMOR_S_CLASS
 //#define SHOW_TIME
 
 using namespace cv;
@@ -20,6 +20,9 @@ ArmorDetector::ArmorDetector()
     FileStorage fs("../other/detect_data.yaml", FileStorage::READ);
 
     binThresh = (int)fs["binThresh"];
+    redBinThresh = (int)fs["redBinThresh"];
+    blueBinThresh = (int)fs["blueBinThresh"];
+
     //light_judge_condition
     light_max_angle = (double)fs["light_max_angle"];
     light_min_hw_ratio = (double)fs["light_min_hw_ratio"];
@@ -65,8 +68,8 @@ void ArmorDetector::setImage(const Mat &src)
 
     //二值化
     Mat gray;
-    cvtColor(_src,gray,COLOR_BGR2GRAY);
-    threshold(gray,_binary,binThresh,255,THRESH_BINARY);
+    cvtColor(_src,_gray,COLOR_BGR2GRAY);
+    threshold(_gray,_binary,binThresh,255,THRESH_BINARY);
 #ifdef BINARY_SHOW
     imshow("_binary",_binary);
 #endif //BINARY_SHOW
@@ -102,7 +105,7 @@ bool ArmorDetector::isLight(Light& light, vector<Point> &cnt)
 
     bool is_light = hw_ratio_ok && area_ratio_ok && angle_ok && standing_ok && area_ok;
 
-        if(!is_light)
+    if(!is_light)
     {
 //        cout<<hw_ratio<<"    "<<contourArea(cnt) / light_max_area<<"    "<<light.angle<<endl;
     }
@@ -110,7 +113,7 @@ bool ArmorDetector::isLight(Light& light, vector<Point> &cnt)
     return is_light;
 }
 
-void ArmorDetector::findLights()
+void ArmorDetector::findLights(int color)
 {
     vector<vector<cv::Point>> contours;
     vector<cv::Vec4i> hierarchy;
@@ -141,27 +144,58 @@ void ArmorDetector::findLights()
             if (0 <= rect.x && 0 <= rect.width  && rect.x + rect.width  <= _src.cols &&
                 0 <= rect.y && 0 <= rect.height && rect.y + rect.height <= _src.rows)
             {
-                int sum_r = 0, sum_b = 0;
-                cv::Mat roi = _src(rect);
-                // Iterate through the ROI
-                for (int i = 0; i < roi.rows; i++)
-                {
-                    for (int j = 0; j < roi.cols; j++)
-                    {
-                        if (cv::pointPolygonTest(contour, cv::Point2f(j + rect.x, i + rect.y), false) >= 0) // 只加正矩形中的轮廓！！！
-                        {
-                            sum_r += roi.at<cv::Vec3b>(i, j)[2];
-                            sum_b += roi.at<cv::Vec3b>(i, j)[0];
-                        }
-                    }
-                }
-//                 std::cout<<sum_r<<"           "<<sum_b<<std::endl;
+                // old plan --- waste time
+                // int sum_r = 0, sum_b = 0;
+                // cv::Mat roi = _src(rect);
+                // // Iterate through the ROI
+                // for (int i = 0; i < roi.rows; i++)
+                // {
+                //     for (int j = 0; j < roi.cols; j++)
+                //     {
+                //         if (cv::pointPolygonTest(contour, cv::Point2f(j + rect.x, i + rect.y), false) >= 0) // 只加正矩形中的轮廓！！！
+                //         {
+                //             sum_r += roi.at<cv::Vec3b>(i, j)[2];
+                //             sum_b += roi.at<cv::Vec3b>(i, j)[0];
+                //         }
+                //     }
+                // }
+                // std::cout<<sum_r<<"           "<<sum_b<<std::endl;
                 // Sum of red pixels > sum of blue pixels ?
-                light.lightColor = sum_r > sum_b ? RED : BLUE;
+                // light.lightColor = sum_r > sum_b ? RED : BLUE;
+
+                cv::Mat roi = _src(rect);
+                cv::Mat mask = _binary(rect);
+                // cv::Mat channels[3];
+                // cv::split(roi, channels); // 分离多通道图像的通道
+                // Scalar sum_r = cv::mean(channels[2], mask);
+                // Scalar sum_b = cv::mean(channels[0], mask);
+                // Scalar sum_g = cv::mean(channels[1], mask);
+
+                Scalar sum = cv::mean(roi,mask);
+                // cout << "color: red-" << sum_r[0] << " | blue-" << sum_b[0] << " | green-" << sum_g[0] << endl;
+
+                light.lightColor = sum[2] > sum[0] ? RED : BLUE;
+
+                // if(sum_r[0]>sum_b[0])
+                // {
+                //     light.lightColor = RED;
+                // }
+                // else if(sum_r[0]>sum_b[0])
+                // {
+                //     light.lightColor = RED;
+                // }
+                // else if(sum_r[0]>sum_b[0])
+                // {
+                //     light.lightColor = RED;
+                // }
+
+
+                //enermy_color ==  BLUE;
+                //cout<<"enermy_color  ==  "<<enermy_color<<endl;
+                // cout<<"light.lightColor  ==  "<<light.lightColor<<endl;
 
                 // 颜色不符合电控发的就不放入
-
-                if(light.lightColor == 2)
+                if(light.lightColor == color)
                 {
                     candidateLights.emplace_back(light);
 #ifdef DRAW_LIGHTS_RRT
@@ -253,6 +287,7 @@ void ArmorDetector::matchLights()
 
                     candidateArmors.emplace_back(armor);
 #ifdef DRAW_ARMORS_RRT
+
                     //cout<<"LightI_angle :   "<<lightI.angle<<"   LightJ_angle :   "<<lightJ.angle<<"     "<<fabs(lightI.angle - lightJ.angle)<<endl;
                     //cout<<"armorAngle   :   "<<armorAngle * 180 / CV_PI <<endl;
                     //cout<<"    w/h      :   "<<armorWidth/armorHeight<<endl;
@@ -266,8 +301,8 @@ void ArmorDetector::matchLights()
                         line(showSrc, vertice_armors[m], vertice_armors[(m + 1) % 4], CV_RGB(0, 255, 255),2,LINE_8);
                     }
                     //circle(showSrc,armorCenter,15,Scalar(0,255,255),-1);
-                    imshow("showSrc", showSrc);
                     putText(showSrc,to_string(armorAngle),armor.armor_pt4[3],FONT_HERSHEY_COMPLEX,1.0,Scalar(0,255,255),2,8);
+                    imshow("showSrc", showSrc);
 #endif //DRAW_ARMORS_RRT
                 }
             }
@@ -275,6 +310,121 @@ void ArmorDetector::matchLights()
         }
     }
 }
+
+//void ArmorDetector::chooseTarget_home()
+//{
+//
+//    if(candidateArmors.empty())
+//    {
+//        //cout<<"no target!!"<<endl;
+////        finalArmor = Armor();
+//        return;
+//    }
+//    else if(candidateArmors.size() == 1)
+//    {
+//        fmt::print("get 1 target!!");
+//        Mat out_blobs = dnnDetect_home.net_forward(numROIs);
+//
+//        float *outs = (float*)out_blobs.data;
+//        if (get_max(outs, candidateArmors[0].confidence, candidateArmors[0].id))
+//        {
+//#ifdef SHOW_NUMROI
+//            cv::Mat numDst;
+//            resize(numROIs[0],numDst,Size(200,300));
+//            string name = to_string(candidateArmors[0].id) + ":" + to_string(candidateArmors[0].confidence*100) + "%";
+//            //        printf("%d",armor.id);
+//            imshow("name",numDst);
+//            //        std::cout<<"number:   "<<armor.id<<"   type:   "<<armor.type<<std::endl;
+//            //        string file_name = "../data/"+std::to_string(0)+"_"+std::to_string(cnt_count)+".jpg";
+//            //        cout<<file_name<<endl;
+//            //        imwrite(file_name,numDst);
+//            //        cnt_count++;
+//#endif
+//            candidateArmors[0].grade = 100;
+//            finalArmors.emplace_back(candidateArmors[0]);
+//        }
+//    }
+//    else
+//    {
+//        //cout<<"get "<<candidateArmors.size()<<" target!!"<<endl;
+//
+//        // dnn implement
+//        Mat out_blobs = dnnDetect.net_forward(numROIs);
+//        float *outs = (float*)out_blobs.data;
+//
+//        // 获取每个候选装甲板的id和type
+//        for(int i=0;i<candidateArmors.size();i++) {
+//            // numROIs has identical size as candidateArmors
+//            if (!get_max(outs, candidateArmors[i].confidence, candidateArmors[i].id))
+//            {
+//                outs+=categories;
+//                continue;
+//            }
+//#ifdef SHOW_NUMROI
+//            cv::Mat numDst;
+//            resize(numROIs[i],numDst,Size(200,300));
+//            string name = to_string(candidateArmors[i].id) + ":" + to_string(candidateArmors[i].confidence*100) + "%";
+//            //        printf("%d",armor.id);
+//            imshow("name",numDst);
+//            //        std::cout<<"number:   "<<armor.id<<"   type:   "<<armor.type<<std::endl;
+//            //        string file_name = "../data/"+std::to_string(0)+"_"+std::to_string(cnt_count)+".jpg";
+//            //        cout<<file_name<<endl;
+//            //        imwrite(file_name,numDst);
+//            //        cnt_count++;
+//#endif
+//            // 装甲板中心点在屏幕中心部分，在中心部分中又是倾斜最小的，
+//            // 如何避免频繁切换目标：缩小矩形框就是跟踪到了，一旦陀螺则会目标丢失，
+//            // UI界面做数字选择，选几就是几号，可能在切换会麻烦，（不建议）
+//
+//            //打分制筛选装甲板优先级(！！！！最后只保留了优先级条件2和4和id优先级，其他有些冗余！！！！)
+//            /*最高优先级数字识别英雄1号装甲板，其次3和4号（如果打分的话1给100，3和4给80大概这个比例）
+//             *1、宽高比（筛选正面和侧面装甲板，尽量打正面装甲板）
+//             *2、装甲板靠近图像中心
+//             *3、装甲板倾斜角度最小
+//             *4、装甲板高最大
+//             */
+//            //1、宽高比用一个标准值和当前值做比值（大于标准值默认置为1）乘上标准分数作为得分
+//            //2、在缩小roi内就给分，不在不给分（分数占比较低）
+//            //3、90度减去装甲板的角度除以90得到比值乘上标准分作为得分
+//            //4、在前三步打分之前对装甲板进行高由大到小排序，获取最大最小值然后归一化，用归一化的高度值乘上标准分作为得分
+//
+//            candidateArmors[i].grade = armorGrade(candidateArmors[i]);
+//
+//            if (candidateArmors[i].grade > grade_standard)
+//            {
+//                finalArmors.emplace_back(candidateArmors[i]);
+//            }
+//            outs+=categories;
+//        }
+//    }
+//
+//
+//#ifdef DRAW_FINAL_ARMOR_S_CLASS
+//    Mat showSrc;
+//    _src.copyTo(showSrc);
+//    // std::cout<<"final_armors_size:   "<<finalArmors.size()<<std::endl;
+//
+//    for(size_t i = 0; i < finalArmors.size(); i++)
+//    {
+////        Point2f armor_pts[4];
+////        finalArmors[i].points(armor_pts);
+//        for (int j = 0; j < 4; j++)
+//        {
+//            line(showSrc, finalArmors[i].armor_pt4[j], finalArmors[i].armor_pt4[(j + 1) % 4], CV_RGB(255, 255, 0), 2);
+//        }
+//
+//        double ff = finalArmors[i].grade;
+//        string information = to_string(finalArmors[i].id) + ":" + to_string(finalArmors[i].confidence*100) + "%";
+////        putText(final_armors_src,ff,finalArmors[i].center,FONT_HERSHEY_COMPLEX, 1.0, Scalar(12, 23, 200), 1, 8);
+//        putText(showSrc, information,finalArmors[i].armor_pt4[3],FONT_HERSHEY_COMPLEX,1,Scalar(255,0,255));
+//        putText(showSrc, to_string(finalArmors[i].grade),finalArmors[i].armor_pt4[0],FONT_HERSHEY_COMPLEX,1,Scalar(255,0,255));
+//
+//    }
+////    if(!finalArmors.empty())
+////        imshow("showSrc", showSrc);
+//#endif //DRAW_FINAL_ARMOR_S_CLASS
+//
+//}
 
 void ArmorDetector::chooseTarget()
 {
@@ -287,11 +437,24 @@ void ArmorDetector::chooseTarget()
     }
     else if(candidateArmors.size() == 1)
     {
-        cout<<"get 1 target!!"<<endl;
+//        fmt::print("get 1 target!!\n");
         Mat out_blobs = dnnDetect.net_forward(numROIs);
+
         float *outs = (float*)out_blobs.data;
-        if (get_valid(outs, candidateArmors[0].confidence, candidateArmors[0].id))
+        if (get_max(outs, candidateArmors[0].confidence, candidateArmors[0].id))
         {
+#ifdef SHOW_NUMROI
+            cv::Mat numDst;
+            resize(numROIs[0],numDst,Size(200,300));
+            string name = to_string(candidateArmors[0].id) + ":" + to_string(candidateArmors[0].confidence*100) + "%";
+            //        printf("%d",armor.id);
+            imshow("name",numDst);
+            //        std::cout<<"number:   "<<armor.id<<"   type:   "<<armor.type<<std::endl;
+            //        string file_name = "../data/"+std::to_string(0)+"_"+std::to_string(cnt_count)+".jpg";
+            //        cout<<file_name<<endl;
+            //        imwrite(file_name,numDst);
+            //        cnt_count++;
+#endif
             candidateArmors[0].grade = 100;
             finalArmors.emplace_back(candidateArmors[0]);
         }
@@ -307,7 +470,7 @@ void ArmorDetector::chooseTarget()
         // 获取每个候选装甲板的id和type
         for(int i=0;i<candidateArmors.size();i++) {
             // numROIs has identical size as candidateArmors
-            if (!get_valid(outs, candidateArmors[i].confidence, candidateArmors[i].id))
+            if (!get_max(outs, candidateArmors[i].confidence, candidateArmors[i].id))
             {
                 outs+=categories;
                 continue;
@@ -315,8 +478,9 @@ void ArmorDetector::chooseTarget()
 #ifdef SHOW_NUMROI
             cv::Mat numDst;
             resize(numROIs[i],numDst,Size(200,300));
+            string name = to_string(candidateArmors[i].id) + ":" + to_string(candidateArmors[i].confidence*100) + "%";
             //        printf("%d",armor.id);
-            imshow("number_show",numDst);
+            imshow("name",numDst);
             //        std::cout<<"number:   "<<armor.id<<"   type:   "<<armor.type<<std::endl;
             //        string file_name = "../data/"+std::to_string(0)+"_"+std::to_string(cnt_count)+".jpg";
             //        cout<<file_name<<endl;
@@ -367,14 +531,16 @@ void ArmorDetector::chooseTarget()
         double ff = finalArmors[i].grade;
         string information = to_string(finalArmors[i].id) + ":" + to_string(finalArmors[i].confidence*100) + "%";
 //        putText(final_armors_src,ff,finalArmors[i].center,FONT_HERSHEY_COMPLEX, 1.0, Scalar(12, 23, 200), 1, 8);
-        putText(showSrc, information,finalArmors[i].armor_pt4[3],FONT_HERSHEY_COMPLEX,0.5,Scalar(255,0,255));
+        putText(showSrc, information,finalArmors[i].armor_pt4[3],FONT_HERSHEY_COMPLEX,1,Scalar(255,0,255));
+        putText(showSrc, to_string(finalArmors[i].grade),finalArmors[i].armor_pt4[0],FONT_HERSHEY_COMPLEX,1,Scalar(255,0,255));
+
     }
-    if(!finalArmors.empty())
-        imshow("showSrc", showSrc);
+//    if(!finalArmors.empty())
+//        imshow("showSrc", showSrc);
 #endif //DRAW_FINAL_ARMOR_S_CLASS
 }
 
-vector<Armor> ArmorDetector::autoAim(const cv::Mat &src)
+vector<Armor> ArmorDetector::autoAim(const cv::Mat &src,int color)
 {
     //init
     if(!numROIs.empty())numROIs.clear();
@@ -406,10 +572,34 @@ vector<Armor> ArmorDetector::autoAim(const cv::Mat &src)
     printf("choose_time:%lf\n",duration);
 #else
 
+    if(color == RED)
+    {
+        binThresh = redBinThresh;
+    }
+    else if(color == BLUE)
+    {
+        binThresh = blueBinThresh;
+    }
+
     setImage(src);
-    findLights();
+    findLights(color);
     matchLights();
     chooseTarget();
+
+    // 遍历vector并删除不符合要求的元素
+//    auto it = finalArmors.begin();
+//    while (it != finalArmors.end())
+//    {
+//        if ((*it).id < 1 && (*it).id > 6)
+//        {
+//            it = finalArmors.erase(it);
+//        }
+//        else
+//        {
+//            ++it;
+//        }
+//    }
+
 #endif
 
     return finalArmors;
@@ -450,7 +640,7 @@ void ArmorDetector::preImplement(Armor& armor)
     const int small_armor_width = 32;//为48/3*2
     const int large_armor_width = 44;//约为70/3*2
     // Number ROI size
-    const cv::Size roi_size(20, 30);
+    const cv::Size roi_size(22, 30);
 
     const int top_light_y = (warp_height - light_length) / 2;
     const int bottom_light_y = top_light_y + light_length;
@@ -464,7 +654,7 @@ void ArmorDetector::preImplement(Armor& armor)
             cv::Point(0, top_light_y),
     };
     const Mat& rotation_matrix = cv::getPerspectiveTransform(armor.armor_pt4, target_vertices);
-    cv::warpPerspective(_src, numDst, rotation_matrix, cv::Size(warp_width, warp_height));
+    cv::warpPerspective(_gray, numDst, rotation_matrix, cv::Size(warp_width, warp_height));
 
     // Get ROI
     numDst = numDst(cv::Rect(cv::Point((warp_width - roi_size.width) / 2, 0), roi_size));
@@ -482,22 +672,12 @@ void ArmorDetector::preImplement(Armor& armor)
 //         save_num_cnt++;
 //     }
 
-    resize(numDst, numDst,Size(200,300));
-    cvtColor(numDst, numDst, cv::COLOR_BGR2GRAY);
-    threshold(numDst, numDst, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
-    string name = to_string(armor.id) + ":" + to_string(armor.confidence*100) + "%";
-    imshow("name", numDst);
+//    resize(numDst, numDst,Size(200,300));
+//    cvtColor(numDst, numDst, cv::COLOR_BGR2GRAY);
+//    threshold(numDst, numDst, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
+//    string name = to_string(armor.id) + ":" + to_string(armor.confidence*100) + "%";
+//    imshow("name", numDst);
     // std::cout<<"number:   "<<armor.id<<"   type:   "<<armor.type<<std::endl;
-#ifdef SHOW_TIME
-    auto start = std::chrono::high_resolution_clock::now();
-    dnn_detect(numDst, armor);
-    auto end = std::chrono::high_resolution_clock::now();
-    auto duration = seconds_duration(end-start).count();
-    printf("dnn_time:%lf\n",duration);
-	putText(showSrc, to_string(duration),Point(10,100),2,3,Scalar(0,0,255));
-#else
-//	dnn_detect(numDst, armor);
-#endif
 
 }
 
@@ -528,7 +708,7 @@ int ArmorDetector::armorGrade(const Armor& checkArmor)
     /////////id优先级打分项目////////////////////////
     int id_grade;
     int check_id = checkArmor.id;
-    id_grade = check_id == 1 ? 100 : 80;
+    id_grade = check_id == 1 ? 100 : 100;
     ////////end///////////////////////////////////
 
     /////////最大装甲板板打分项目/////////////////////
@@ -559,6 +739,7 @@ int ArmorDetector::armorGrade(const Armor& checkArmor)
 }
 
 
+//already abandoned
 bool ArmorDetector::get_valid(const float *data, float &confidence, int &id)
 {
     id = 1;

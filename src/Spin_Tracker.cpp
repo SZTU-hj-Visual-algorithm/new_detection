@@ -1,8 +1,8 @@
 #include "Spin_Tracker.h"
 
-SpinTracker::SpinTracker(const Armor& armor, chrono_time src_timestamp)
+SpinTracker::SpinTracker(const Armor& src, chrono_time src_timestamp)
 {
-    last_armor = armor;
+    last_armor = src;
     last_timestamp = src_timestamp;
     is_initialized = false;
 }

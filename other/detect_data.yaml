@@ -1,6 +1,10 @@
 %YAML:1.0
 ---
-binThresh: 70
+#binThresh: 1234567890
+#enemy_color: BLUE  #todo:when change side, remember this value
+
+redBinThresh: 50
+blueBinThresh: 150
 
 light_max_angle: 45.0
 light_min_hw_ratio: 1
@@ -19,15 +23,14 @@ armor_ij_min_ratio: 0.4
 armor_ij_max_ratio: 2.5
 armor_max_angle: 45.0
 
-near_standard: 500
+near_standard: 200
 height_standard: 25
-grade_standard: 60
+grade_standard: 1
 
-id_grade_ratio: 0.6
-near_grade_ratio: 0.2
-height_grade_ratio: 0.2
+id_grade_ratio: 0.1
+near_grade_ratio: 0.8
+height_grade_ratio: 0.1
 
-categories: 10
+categories: 8   #todo: 2_16_hj_num:6, 3_16_hj_num and 4_9_hj_num:9
 # 阈值是0~1之间
-thresh_confidence: 0
-enemy_color: BLUE
+thresh_confidence: 0.90

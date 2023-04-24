@@ -16,6 +16,7 @@
 #include <sys/ioctl.h>
 #include <iostream>
 #include "crc.h"
+#include "fmt/core.h"
 using namespace std;
 
 

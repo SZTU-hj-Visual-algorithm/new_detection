@@ -1,5 +1,6 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/highgui/highgui.hpp>
+#include "fmt/core.h"
 #include "Spin_Tracker.h"
 #include "armor_detection.h"
 #include "singer_prediction.h"
@@ -42,6 +43,7 @@ public:
 
     float pitch;
     float yaw;
+    float roll;
 
     Skalman Singer;
 
@@ -51,26 +53,29 @@ public:
 
     void reset();
     void show();
-    bool initial(std::vector<Armor> &find_armors);
-
-    bool selectEnemy2(std::vector<Armor> &find_armors, double dt);
+    bool initial(std::vector<Armor> find_armors);
+    bool switchEnemy(std::vector<Armor> find_armors);
+    bool selectEnemy(std::vector<Armor> find_armors, double dt);
     bool estimateEnemy(double dt);
-    bool locateEnemy(const cv::Mat& src, std::vector<Armor> &armors, const chrono_time &time);
+    bool locateEnemy(const cv::Mat src, std::vector<Armor> armors, const chrono_time time, int mode);
 
 
     Circle fitCircle(const cv::Point2f& x1, const cv::Point2f& x2, const cv::Point2f& x3);
     bool updateSpinScore();
     void spin_detect();
-private:
+
     Armor enemy_armor;//最终选择的装甲板
     Armor real_armor; // virtual armor state, real armor
     KalmanFilter KF;
 
-
+    int max_history_len;
     double last_r = 0.35;
+    int vir_max = 20;
+    int vir_num = 0;
     Eigen::Vector3d last_position;
     bool is_vir_armor = false;
     bool is_anti = false;
+    bool is_target_move = false;
     int last_final_armors_size;
     double anti_spin_max_r_multiple;         // 符合陀螺条件，反陀螺分数增加倍数
     int anti_spin_judge_low_thres;           // 小于该阈值认为该车已关闭陀螺
@@ -87,13 +92,11 @@ private:
     std::map<int,SpinHeading> spin_status_map;     // 记录该车小陀螺状态（未知，顺时针，逆时针）
     std::map<int,double> spin_score_map;           // 记录各装甲板小陀螺可能性分数，大于0为逆时针旋转，小于0为顺时针旋转
     std::deque<Armor> history_armors;
-    const int max_history_len = 4;
+
 
     bool is_aim_virtual_armor;  // 出现虚拟装甲板后转过去
 
     bool locate_target;
-
-    bool isChangeSameID;
 
     int find_aim_cnt;
     int find_threshold;
@@ -112,6 +115,26 @@ private:
     Eigen::Vector3d predicted_speed;  // 预测得到的速度???
     Eigen::Matrix<double,6,1> predicted_enemy;
     Eigen::Vector3d bullet_point;
+
+
+    int switch_armor_threshold;
+    int switch_armor_cnt;
+
+    // int switch_enemy_cnt;
+    int switch_enemy_threshold;
+    double max_effective_distance;
+
+    bool is_switch_time_set;
+    chrono_time last_change_time;
+    double switch_time_threshold;
+
+///---------------------switchEnemy---------------------
+    int switch_enemy_cnt[5];
+    bool flag[5];
+    Armor temp[5];
+    double delta_distance;
+    double hero_distance;
+//----------------------------------------------------------
 };
 
 //}

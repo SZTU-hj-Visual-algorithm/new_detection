@@ -1,6 +1,6 @@
-#include "robot_status.h"
 #include "opencv2/opencv.hpp"
 #include <Eigen/Dense>
+#include "fmt/core.h"
 #include "armor_detection.h"
 
 
@@ -56,8 +56,8 @@ public:
     Eigen::Vector3d buff2imu(Eigen::Vector3d buff_pos);
     double buff_scale_ratio;
 
-    Eigen::Vector3d getAngle(Eigen::Vector3d predicted_position);
-    Eigen::Vector3d airResistanceSolve(Eigen::Vector3d Pos);//consider gravity asn air resistance
+    Eigen::Vector3d getAngle(Eigen::Vector3d predicted_position, Eigen::Vector3d &world_dropPosition);
+    Eigen::Vector3d airResistanceSolve(Eigen::Vector3d Pos, double &pitch);//consider gravity asn air resistance
     float BulletModel(float x, float v, float angle);
     Eigen::Vector3d yawPitchSolve(Eigen::Vector3d &Pos);
 
@@ -68,6 +68,7 @@ public:
     bool circleLeastFit(const std::vector<cv::Point2f> &points, double &center_x, double &center_y, double &radius);  // 对二维平面点集拟合成圆
     double countArmorIoU(Armor armor1, Armor armor2);   // 输出像素坐标系内两旋转矩形的交并比
     cv::Point2f Vector3d2point2f(Eigen::Vector3d src_vector);
+
     double getFlyTime(Eigen::Vector3d &pos);
 };
 

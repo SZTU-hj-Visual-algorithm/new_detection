@@ -1,5 +1,20 @@
 %YAML:1.0
 ---
-find_threshold: 20
-lost_threshold: 50
-new_old_threshold: 0.1
+find_threshold: 5
+lost_threshold: 20
+new_old_threshold: 0.15
+switch_armor_threshold: 5
+
+switch_time_threshold: 10
+switch_enemy_threshold: 5
+max_effective_distance: 7.5
+
+
+anti_spin_max_r_multiple: 5
+anti_spin_judge_low_thres: 1500
+anti_spin_judge_high_thres: 20000
+max_delta_t: 120
+max_history_len: 30
+
+delta_distance: 0.5
+hero_distance: 3
