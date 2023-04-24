@@ -43,6 +43,7 @@ public:
 
     float pitch;
     float yaw;
+    float roll;
 
     Skalman Singer;
 
@@ -56,7 +57,7 @@ public:
     bool switchEnemy(std::vector<Armor> find_armors);
     bool selectEnemy(std::vector<Armor> find_armors, double dt);
     bool estimateEnemy(double dt);
-    bool locateEnemy(const cv::Mat src, std::vector<Armor> armors, const chrono_time time);
+    bool locateEnemy(const cv::Mat src, std::vector<Armor> armors, const chrono_time time, int mode);
 
 
     Circle fitCircle(const cv::Point2f& x1, const cv::Point2f& x2, const cv::Point2f& x3);
@@ -67,13 +68,14 @@ public:
     Armor real_armor; // virtual armor state, real armor
     KalmanFilter KF;
 
-    const int max_history_len = 4;
+    int max_history_len;
     double last_r = 0.35;
     int vir_max = 20;
     int vir_num = 0;
     Eigen::Vector3d last_position;
     bool is_vir_armor = false;
     bool is_anti = false;
+    bool is_target_move = false;
     int last_final_armors_size;
     double anti_spin_max_r_multiple;         // 符合陀螺条件，反陀螺分数增加倍数
     int anti_spin_judge_low_thres;           // 小于该阈值认为该车已关闭陀螺
@@ -113,6 +115,26 @@ public:
     Eigen::Vector3d predicted_speed;  // 预测得到的速度???
     Eigen::Matrix<double,6,1> predicted_enemy;
     Eigen::Vector3d bullet_point;
+
+
+    int switch_armor_threshold;
+    int switch_armor_cnt;
+
+    // int switch_enemy_cnt;
+    int switch_enemy_threshold;
+    double max_effective_distance;
+
+    bool is_switch_time_set;
+    chrono_time last_change_time;
+    double switch_time_threshold;
+
+///---------------------switchEnemy---------------------
+    int switch_enemy_cnt[5];
+    bool flag[5];
+    Armor temp[5];
+    double delta_distance;
+    double hero_distance;
+//----------------------------------------------------------
 };
 
 //}

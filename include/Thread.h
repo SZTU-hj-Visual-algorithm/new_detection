@@ -26,6 +26,7 @@ void* Implement(void* PARAM);
 //void* Send(void* PARAM);
 typedef struct form
 {
+    int id;
 	int mode;
 	int dat_is_get;
 	float data[3];

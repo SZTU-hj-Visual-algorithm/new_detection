@@ -69,12 +69,16 @@
     public:
         ArmorDetector(); //构造函数初始化
 
-        std::vector<Armor> autoAim(const cv::Mat &src); //将最终目标的坐标转换到摄像头原大小的
+        std::vector<Armor> autoAim(const cv::Mat &src, int color); //将最终目标的坐标转换到摄像头原大小的
 
     private:
         int save_num_cnt;
 
         int binThresh;
+        int redBinThresh;
+        int blueBinThresh;
+
+
         int enemy_color;
         int categories;
 
@@ -111,6 +115,7 @@
 
         cv::Mat _src;  // 裁剪src后的ROI
         cv::Mat _binary;
+        cv::Mat _gray;
         std::vector<cv::Mat> temps;
 
         Armor lastArmor;
@@ -123,12 +128,15 @@
 
         DNN_detect dnnDetect;
 
+        DNN_detect dnnDetect_home;
+
         void setImage(const cv::Mat &src); //对图像进行设置
 
-        void findLights(); //找灯条获取候选匹配的灯条
+        void findLights(int color); //找灯条获取候选匹配的灯条
 
         void matchLights(); //匹配灯条获取候选装甲板
 
+        void chooseTarget_home();
         void chooseTarget(); //找出优先级最高的装甲板
 
         bool isLight(Light& light, std::vector<cv::Point> &cnt);

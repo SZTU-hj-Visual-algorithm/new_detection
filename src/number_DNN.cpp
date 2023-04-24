@@ -21,7 +21,7 @@ void DNN_detect::img_processing(Mat ori_img, std::vector<cv::Mat>& numROIs) {
 //    Mat ggg;
 //    resize(ori_img,ggg,Size (330,450));
 //    imshow("ori_img",ggg);
-    cvtColor(ori_img, ori_img, cv::COLOR_RGB2GRAY);
+//    cvtColor(ori_img, ori_img, cv::COLOR_RGB2GRAY);
     threshold(ori_img, ori_img, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
     numROIs.push_back(ori_img);
 }

@@ -42,93 +42,28 @@ AngleSolve::AngleSolve()
 
 Eigen::Vector3d AngleSolve::pnpSolve(Point2f *p, int type)
 {
-    std::vector<cv::Point3d> ps;
-    std::vector<cv::Point2f> pu;
+    double w = type == SMALL ? small_w : big_w;
+    double h = type == SMALL ? small_h : big_h;
+    cv::Point2f lu, ld, ru, rd;
+    std::vector<cv::Point3d> ps = {
+            {-w / 2 , -h / 2, 0.},
+            { w / 2 , -h / 2, 0.},
+            { w / 2 ,  h / 2, 0.},
+            {-w / 2 ,  h / 2, 0.}
+    };
 
-    if(type == SMALL)
-    {
-        double w = small_w;
-        double h = small_h;
-        ps = {
-                {-w / 2 , -h / 2, 0.},
-                { w / 2 , -h / 2, 0.},
-                { w / 2 ,  h / 2, 0.},
-                {-w / 2 ,  h / 2, 0.}
-        };
-        pu.push_back(p[3]);
-        pu.push_back(p[2]);
-        pu.push_back(p[1]);
-        pu.push_back(p[0]);
-    }
-    else if(type == BIG)
-    {
-        double w = big_w;
-        double h = big_h;
-        ps = {
-                {-w / 2 , -h / 2, 0.},
-                { w / 2 , -h / 2, 0.},
-                { w / 2 ,  h / 2, 0.},
-                {-w / 2 ,  h / 2, 0.}
-        };
-        pu.push_back(p[3]);
-        pu.push_back(p[2]);
-        pu.push_back(p[1]);
-        pu.push_back(p[0]);
-    }
-    else if(type == BUFF_R)
-    {
-        double w = buff_r_w;
-        double h = buff_r_h;
-        ps = {
-                {-w / 2 , -h / 2, 0.},
-                { w / 2 , -h / 2, 0.},
-                { w / 2 ,  h / 2, 0.},
-                {-w / 2 ,  h / 2, 0.}
-        };
-        pu.push_back(p[0]);
-        pu.push_back(p[1]);
-        pu.push_back(p[2]);
-        pu.push_back(p[3]);
-    }
-    else if(type == BUFF_NO)
-    {
-        ps = {
-                {-buff_out_w / 2 , -buff_out_h , 0.},
-                { buff_out_w / 2 , -buff_out_h , 0.},
-                { buff_in_w / 2 ,  buff_in_h , 0.},
-                {-buff_in_w / 2 ,  buff_in_h , 0.},
-                {0 , buff_radius, -buff_convex},
-        };
-        pu.push_back(p[0]);
-        pu.push_back(p[1]);
-        pu.push_back(p[2]);
-        pu.push_back(p[3]);
-        pu.push_back(p[4]);
-    }
-    else if(type == BUFF_YES)
-    {
-        ps = {
-                {-buff_out_w / 2 , -buff_out_h , 0.},
-                { buff_out_w / 2 , -buff_out_h , 0.},
-                { buff_in_w / 2 ,  buff_in_h , 0.},
-                {-buff_in_w / 2 ,  buff_in_h , 0.},
-                {0 , buff_radius, -buff_convex},
-        };
-        pu.push_back(p[0]);
-        pu.push_back(p[1]);
-        pu.push_back(p[2]);
-        pu.push_back(p[3]);
-        pu.push_back(p[4]);
-    }
+    std::vector<cv::Point2f> pu;
+    pu.clear();
+    pu.push_back(p[3]);
+    pu.push_back(p[2]);
+    pu.push_back(p[1]);
+    pu.push_back(p[0]);
 
     cv::Mat rvec;
     cv::Mat tvec;
+    Eigen::Vector3d tv;
 
     cv::solvePnP(ps, pu, F_MAT, C_MAT, rvec, tvec/*, SOLVEPNP_IPPE*/);
-
-    Mat rv_mat;
-    cv::Rodrigues(rvec,rv_mat);
-    cv::cv2eigen(rv_mat,rv);
     cv::cv2eigen(tvec, tv);
 
 #ifdef SHOW_MEASURE_RRECT
@@ -281,12 +216,15 @@ float AngleSolve::BulletModel(float x, float v, float angle) { //x:m,v:m/s,angle
     return y;
 }
 
-Eigen::Vector3d AngleSolve::airResistanceSolve(Vector3d Pos)
+Eigen::Vector3d AngleSolve::airResistanceSolve(Vector3d Pos, double &pitch)
 {
+    // std::cout<<"fvgbhjkvghbj: "<< Pos.transpose()  <<std::endl;
     //at world coordinate system
     float y = (float)Pos[2];
     // -----------要水平距离的融合，否则计算的距离会少，在视野边缘处误差会大----------
     float x = (float)sqrt(Pos[0]*Pos[0]+ Pos[1]*Pos[1]);
+
+    // float x = (float)sqrt(Pos[0]*Pos[0]);
 
     float y_temp, y_actual, dy;
     float a;
@@ -298,21 +236,22 @@ Eigen::Vector3d AngleSolve::airResistanceSolve(Vector3d Pos)
         y_actual = BulletModel(x, bullet_speed, a);
         dy = y - y_actual;
         y_temp = y_temp + dy;
-        if (fabsf(dy) < 0.001) {
+        if (fabsf(dy) < 0.00001) {
             break;
         }
         // printf("iteration num %d: angle %f,temp target y:%f,err of y:%f\n",i+1,a*180/3.1415926535,y_temp,dy);
     }
-
+    pitch = a*180/3.1415926535;
     // return Vector3d(Pos[0],-y_temp,Pos[2]);  // cam
     return Vector3d(Pos[0],Pos[1],y_temp);  // imu
 }
 
 Eigen::Vector3d AngleSolve::yawPitchSolve(Vector3d &Pos)
 {
-
     Eigen::Vector3d rpy;
-    rpy[2] = -atan2(Pos[0],Pos[1]) / CV_PI*180.0;
+    // rpy[2] = atan2(Pos[1],Pos[0]) / CV_PI*180.0 - 90;
+    rpy[2] = -atan2(Pos[0],Pos[1]) / CV_PI*180.0 ;
+
     rpy[1] = atan2(Pos[2],Pos[1]) / CV_PI*180.0;
     // rpy[1] = 0;
     rpy[0] = atan2(Pos[2],Pos[0]) / CV_PI*180.0;
@@ -323,11 +262,14 @@ Eigen::Vector3d AngleSolve::yawPitchSolve(Vector3d &Pos)
 }
 
 
-Eigen::Vector3d AngleSolve::getAngle(Eigen::Vector3d predicted_position)
+Eigen::Vector3d AngleSolve::getAngle(Eigen::Vector3d predicted_position, Eigen::Vector3d &world_dropPosition)
 {
-    Vector3d world_dropPosition;
-    world_dropPosition = airResistanceSolve(predicted_position);//calculate gravity and air resistance
+    double pitch;
+    // Vector3d world_dropPosition;
+    world_dropPosition = airResistanceSolve(predicted_position,pitch);//calculate gravity and air resistance
     Eigen::Vector3d rpy = yawPitchSolve(world_dropPosition);//get need yaw and pitch
+
+    rpy[1] = pitch;
 
     rpy[0] += gimbal_offset_angle[0];
     rpy[1] += gimbal_offset_angle[1];

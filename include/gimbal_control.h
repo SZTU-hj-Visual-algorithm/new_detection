@@ -56,8 +56,8 @@ public:
     Eigen::Vector3d buff2imu(Eigen::Vector3d buff_pos);
     double buff_scale_ratio;
 
-    Eigen::Vector3d getAngle(Eigen::Vector3d predicted_position);
-    Eigen::Vector3d airResistanceSolve(Eigen::Vector3d Pos);//consider gravity asn air resistance
+    Eigen::Vector3d getAngle(Eigen::Vector3d predicted_position, Eigen::Vector3d &world_dropPosition);
+    Eigen::Vector3d airResistanceSolve(Eigen::Vector3d Pos, double &pitch);//consider gravity asn air resistance
     float BulletModel(float x, float v, float angle);
     Eigen::Vector3d yawPitchSolve(Eigen::Vector3d &Pos);
 
