@@ -16,4 +16,3 @@ bool SpinTracker::update_tracker(const Armor& new_armor, chrono_time new_timesta
     return true;
 }
 
-

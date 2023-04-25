@@ -59,8 +59,10 @@ public:
     bool estimateEnemy(double dt);
     bool locateEnemy(const cv::Mat src, std::vector<Armor> armors, const chrono_time time, int mode);
 
-
-    Circle fitCircle(const cv::Point2f& x1, const cv::Point2f& x2, const cv::Point2f& x3);
+    void update_jump_trackers(Armor new_armor);
+    void reset_kf(Armor new_armor);
+    void update_history_armors(Armor new_armor);
+    void update_spin_T(Armor matched_armor, std::vector<Armor> &final_armors);
     bool updateSpinScore();
     void spin_detect();
 
