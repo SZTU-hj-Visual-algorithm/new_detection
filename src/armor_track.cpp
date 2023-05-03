@@ -350,6 +350,7 @@ bool ArmorTracker::selectEnemy(std::vector<Armor> find_armors, double dt)
                     fmt::print("---1->1(跳变)---");
                     update_spin_T(matched_armor, final_armors);
                     update_jump_trackers(matched_armor);
+                    save_spin_history();
                     //disappear_tracker.disappear_armor = jump_trackers.at(0).jump_armor;
                     jump_trackers.erase(jump_trackers.begin());
 
@@ -376,9 +377,9 @@ bool ArmorTracker::selectEnemy(std::vector<Armor> find_armors, double dt)
                 fmt::print("duration:  {}",  milliseconds_duration (t - jump_trackers.back().jump_time).count());
                 fmt::print("T:  {}", spin_T);
 
-                if(spin_T != 0 &&
+                if(history_spin_state.size() > 1 &&
                    milliseconds_duration (t - jump_trackers.back().jump_time).count() >
-                   milliseconds_duration (spin_T - delay_time).count())
+                   std::get<0>(history_spin_state.front()) - delay_time)
                 {
                     fmt::print("---generate virtual armor---");
                     real_armor = matched_armor;
@@ -391,16 +392,17 @@ bool ArmorTracker::selectEnemy(std::vector<Armor> find_armors, double dt)
 
                     pts.push_back(AS.Vector3d2point2f(jump_trackers.back().jump_armor.world_position));
 
-                    Circle circle;  //TODO：添加双圆
+                    Circle circle;
                     AS.circleLeastFit(pts, circle.x, circle.y, circle.r);
-                    circle.r = (circle.r + last_r) / 2;//FIXME：非正方形误差大，时间也同理
+                    last_r = (circle.r + last_r) / 2;
                     fmt::print("[r]: {}", circle.r);
-                    if (circle.r > 0.35){
+                    if (last_r > 0.35){
                         is_target_move = true;
                         spin_score_map[tracking_id] = 2000;  // 异常值退出反陀螺
                     }
                     else
                     {
+                        double r = std::get<1>(history_spin_state.back());
                         double new_world_position_x;
                         double new_world_position_y;
                         // 该点与圆心连线和水平方向的夹角θ
@@ -409,15 +411,17 @@ bool ArmorTracker::selectEnemy(std::vector<Armor> find_armors, double dt)
                         // 逆时针-，顺时针+
                         if (spin_status == COUNTER_CLOCKWISE) {
                             double alpha = theta - M_PI * 3 / 5;
-                            new_world_position_x = circle.r * cos(alpha) + circle.x;
-                            new_world_position_y = circle.r * sin(alpha) + circle.y;
-                        } else {
+                            new_world_position_x = r * cos(alpha) + circle.x;
+                            new_world_position_y = r * sin(alpha) + circle.y;
+                        } else
+                        {
                             double beta = theta + M_PI * 3 / 5;
-                            new_world_position_x = circle.r * cos(beta) + circle.x;
-                            new_world_position_y = circle.r * sin(beta) + circle.y;
+                            new_world_position_x = r * cos(beta) + circle.x;
+                            new_world_position_y = r * sin(beta) + circle.y;
                         }
                         matched_armor.world_position.x() = new_world_position_x;
                         matched_armor.world_position.y() = new_world_position_y;
+                        matched_armor.world_position.z() = std::get<2>(history_spin_state.back());
                     }
                     if (is_target_move)
                     {
@@ -478,6 +482,7 @@ bool ArmorTracker::selectEnemy(std::vector<Armor> find_armors, double dt)
                 {
                     fmt::print("---1->2(跳变)---");
                     update_jump_trackers(matched_armor);
+                    save_spin_history();
                     if(is_vir_armor)
                     {
                         predicted_enemy = KF.update(matched_armor.world_position);
@@ -1195,5 +1200,18 @@ void ArmorTracker::update_spin_T(Armor matched_armor,  std::vector<Armor> &final
         enemy_armor.world_position = predicted_enemy.head(3);
         matched_armor = enemy_armor;
         final_armors.push_back(matched_armor);
+    }
+}
+
+void ArmorTracker::save_spin_history() {
+
+
+    if (history_spin_state.size() < 2)
+    {
+        history_spin_state.emplace_back(spin_T, last_r, enemy_armor.world_position.z());
+    } else
+    {
+        history_spin_state.pop_front();
+        history_spin_state.emplace_back(spin_T, last_r, enemy_armor.world_position.z());
     }
 }

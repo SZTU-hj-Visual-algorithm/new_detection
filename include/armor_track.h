@@ -65,7 +65,7 @@ public:
     void update_spin_T(Armor matched_armor, std::vector<Armor> &final_armors);
     bool updateSpinScore();
     void spin_detect();
-
+    void save_spin_history();
     Armor enemy_armor;//最终选择的装甲板
     Armor real_armor; // virtual armor state, real armor
     KalmanFilter KF;
@@ -83,7 +83,6 @@ public:
     int anti_spin_judge_low_thres;           // 小于该阈值认为该车已关闭陀螺
     int anti_spin_judge_high_thres;          // 大于该阈值认为该车已开启陀螺
     int max_delta_t;                    //使用同一预测器的最大时间间隔(ms)
-//    double max_delta_dist;               // 最大追踪距离
     double spin_T;
     Jump_tracker jump_tracker;
     Disappear_tracker disappear_tracker;
@@ -94,6 +93,7 @@ public:
     std::map<int,SpinHeading> spin_status_map;     // 记录该车小陀螺状态（未知，顺时针，逆时针）
     std::map<int,double> spin_score_map;           // 记录各装甲板小陀螺可能性分数，大于0为逆时针旋转，小于0为顺时针旋转
     std::deque<Armor> history_armors;
+    std::deque<std::tuple<double, double, double>> history_spin_state;
 
 
     bool is_aim_virtual_armor;  // 出现虚拟装甲板后转过去
